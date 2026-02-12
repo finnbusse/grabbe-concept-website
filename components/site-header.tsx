@@ -24,33 +24,18 @@ export function SiteHeader({
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
-  const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 30)
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    handleScroll()
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  const headerClasses = scrolled
-    ? "glass-strong shadow-lg shadow-primary/[0.04]"
-    : "bg-background/80 backdrop-blur-md border-b border-border/30"
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${headerClasses}`}>
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:h-[68px] lg:px-8">
+    <header className="fixed top-0 left-0 right-0 z-50">
+      {/* Centered frosty glass navbar */}
+      <div className="mx-auto mt-3 flex max-w-5xl items-center justify-between rounded-2xl px-5 py-2.5 glass-strong shadow-lg shadow-black/[0.04] lg:mt-4 lg:px-6 lg:py-3">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt={schoolName}
-              className="h-9 w-auto"
-            />
-          ) : (
-            <span className="font-display text-xl text-foreground">{schoolName}</span>
-          )}
+        <Link href="/" className="flex items-center gap-3 shrink-0 transition-opacity hover:opacity-80">
+          <img
+            src={logoUrl || "/images/grabbe-logo.svg"}
+            alt={schoolName}
+            className="h-8 w-auto lg:h-9"
+          />
         </Link>
 
         {/* Desktop nav */}
@@ -78,7 +63,7 @@ export function SiteHeader({
                   />
                 </button>
                 {openDropdown === item.id && (
-                  <div className="absolute left-0 top-full z-50 min-w-[240px] glass-strong rounded-2xl p-2 shadow-xl shadow-primary/[0.06] animate-blur-in">
+                  <div className="absolute left-0 top-full z-50 mt-1 min-w-[240px] glass-strong rounded-2xl p-2 shadow-xl shadow-primary/[0.06] animate-blur-in">
                     {item.children.map((child) => (
                       <Link
                         key={child.id}
@@ -121,7 +106,7 @@ export function SiteHeader({
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="glass-strong border-t border-border/30 px-4 py-6 lg:hidden animate-blur-in">
+        <div className="mx-4 mt-2 rounded-2xl glass-strong p-4 shadow-xl lg:hidden animate-blur-in">
           <nav className="flex flex-col gap-1">
             {navItems.map((item) => (
               <div key={item.id}>

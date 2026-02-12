@@ -35,15 +35,11 @@ export function SiteFooter({
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="flex items-center gap-4">
-              {settings.school_logo_url ? (
-                <img
-                  src={settings.school_logo_url}
-                  alt={name}
-                  className="h-10 w-auto brightness-0 invert opacity-80"
-                />
-              ) : (
-                <span className="font-display text-3xl italic text-primary-foreground">{name}</span>
-              )}
+              <img
+                src="/images/grabbe-logo.svg"
+                alt={name}
+                className="h-10 w-auto brightness-0 invert opacity-80"
+              />
             </div>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-primary-foreground/50">
               {settings.school_description ||

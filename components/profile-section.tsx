@@ -54,7 +54,7 @@ export function ProfileSection() {
       <div className="relative mx-auto max-w-6xl px-4 lg:px-8">
         <AnimateOnScroll>
           <div className="mx-auto max-w-2xl text-center">
-            <p className="font-pixel text-xs uppercase tracking-[0.4em] text-primary">
+            <p className="font-pixel text-sm uppercase tracking-[0.4em] text-primary">
               {"// "}Profilprojekte
             </p>
             <h2 className="mt-4 font-display text-4xl md:text-5xl lg:text-6xl tracking-tight text-foreground">
@@ -80,13 +80,14 @@ export function ProfileSection() {
                     alt={profile.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <div className={`absolute inset-0 bg-gradient-to-t ${profile.color} opacity-0 group-hover:opacity-50 transition-opacity duration-500`} />
                   <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
 
-                  {/* Pixel font tag */}
+                  {/* Pixel font tag -- uses Geist Pixel Square */}
                   <div className="absolute top-4 left-4 flex items-center gap-2">
-                    <span className="font-pixel text-sm uppercase tracking-widest bg-foreground/80 text-background px-3 py-1.5 rounded-md backdrop-blur-sm">
+                    <span className="font-pixel text-base uppercase tracking-widest bg-foreground/80 text-background px-3 py-1.5 rounded-md backdrop-blur-sm">
                       {profile.tag}
                     </span>
                   </div>
@@ -101,7 +102,7 @@ export function ProfileSection() {
                     <h3 className="font-display text-2xl text-card-foreground group-hover:text-primary transition-colors duration-300">
                       {profile.title}
                     </h3>
-                    <span className="font-pixel text-[11px] uppercase tracking-widest text-muted-foreground/60 border border-border rounded px-2 py-0.5">
+                    <span className="font-pixel text-xs uppercase tracking-widest text-muted-foreground/60 border border-border rounded px-2 py-0.5">
                       profil
                     </span>
                   </div>
