@@ -1,5 +1,4 @@
-import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteLayout } from "@/components/site-layout"
 import { Heart, Users, Lightbulb, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -11,8 +10,7 @@ export const metadata = {
 
 export default function ErprobungsstufePage() {
   return (
-    <>
-      <SiteHeader />
+    <SiteLayout>
       <main>
         <section className="border-b border-border bg-muted">
           <div className="mx-auto max-w-7xl px-4 pb-12 pt-16 lg:px-8 lg:pb-16 lg:pt-24">
@@ -102,7 +100,6 @@ export default function ErprobungsstufePage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
-    </>
+    </SiteLayout>
   )
 }

@@ -1,5 +1,4 @@
-import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteLayout } from "@/components/site-layout"
 import { createClient } from "@/lib/supabase/server"
 import { CalendarDays, ArrowRight } from "lucide-react"
 import Link from "next/link"
@@ -19,8 +18,7 @@ export default async function AktuellesPage() {
     .limit(20)
 
   return (
-    <>
-      <SiteHeader />
+    <SiteLayout>
       <main>
         {/* Header */}
         <section className="border-b border-border bg-muted">
@@ -87,7 +85,6 @@ export default async function AktuellesPage() {
           )}
         </section>
       </main>
-      <SiteFooter />
-    </>
+    </SiteLayout>
   )
 }

@@ -1,5 +1,4 @@
-import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteLayout } from "@/components/site-layout"
 import { Phone, Mail, GraduationCap, FileText, ClipboardCheck, Bus } from "lucide-react"
 
 export const metadata = {
@@ -9,8 +8,7 @@ export const metadata = {
 
 export default function OberstufePage() {
   return (
-    <>
-      <SiteHeader />
+    <SiteLayout>
       <main>
         <section className="border-b border-border bg-muted">
           <div className="mx-auto max-w-7xl px-4 pb-12 pt-16 lg:px-8 lg:pb-16 lg:pt-24">
@@ -121,7 +119,6 @@ export default function OberstufePage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
-    </>
+    </SiteLayout>
   )
 }

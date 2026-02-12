@@ -1,5 +1,4 @@
-import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteLayout } from "@/components/site-layout"
 import { MarkdownContent } from "@/components/markdown-content"
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
@@ -21,8 +20,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   if (!post) notFound()
 
   return (
-    <>
-      <SiteHeader />
+    <SiteLayout>
       <main>
         <article className="mx-auto max-w-3xl px-4 py-16 lg:px-8 lg:py-24">
           <Button variant="ghost" size="sm" asChild className="mb-8">
@@ -82,7 +80,6 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           </div>
         </article>
       </main>
-      <SiteFooter />
-    </>
+    </SiteLayout>
   )
 }

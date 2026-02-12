@@ -1,5 +1,4 @@
-import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteLayout } from "@/components/site-layout"
 import Image from "next/image"
 import { Palette, Music, Dumbbell, FlaskConical } from "lucide-react"
 
@@ -64,8 +63,7 @@ const profiles = [
 
 export default function ProfilprojektePage() {
   return (
-    <>
-      <SiteHeader />
+    <SiteLayout>
       <main>
         <section className="border-b border-border bg-muted">
           <div className="mx-auto max-w-7xl px-4 pb-12 pt-16 lg:px-8 lg:pb-16 lg:pt-24">
@@ -120,7 +118,6 @@ export default function ProfilprojektePage() {
           </div>
         </section>
       </main>
-      <SiteFooter />
-    </>
+    </SiteLayout>
   )
 }

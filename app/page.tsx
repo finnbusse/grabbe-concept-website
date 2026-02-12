@@ -1,5 +1,4 @@
-import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteLayout } from "@/components/site-layout"
 import { HeroSection } from "@/components/hero-section"
 import { WelcomeSection } from "@/components/welcome-section"
 import { ProfileSection } from "@/components/profile-section"
@@ -31,8 +30,7 @@ export default async function HomePage() {
   ])
 
   return (
-    <>
-      <SiteHeader />
+    <SiteLayout>
       <main>
         <HeroSection />
         <WelcomeSection />
@@ -44,7 +42,6 @@ export default async function HomePage() {
         <ContactSection />
         <PartnersSection />
       </main>
-      <SiteFooter />
-    </>
+    </SiteLayout>
   )
 }

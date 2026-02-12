@@ -1,5 +1,4 @@
-import { SiteHeader } from "@/components/site-header"
-import { SiteFooter } from "@/components/site-footer"
+import { SiteLayout } from "@/components/site-layout"
 import { createClient } from "@/lib/supabase/server"
 import { Download, FileText, ImageIcon, ExternalLink } from "lucide-react"
 
@@ -43,8 +42,7 @@ export default async function DownloadsPage() {
   }
 
   return (
-    <>
-      <SiteHeader />
+    <SiteLayout>
       <main>
         <section className="border-b bg-muted">
           <div className="mx-auto max-w-7xl px-4 pb-12 pt-16 lg:px-8 lg:pb-16 lg:pt-24">
@@ -104,7 +102,6 @@ export default async function DownloadsPage() {
           )}
         </section>
       </main>
-      <SiteFooter />
-    </>
+    </SiteLayout>
   )
 }
