@@ -69,10 +69,6 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-anon-key
    ```
    
    **Why both?** Server-side code can use `SUPABASE_*`, but browser code (CMS) needs `NEXT_PUBLIC_*`.
-   ```
-   NEXT_PUBLIC_SUPABASE_URL = [Your Project URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY = [Your anon public key]
-   ```
 
 5. **Redeploy Your Application**
    - After saving variables, trigger a new deployment
