@@ -13,15 +13,15 @@ export async function ContactSection() {
   const stellvertreter = s.schulleitung_2 || "Oliver Sprenger"
 
   return (
-    <section className="relative py-28 lg:py-36">
+    <section className="relative py-28 lg:py-36 bg-mesh-blue">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
         <div className="grid gap-16 lg:grid-cols-2">
           <div>
-            <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-accent">
+            <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
               Kontakt
             </p>
             <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-foreground">
-              So finden <span className="italic text-accent">Sie uns</span>
+              So finden <span className="italic text-primary">Sie uns</span>
             </h2>
             <p className="mt-5 text-base text-muted-foreground leading-relaxed">
               Du bist in hoechstens 30 Minuten bei uns - mit Bahn, Bus, Fahrrad oder zu Fuss.
@@ -44,7 +44,7 @@ export async function ContactSection() {
                   title: "Telefon",
                   content: (
                     <>
-                      <a href={`tel:${phone.replace(/[\s-]/g, "")}`} className="hover:text-accent transition-colors">{phone}</a>
+                      <a href={`tel:${phone.replace(/[\s-]/g, "")}`} className="hover:text-primary transition-colors">{phone}</a>
                       <br />
                       <span className="text-xs">{"Fax: "}{fax}</span>
                     </>
@@ -54,12 +54,12 @@ export async function ContactSection() {
                   icon: Mail,
                   title: "E-Mail",
                   content: (
-                    <a href={`mailto:${email}`} className="text-accent hover:underline">{email}</a>
+                    <a href={`mailto:${email}`} className="text-primary hover:underline">{email}</a>
                   ),
                 },
               ].map((item) => (
                 <div key={item.title} className="flex items-start gap-5 group">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground group-hover:rotate-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:rotate-3">
                     <item.icon className="h-5 w-5" />
                   </div>
                   <div>
@@ -72,23 +72,23 @@ export async function ContactSection() {
 
             <Link
               href="/kontakt"
-              className="mt-10 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground transition-all hover:bg-accent hover:text-foreground hover:shadow-lg hover:shadow-accent/20 group"
+              className="mt-10 inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-white transition-all hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 group"
             >
               Alle Ansprechpartner:innen
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
-          <div className="rounded-2xl border border-border/60 bg-card p-10 transition-all hover:shadow-lg hover:shadow-accent/5">
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-10 transition-all hover:shadow-lg hover:shadow-primary/[0.06]">
             <h3 className="font-display text-2xl text-card-foreground">Schulleitung</h3>
-            <div className="mt-2 divider-line bg-accent/40 mx-0" />
+            <div className="mt-2 divider-line mx-0" />
             <div className="mt-8 space-y-8">
               {[
                 { name: schulleiter, role: "Schulleiter" },
                 { name: stellvertreter, role: "Stellvertretende Schulleitung" },
               ].map((person) => (
                 <div key={person.name} className="flex items-start gap-5">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-muted font-display text-lg text-muted-foreground">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-lg text-primary">
                     {person.name.split(" ").map(w => w[0]).join("").slice(0, 2)}
                   </div>
                   <div>

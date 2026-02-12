@@ -1,7 +1,6 @@
 "use client"
 
 import { AnimateOnScroll } from "./animate-on-scroll"
-import { useEffect, useRef, useState } from "react"
 
 const partners = [
   "Hochschule fuer Musik",
@@ -22,7 +21,7 @@ function MarqueeRow({ items, reverse = false }: { items: string[]; reverse?: boo
   return (
     <div className="relative overflow-hidden py-2">
       <div
-        className={`flex gap-4 ${reverse ? "animate-marquee" : "animate-marquee"}`}
+        className="flex gap-4 animate-marquee"
         style={{
           animationDirection: reverse ? "reverse" : "normal",
           animationDuration: "40s",
@@ -31,7 +30,7 @@ function MarqueeRow({ items, reverse = false }: { items: string[]; reverse?: boo
         {doubled.map((partner, i) => (
           <span
             key={`${partner}-${i}`}
-            className="shrink-0 rounded-full border border-border/60 bg-card px-6 py-2.5 text-xs font-medium text-muted-foreground transition-all duration-300 hover:border-accent/40 hover:text-foreground hover:bg-accent/5 whitespace-nowrap cursor-default"
+            className="shrink-0 rounded-full border border-border/60 bg-card/80 backdrop-blur-sm px-6 py-2.5 text-xs font-medium text-muted-foreground transition-all duration-300 hover:border-primary/30 hover:text-primary hover:bg-primary/5 whitespace-nowrap cursor-default"
           >
             {partner}
           </span>
@@ -50,11 +49,11 @@ export function PartnersSection() {
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
         <AnimateOnScroll>
           <div className="text-center">
-            <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-accent">
+            <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
               Vernetzt in Detmold
             </p>
             <h2 className="mt-3 font-display text-3xl md:text-4xl tracking-tight text-foreground">
-              Unsere <span className="italic text-accent">Partner</span>
+              Unsere <span className="italic text-primary">Partner</span>
             </h2>
             <p className="mt-4 text-sm text-muted-foreground max-w-lg mx-auto">
               Wir bieten Ihren Kindern nicht nur in der Schule lebensnahe Erfahrungen, sondern auch

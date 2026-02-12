@@ -4,73 +4,73 @@
 
 @layer base {
   :root {
-    --background: 40 20% 97%;
-    --foreground: 220 20% 10%;
-    --card: 40 15% 99%;
-    --card-foreground: 220 20% 10%;
-    --popover: 40 15% 99%;
-    --popover-foreground: 220 20% 10%;
-    --primary: 220 60% 18%;
-    --primary-foreground: 40 20% 97%;
-    --secondary: 40 15% 93%;
-    --secondary-foreground: 220 20% 10%;
-    --muted: 40 12% 94%;
-    --muted-foreground: 220 10% 42%;
-    --accent: 38 70% 55%;
-    --accent-foreground: 220 20% 10%;
+    --background: 210 40% 98%;
+    --foreground: 215 25% 12%;
+    --card: 210 40% 100%;
+    --card-foreground: 215 25% 12%;
+    --popover: 210 40% 100%;
+    --popover-foreground: 215 25% 12%;
+    --primary: 215 70% 45%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 30% 93%;
+    --secondary-foreground: 215 25% 12%;
+    --muted: 210 25% 95%;
+    --muted-foreground: 215 15% 45%;
+    --accent: 210 80% 55%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 40 12% 88%;
-    --input: 40 12% 88%;
-    --ring: 220 60% 18%;
-    --chart-1: 220 60% 18%;
-    --chart-2: 38 70% 55%;
-    --chart-3: 160 40% 40%;
-    --chart-4: 280 50% 50%;
-    --chart-5: 340 60% 50%;
+    --border: 210 25% 90%;
+    --input: 210 25% 90%;
+    --ring: 215 70% 45%;
+    --chart-1: 215 70% 45%;
+    --chart-2: 195 75% 50%;
+    --chart-3: 160 40% 45%;
+    --chart-4: 230 55% 55%;
+    --chart-5: 190 60% 40%;
     --radius: 0.75rem;
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 220 60% 18%;
+    --sidebar-foreground: 215 25% 12%;
+    --sidebar-primary: 215 70% 45%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 40 15% 93%;
-    --sidebar-accent-foreground: 220 20% 10%;
-    --sidebar-border: 40 12% 88%;
-    --sidebar-ring: 220 60% 18%;
+    --sidebar-accent: 210 30% 93%;
+    --sidebar-accent-foreground: 215 25% 12%;
+    --sidebar-border: 210 25% 90%;
+    --sidebar-ring: 215 70% 45%;
   }
   .dark {
-    --background: 220 22% 6%;
-    --foreground: 40 15% 95%;
-    --card: 220 22% 8%;
-    --card-foreground: 40 15% 95%;
-    --popover: 220 22% 8%;
-    --popover-foreground: 40 15% 95%;
-    --primary: 38 70% 55%;
-    --primary-foreground: 220 22% 6%;
-    --secondary: 220 18% 14%;
-    --secondary-foreground: 40 15% 95%;
-    --muted: 220 18% 14%;
-    --muted-foreground: 220 10% 55%;
-    --accent: 38 70% 55%;
-    --accent-foreground: 220 22% 6%;
+    --background: 215 30% 7%;
+    --foreground: 210 30% 95%;
+    --card: 215 30% 10%;
+    --card-foreground: 210 30% 95%;
+    --popover: 215 30% 10%;
+    --popover-foreground: 210 30% 95%;
+    --primary: 210 80% 55%;
+    --primary-foreground: 215 30% 7%;
+    --secondary: 215 25% 15%;
+    --secondary-foreground: 210 30% 95%;
+    --muted: 215 25% 15%;
+    --muted-foreground: 210 15% 55%;
+    --accent: 210 80% 55%;
+    --accent-foreground: 215 30% 7%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 16% 18%;
-    --input: 220 16% 18%;
-    --ring: 38 70% 55%;
-    --chart-1: 38 70% 55%;
-    --chart-2: 220 60% 40%;
+    --border: 215 20% 18%;
+    --input: 215 20% 18%;
+    --ring: 210 80% 55%;
+    --chart-1: 210 80% 55%;
+    --chart-2: 195 75% 50%;
     --chart-3: 160 40% 50%;
-    --chart-4: 280 50% 55%;
-    --chart-5: 340 60% 55%;
-    --sidebar-background: 220 22% 8%;
-    --sidebar-foreground: 40 15% 95%;
-    --sidebar-primary: 38 70% 55%;
-    --sidebar-primary-foreground: 220 22% 6%;
-    --sidebar-accent: 220 18% 14%;
-    --sidebar-accent-foreground: 40 15% 95%;
-    --sidebar-border: 220 16% 18%;
-    --sidebar-ring: 38 70% 55%;
+    --chart-4: 230 55% 60%;
+    --chart-5: 190 60% 45%;
+    --sidebar-background: 215 30% 10%;
+    --sidebar-foreground: 210 30% 95%;
+    --sidebar-primary: 210 80% 55%;
+    --sidebar-primary-foreground: 215 30% 7%;
+    --sidebar-accent: 215 25% 15%;
+    --sidebar-accent-foreground: 210 30% 95%;
+    --sidebar-border: 215 20% 18%;
+    --sidebar-ring: 210 80% 55%;
   }
 }
 
@@ -89,7 +89,6 @@
   }
 }
 
-/* Smooth scroll */
 html {
   scroll-behavior: smooth;
 }
@@ -99,14 +98,8 @@ html {
    ============================================ */
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(32px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
@@ -115,62 +108,28 @@ html {
 }
 
 @keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes revealUp {
-  from {
-    opacity: 0;
-    transform: translateY(100%);
-    clip-path: inset(100% 0 0 0);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    clip-path: inset(0 0 0 0);
-  }
+  from { opacity: 0; transform: translateY(100%); clip-path: inset(100% 0 0 0); }
+  to { opacity: 1; transform: translateY(0); clip-path: inset(0 0 0 0); }
 }
 
 @keyframes blurIn {
-  from {
-    opacity: 0;
-    filter: blur(12px);
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-    transform: translateY(0);
-  }
+  from { opacity: 0; filter: blur(16px); transform: translateY(12px); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
 
 @keyframes typing {
@@ -185,7 +144,7 @@ html {
 
 @keyframes parallaxFloat {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+  50% { transform: translateY(-10px); }
 }
 
 @keyframes shimmer {
@@ -193,14 +152,9 @@ html {
   100% { background-position: 200% 0; }
 }
 
-@keyframes drawLine {
-  from { stroke-dashoffset: 1000; }
-  to { stroke-dashoffset: 0; }
-}
-
 @keyframes gentlePulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.05); }
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
 }
 
 @keyframes marquee {
@@ -213,12 +167,33 @@ html {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(60px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-8px) rotate(1deg); }
+  66% { transform: translateY(4px) rotate(-0.5deg); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px 0 hsla(210, 80%, 55%, 0.15); }
+  50% { box-shadow: 0 0 40px 5px hsla(210, 80%, 55%, 0.25); }
+}
+
+@keyframes borderGlow {
+  0%, 100% { border-color: hsla(210, 80%, 55%, 0.2); }
+  50% { border-color: hsla(210, 80%, 55%, 0.5); }
+}
+
 /* ============================================
    ANIMATION CLASSES
    ============================================ */
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fadeInUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-fade-in {
@@ -226,23 +201,27 @@ html {
 }
 
 .animate-slide-in-left {
-  animation: slideInLeft 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: slideInLeft 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-slide-in-right {
-  animation: slideInRight 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: slideInRight 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: scaleIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-reveal-up {
-  animation: revealUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: revealUp 1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-blur-in {
-  animation: blurIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: blurIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-slide-up {
+  animation: slideUp 1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .animate-parallax-float {
@@ -250,18 +229,29 @@ html {
 }
 
 .animate-gentle-pulse {
-  animation: gentlePulse 4s ease-in-out infinite;
+  animation: gentlePulse 5s ease-in-out infinite;
 }
 
 .animate-marquee {
-  animation: marquee 30s linear infinite;
+  animation: marquee 35s linear infinite;
 }
 
 .animate-count-up {
   animation: countUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Typing animation wrapper */
+.animate-float-slow {
+  animation: floatSlow 8s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+.animate-border-glow {
+  animation: borderGlow 3s ease-in-out infinite;
+}
+
 .typing-wrapper {
   overflow: hidden;
   white-space: nowrap;
@@ -269,7 +259,6 @@ html {
   animation: typing 3s steps(40, end) both, blink 0.75s step-end infinite;
 }
 
-/* Shimmer text effect */
 .shimmer-text {
   background: linear-gradient(
     90deg,
@@ -281,7 +270,7 @@ html {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 3s linear infinite;
+  animation: shimmer 4s linear infinite;
 }
 
 /* ============================================
@@ -298,35 +287,68 @@ html {
 .delay-800 { animation-delay: 0.8s; }
 .delay-900 { animation-delay: 0.9s; }
 .delay-1000 { animation-delay: 1s; }
+.delay-1200 { animation-delay: 1.2s; }
+.delay-1500 { animation-delay: 1.5s; }
+
+/* ============================================
+   GLASS MORPHISM
+   ============================================ */
+
+.glass {
+  background: hsla(210, 40%, 100%, 0.6);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid hsla(210, 40%, 100%, 0.4);
+}
+
+.glass-strong {
+  background: hsla(210, 40%, 100%, 0.75);
+  backdrop-filter: blur(32px) saturate(2);
+  -webkit-backdrop-filter: blur(32px) saturate(2);
+  border: 1px solid hsla(210, 40%, 100%, 0.5);
+}
+
+.glass-dark {
+  background: hsla(215, 30%, 12%, 0.6);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid hsla(215, 30%, 20%, 0.3);
+}
 
 /* ============================================
    GLOBAL TYPOGRAPHY HELPERS
    ============================================ */
 
-/* Elegant horizontal rule */
 .divider-line {
-  @apply mx-auto h-px w-24 bg-border;
+  @apply mx-auto h-px w-24;
+  background: linear-gradient(90deg, transparent, hsl(var(--accent)), transparent);
 }
 
-/* Decorative serif italic accent */
 .accent-serif {
   font-family: var(--font-instrument-serif);
   font-style: italic;
 }
 
-/* Profile / code font */
 .font-pixel {
   font-family: var(--font-geist-mono);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.05em;
 }
 
-/* Subtle noise texture overlay */
+/* Noise texture overlay */
 .noise-overlay::after {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.03;
+  opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 1;
+}
+
+/* Blue gradient mesh background helper */
+.bg-mesh-blue {
+  background:
+    radial-gradient(ellipse at 20% 50%, hsla(210, 80%, 55%, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, hsla(195, 75%, 50%, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, hsla(230, 55%, 55%, 0.05) 0%, transparent 50%);
 }

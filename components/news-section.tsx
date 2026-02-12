@@ -22,17 +22,17 @@ export function NewsSection({ posts }: { posts: Post[] }) {
   const rest = posts.slice(1, 4)
 
   return (
-    <section className="relative py-28 lg:py-36 bg-muted/30">
+    <section className="relative py-28 lg:py-36 bg-muted/40">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
         <AnimateOnScroll>
           <div className="flex items-end justify-between">
             <div>
-              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-accent">Aktuelles</p>
+              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">Aktuelles</p>
               <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-foreground">
-                Neuigkeiten vom <span className="italic text-accent">Grabbe</span>
+                Neuigkeiten vom <span className="italic text-primary">Grabbe</span>
               </h2>
             </div>
-            <Link href="/aktuelles" className="hidden items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-accent hover:text-foreground transition-colors sm:flex group">
+            <Link href="/aktuelles" className="hidden items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-primary hover:text-foreground transition-colors sm:flex group">
               Alle Beitraege
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
@@ -40,9 +40,9 @@ export function NewsSection({ posts }: { posts: Post[] }) {
         </AnimateOnScroll>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-5">
-          {/* Featured post - larger */}
+          {/* Featured post */}
           <AnimateOnScroll animation="fade-in-up" delay={0.1} className="lg:col-span-3">
-            <Link href={`/aktuelles/${featured.slug}`} className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card transition-all duration-500 hover:shadow-xl hover:shadow-accent/5 hover:border-accent/30 h-full">
+            <Link href={`/aktuelles/${featured.slug}`} className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm transition-all duration-500 hover:shadow-xl hover:shadow-primary/[0.06] hover:border-primary/30 h-full">
               {featured.image_url ? (
                 <div className="relative h-72 overflow-hidden">
                   <img src={featured.image_url} alt={featured.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -58,12 +58,12 @@ export function NewsSection({ posts }: { posts: Post[] }) {
                   <Calendar className="h-3 w-3" />
                   <time>{new Date(featured.created_at).toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" })}</time>
                   {featured.category && (
-                    <span className="rounded-full bg-accent/10 px-3 py-0.5 font-sub text-[10px] uppercase tracking-wider text-accent">{featured.category}</span>
+                    <span className="rounded-full bg-primary/10 px-3 py-0.5 font-sub text-[10px] uppercase tracking-wider text-primary">{featured.category}</span>
                   )}
                 </div>
-                <h3 className="mt-4 font-display text-2xl md:text-3xl text-card-foreground group-hover:text-accent transition-colors duration-300">{featured.title}</h3>
+                <h3 className="mt-4 font-display text-2xl md:text-3xl text-card-foreground group-hover:text-primary transition-colors duration-300">{featured.title}</h3>
                 {featured.excerpt && <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground line-clamp-3">{featured.excerpt}</p>}
-                <div className="mt-6 flex items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-accent">
+                <div className="mt-6 flex items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-primary">
                   Weiterlesen
                   <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                 </div>
@@ -77,7 +77,7 @@ export function NewsSection({ posts }: { posts: Post[] }) {
               <AnimateOnScroll key={post.id} animation="slide-in-right" delay={0.15 + i * 0.1}>
                 <Link
                   href={`/aktuelles/${post.slug}`}
-                  className="group flex gap-5 rounded-2xl border border-border/60 bg-card p-5 transition-all duration-500 hover:shadow-lg hover:shadow-accent/5 hover:border-accent/30"
+                  className="group flex gap-5 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-500 hover:shadow-lg hover:shadow-primary/[0.06] hover:border-primary/30"
                 >
                   {post.image_url ? (
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl">
@@ -91,9 +91,9 @@ export function NewsSection({ posts }: { posts: Post[] }) {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                       <time>{new Date(post.created_at).toLocaleDateString("de-DE", { day: "numeric", month: "short", year: "numeric" })}</time>
-                      {post.category && <span className="rounded-full bg-accent/10 px-2 py-0.5 font-sub text-[10px] uppercase tracking-wider text-accent">{post.category}</span>}
+                      {post.category && <span className="rounded-full bg-primary/10 px-2 py-0.5 font-sub text-[10px] uppercase tracking-wider text-primary">{post.category}</span>}
                     </div>
-                    <h3 className="mt-2 font-display text-lg text-card-foreground line-clamp-2 group-hover:text-accent transition-colors">{post.title}</h3>
+                    <h3 className="mt-2 font-display text-lg text-card-foreground line-clamp-2 group-hover:text-primary transition-colors">{post.title}</h3>
                     {post.excerpt && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{post.excerpt}</p>}
                   </div>
                 </Link>
@@ -101,7 +101,7 @@ export function NewsSection({ posts }: { posts: Post[] }) {
             ))}
 
             <AnimateOnScroll animation="fade-in-up" delay={0.4}>
-              <Link href="/aktuelles" className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-border/60 p-5 font-sub text-xs uppercase tracking-[0.15em] text-muted-foreground hover:border-accent hover:text-accent transition-all duration-300 group">
+              <Link href="/aktuelles" className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-border/60 p-5 font-sub text-xs uppercase tracking-[0.15em] text-muted-foreground hover:border-primary hover:text-primary transition-all duration-300 group">
                 Alle Beitraege ansehen
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </Link>

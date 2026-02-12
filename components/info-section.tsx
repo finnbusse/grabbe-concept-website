@@ -15,17 +15,17 @@ const quickLinks = [
 
 export function InfoSection() {
   return (
-    <section className="relative py-28 lg:py-36">
+    <section className="relative py-28 lg:py-36 bg-mesh-blue">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
         <div className="grid gap-20 lg:grid-cols-2">
           {/* Left: Erprobungsstufe */}
           <AnimateOnScroll animation="slide-in-left">
             <div>
-              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-accent">
+              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
                 Erprobungsstufe
               </p>
               <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-foreground">
-                Dein Start am <span className="italic text-accent">Grabbe</span>
+                Dein Start am <span className="italic text-primary">Grabbe</span>
               </h2>
               <div className="mt-8 space-y-5 text-muted-foreground">
                 <p className="text-sm leading-relaxed">
@@ -42,7 +42,7 @@ export function InfoSection() {
               </div>
 
               {/* Decorative quote */}
-              <blockquote className="mt-8 border-l-2 border-accent/40 pl-6">
+              <blockquote className="mt-8 border-l-2 border-primary/40 pl-6">
                 <p className="font-display text-xl italic text-foreground/80">
                   {'"'}Ein Ort, an dem jedes Kind seinen Platz findet.{'"'}
                 </p>
@@ -50,7 +50,7 @@ export function InfoSection() {
 
               <Link
                 href="/unsere-schule/erprobungsstufe"
-                className="mt-8 inline-flex items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-accent hover:text-foreground transition-colors group"
+                className="mt-8 inline-flex items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-primary hover:text-foreground transition-colors group"
               >
                 Mehr zur Erprobungsstufe
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
@@ -61,7 +61,7 @@ export function InfoSection() {
           {/* Right: Quick Links */}
           <AnimateOnScroll animation="slide-in-right" delay={0.2}>
             <div>
-              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-accent">
+              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
                 Beliebte Themen
               </p>
               <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-foreground">
@@ -69,17 +69,17 @@ export function InfoSection() {
               </h2>
               <div className="mt-8 grid grid-cols-2 gap-4">
                 {quickLinks.map((link, i) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-5 transition-all duration-500 hover:border-accent/40 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-0.5"
-                    style={{ animationDelay: `${i * 0.05}s` }}
-                  >
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent transition-all duration-500 group-hover:bg-primary group-hover:text-primary-foreground group-hover:rotate-3">
-                      <link.icon className="h-5 w-5" />
-                    </div>
-                    <span className="text-sm font-medium text-card-foreground group-hover:text-accent transition-colors">{link.label}</span>
-                  </Link>
+                  <AnimateOnScroll key={link.label} animation="fade-in-up" delay={0.3 + i * 0.06}>
+                    <Link
+                      href={link.href}
+                      className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-500 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06] hover:-translate-y-0.5"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:rotate-3">
+                        <link.icon className="h-5 w-5" />
+                      </div>
+                      <span className="text-sm font-medium text-card-foreground group-hover:text-primary transition-colors">{link.label}</span>
+                    </Link>
+                  </AnimateOnScroll>
                 ))}
               </div>
             </div>

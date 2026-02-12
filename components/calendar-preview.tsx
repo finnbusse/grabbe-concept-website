@@ -18,9 +18,9 @@ export function CalendarPreview({ events }: { events: Event[] }) {
 
   return (
     <section className="relative py-28 lg:py-36 bg-primary text-primary-foreground overflow-hidden noise-overlay">
-      {/* Decorative elements */}
+      {/* Decorative light blue blobs */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden>
-        <div className="absolute -top-20 -right-20 h-[400px] w-[400px] rounded-full bg-accent/10 blur-[96px]" />
+        <div className="absolute -top-20 -right-20 h-[400px] w-[400px] rounded-full bg-[hsl(200,90%,75%)]/10 blur-[96px]" />
         <div className="absolute -bottom-20 -left-20 h-[300px] w-[300px] rounded-full bg-primary-foreground/5 blur-[80px]" />
       </div>
 
@@ -28,12 +28,12 @@ export function CalendarPreview({ events }: { events: Event[] }) {
         <AnimateOnScroll>
           <div className="flex items-end justify-between">
             <div>
-              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary-foreground/50">Termine</p>
+              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-[hsl(200,90%,80%)]">Termine</p>
               <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-primary-foreground">
-                Naechste <span className="italic text-accent">Veranstaltungen</span>
+                Naechste <span className="italic text-[hsl(200,90%,80%)]">Veranstaltungen</span>
               </h2>
             </div>
-            <Link href="/termine" className="hidden items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-accent hover:text-primary-foreground transition-colors sm:flex group">
+            <Link href="/termine" className="hidden items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-[hsl(200,90%,80%)] hover:text-primary-foreground transition-colors sm:flex group">
               Alle Termine
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
@@ -53,12 +53,12 @@ export function CalendarPreview({ events }: { events: Event[] }) {
                     <div
                       className={`group flex gap-4 rounded-2xl border p-6 transition-all duration-500 hover:-translate-y-1 ${
                         isFerien
-                          ? "bg-accent/15 border-accent/30 hover:bg-accent/20"
+                          ? "bg-[hsl(200,90%,80%)]/15 border-[hsl(200,90%,80%)]/30 hover:bg-[hsl(200,90%,80%)]/20"
                           : "bg-primary-foreground/5 border-primary-foreground/10 hover:bg-primary-foreground/10 hover:border-primary-foreground/20"
                       }`}
                     >
                       <div className={`flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-105 ${
-                        isFerien ? "bg-accent text-foreground" : "bg-primary-foreground/10 text-primary-foreground"
+                        isFerien ? "bg-[hsl(200,90%,80%)] text-primary" : "bg-primary-foreground/10 text-primary-foreground"
                       }`}>
                         <span className="text-[9px] font-sub uppercase tracking-wider opacity-70">{monthNames[date.getMonth()]}</span>
                         <span className="font-display text-2xl leading-none">{date.getDate()}</span>
@@ -82,7 +82,7 @@ export function CalendarPreview({ events }: { events: Event[] }) {
           )}
 
           <div className="mt-10 text-center sm:hidden">
-            <Link href="/termine" className="inline-flex items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-accent hover:text-primary-foreground transition-colors">
+            <Link href="/termine" className="inline-flex items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-[hsl(200,90%,80%)] hover:text-primary-foreground transition-colors">
               Alle Termine ansehen <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>

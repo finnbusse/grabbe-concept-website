@@ -30,6 +30,11 @@ export function SiteFooter({
         </span>
       </div>
 
+      {/* Decorative glow */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden>
+        <div className="absolute top-0 left-1/3 h-[300px] w-[400px] rounded-full bg-[hsl(200,90%,75%)]/[0.05] blur-[100px]" />
+      </div>
+
       <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 lg:px-8 lg:py-24">
         {/* Top: Large branding */}
         <div className="flex flex-col items-start gap-6 md:flex-row md:items-end md:justify-between">
@@ -70,7 +75,7 @@ export function SiteFooter({
                 <li key={l.id}>
                   <Link
                     href={l.href}
-                    className="text-sm text-primary-foreground/60 transition-colors hover:text-accent"
+                    className="text-sm text-primary-foreground/60 transition-colors hover:text-[hsl(200,90%,80%)]"
                   >
                     {l.label}
                   </Link>
@@ -93,7 +98,7 @@ export function SiteFooter({
                 <Phone className="h-4 w-4 shrink-0 text-primary-foreground/30" />
                 <a
                   href={`tel:${phone.replace(/[\s-]/g, "")}`}
-                  className="text-sm text-primary-foreground/60 hover:text-accent transition-colors"
+                  className="text-sm text-primary-foreground/60 hover:text-[hsl(200,90%,80%)] transition-colors"
                 >
                   {phone}
                 </a>
@@ -102,7 +107,7 @@ export function SiteFooter({
                 <Mail className="h-4 w-4 shrink-0 text-primary-foreground/30" />
                 <a
                   href={`mailto:${email}`}
-                  className="text-sm text-primary-foreground/60 hover:text-accent transition-colors"
+                  className="text-sm text-primary-foreground/60 hover:text-[hsl(200,90%,80%)] transition-colors"
                 >
                   {email}
                 </a>
@@ -120,7 +125,7 @@ export function SiteFooter({
                 <li key={l.id}>
                   <Link
                     href={l.href}
-                    className="text-sm text-primary-foreground/60 transition-colors hover:text-accent"
+                    className="text-sm text-primary-foreground/60 transition-colors hover:text-[hsl(200,90%,80%)]"
                   >
                     {l.label}
                   </Link>
