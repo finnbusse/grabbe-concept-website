@@ -47,12 +47,12 @@ export function SiteHeader({
             item.children && item.children.length > 0 ? (
               <div
                 key={item.id}
-                className="relative"
+                className="relative h-full flex items-center"
                 onMouseEnter={() => setOpenDropdown(item.id)}
                 onMouseLeave={() => setOpenDropdown(null)}
               >
                 <button
-                  className={`flex items-center gap-1 px-4 py-1.5 text-[13px] font-medium transition-all duration-200 hover:bg-white/20 ${
+                  className={`flex items-center gap-1 px-4 h-full text-[13px] font-medium transition-all duration-200 hover:bg-white/20 ${
                     index === 0 ? "rounded-l-full" : ""
                   } ${
                     index === array.length - 1 ? "rounded-r-full" : ""
@@ -70,7 +70,7 @@ export function SiteHeader({
                   />
                 </button>
                 {openDropdown === item.id && (
-                  <div className="absolute left-1/2 -translate-x-1/2 top-full z-50 mt-1 min-w-[220px] bg-white/15 backdrop-blur-md border border-white/25 rounded-3xl p-1.5 shadow-xl animate-blur-in">
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full z-50 mt-1 min-w-[220px] bg-white/15 backdrop-blur-xl border border-white/25 rounded-3xl p-1.5 shadow-xl animate-blur-in">
                     {item.children.map((child) => (
                       <Link
                         key={child.id}
@@ -91,7 +91,7 @@ export function SiteHeader({
               <Link
                 key={item.id}
                 href={item.href}
-                className={`px-4 py-1.5 text-[13px] font-medium transition-all duration-200 hover:bg-white/20 ${
+                className={`px-4 h-full flex items-center text-[13px] font-medium transition-all duration-200 hover:bg-white/20 ${
                   index === 0 ? "rounded-l-full" : ""
                 } ${
                   index === array.length - 1 ? "rounded-r-full" : ""
