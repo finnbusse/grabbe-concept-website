@@ -25,8 +25,9 @@ function TypingText({ text, delay = 0, speed = 40 }: { text: string; delay?: num
     return () => clearInterval(interval)
   }, [started, text, speed])
 
+  // Reserve space using min-height to prevent layout shift
   return (
-    <span>
+    <span className="inline-block" style={{ minWidth: started ? 'auto' : `${text.length * 0.5}em` }}>
       {displayed}
       {started && displayed.length < text.length && (
         <span className="inline-block w-[2px] h-[1em] bg-white align-middle ml-0.5 animate-pulse" />
@@ -56,21 +57,22 @@ export function HeroSection() {
           sizes="100vw"
         />
 
+        {/* School logo - aligned with navbar height */}
+        <div className="absolute top-3 left-5 md:left-8 lg:top-4 lg:left-12 z-20">
+          <div className={`transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}>
+            <img
+              src="/images/grabbe-logo.svg"
+              alt="Grabbe-Gymnasium Logo"
+              className="h-16 w-auto md:h-20 lg:h-24 drop-shadow-lg"
+            />
+          </div>
+        </div>
+
         {/* Content overlay -- bottom left, text has its own shadow for readability, NO image darkening */}
         <div
           className="absolute inset-0 z-10 flex flex-col justify-end p-5 md:p-10 lg:p-14"
           style={{ opacity: mounted ? 1 : 0, transition: "opacity 0.5s ease" }}
         >
-          {/* School SVG logo */}
-          <div className={`mb-3 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-            <img
-              src="/images/grabbe-logo.svg"
-              alt="Grabbe-Gymnasium Logo"
-              className="h-8 w-auto md:h-12"
-              style={{ filter: "brightness(0) invert(1)" }}
-            />
-          </div>
-
           {/* Headline */}
           <h1
             className={`font-display text-2xl sm:text-3xl md:text-4xl lg:text-6xl text-white leading-[1.1] tracking-tight transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
