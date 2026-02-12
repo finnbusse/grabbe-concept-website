@@ -60,15 +60,30 @@ export default async function CmsDashboardPage() {
         </div>
 
         <div className="rounded-2xl border bg-card p-6">
-          <h2 className="font-display text-lg font-semibold">Hilfe</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Tipps fuer das CMS</p>
-          <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-            <li className="flex gap-2"><span className="text-primary font-bold">1.</span> Beitraege verwenden Markdown: **fett**, *kursiv*, [Link](url)</li>
-            <li className="flex gap-2"><span className="text-primary font-bold">2.</span> Laden Sie Bilder/PDFs unter &quot;Dokumente&quot; hoch und kopieren Sie die URL</li>
-            <li className="flex gap-2"><span className="text-primary font-bold">3.</span> Setzen Sie &quot;Auf Startseite&quot; bei Beitraegen, die prominent angezeigt werden sollen</li>
-            <li className="flex gap-2"><span className="text-primary font-bold">4.</span> Termine mit Kategorie &quot;Ferien&quot; erscheinen farbig im Jahreskalender</li>
-          </ul>
+          <h2 className="font-display text-lg font-semibold">Verwaltung</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Website-Administration</p>
+          <div className="mt-4 flex flex-col gap-2">
+            <Link href="/cms/settings" className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+              <span className="font-bold text-primary">{">"}</span> Einstellungen (Schulname, Logo, SEO, Variablen)
+            </Link>
+            <Link href="/cms/navigation" className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+              <span className="font-bold text-primary">{">"}</span> Navigation bearbeiten (Header, Footer, Links)
+            </Link>
+            <Link href="/cms/users" className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+              <span className="font-bold text-primary">{">"}</span> Benutzerverwaltung (Lehrer-Accounts)
+            </Link>
+          </div>
         </div>
+      </div>
+
+      <div className="mt-6 rounded-2xl border bg-card p-6">
+        <h2 className="font-display text-lg font-semibold">Tipps</h2>
+        <ul className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+          <li className="flex gap-2"><span className="font-bold text-primary">1.</span> Beitraege verwenden Markdown: **fett**, *kursiv*, [Link](url)</li>
+          <li className="flex gap-2"><span className="font-bold text-primary">2.</span> Bilder/PDFs unter &quot;Dokumente&quot; hochladen, URL kopieren und einbinden</li>
+          <li className="flex gap-2"><span className="font-bold text-primary">3.</span> &quot;Auf Startseite&quot; bei Beitraegen fuer prominente Anzeige aktivieren</li>
+          <li className="flex gap-2"><span className="font-bold text-primary">4.</span> Unter &quot;Einstellungen&quot; alle Texte, Namen und SEO-Daten aendern</li>
+        </ul>
       </div>
     </div>
   )

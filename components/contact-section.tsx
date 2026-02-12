@@ -1,8 +1,18 @@
 import Link from "next/link"
 import { Mail, Phone, MapPin, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { getSettings } from "@/lib/settings"
 
-export function ContactSection() {
+export async function ContactSection() {
+  const s = await getSettings()
+
+  const address = s.school_address || "Kuester-Meyer-Platz 2, 32756 Detmold"
+  const phone = s.school_phone || "05231 - 99260"
+  const fax = s.school_fax || "05231 - 992616"
+  const email = s.school_email || "sekretariat@grabbe.nrw.schule"
+  const schulleiter = s.schulleitung_1 || "Dr. Claus Hilbing"
+  const stellvertreter = s.schulleitung_2 || "Oliver Sprenger"
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 lg:px-8 lg:py-28">
       <div className="grid gap-12 lg:grid-cols-2">
@@ -24,9 +34,8 @@ export function ContactSection() {
               <div>
                 <p className="font-medium text-foreground">Adresse</p>
                 <p className="text-sm text-muted-foreground">
-                  Christian-Dietrich-Grabbe-Gymnasium<br />
-                  Kuester-Meyer-Platz 2<br />
-                  32756 Detmold
+                  {s.school_name_full || "Christian-Dietrich-Grabbe-Gymnasium"}<br />
+                  {address}
                 </p>
               </div>
             </div>
@@ -36,8 +45,8 @@ export function ContactSection() {
               </div>
               <div>
                 <p className="font-medium text-foreground">Telefon</p>
-                <p className="text-sm text-muted-foreground">05231 - 99260</p>
-                <p className="text-xs text-muted-foreground">Fax: 05231 - 992616</p>
+                <p className="text-sm text-muted-foreground">{phone}</p>
+                <p className="text-xs text-muted-foreground">{"Fax: "}{fax}</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
@@ -46,12 +55,7 @@ export function ContactSection() {
               </div>
               <div>
                 <p className="font-medium text-foreground">E-Mail</p>
-                <a
-                  href="mailto:sekretariat@grabbe.nrw.schule"
-                  className="text-sm text-primary hover:underline"
-                >
-                  sekretariat@grabbe.nrw.schule
-                </a>
+                <a href={`mailto:${email}`} className="text-sm text-primary hover:underline">{email}</a>
               </div>
             </div>
           </div>
@@ -63,43 +67,26 @@ export function ContactSection() {
           </Button>
         </div>
 
-        {/* Schulleitung */}
         <div className="rounded-2xl border border-border bg-card p-8">
           <h3 className="font-display text-xl font-semibold text-card-foreground">Schulleitung</h3>
           <div className="mt-6 space-y-6">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted font-display text-sm font-bold text-muted-foreground">
-                CH
+                {schulleiter.split(" ").map(w => w[0]).join("").slice(0, 2)}
               </div>
               <div>
-                <p className="font-medium text-card-foreground">Dr. Claus Hilbing</p>
+                <p className="font-medium text-card-foreground">{schulleiter}</p>
                 <p className="text-sm text-muted-foreground">Schulleiter</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Personal- und Organisationsentwicklung, Unterrichtsverteilung, Didaktische Koordination
-                </p>
               </div>
             </div>
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted font-display text-sm font-bold text-muted-foreground">
-                TB
+                {stellvertreter.split(" ").map(w => w[0]).join("").slice(0, 2)}
               </div>
               <div>
-                <p className="font-medium text-card-foreground">Tanja Brentrup-Lappe</p>
-                <p className="text-sm text-muted-foreground">Staendige Vertretung (komm.)</p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Planung und Bewirtschaftung der Haushaltsmittel, Unterhaltung der Schulgebaeude
-                </p>
+                <p className="font-medium text-card-foreground">{stellvertreter}</p>
+                <p className="text-sm text-muted-foreground">Stellvertretende Schulleitung</p>
               </div>
-            </div>
-          </div>
-
-          <div className="mt-8 border-t border-border pt-6">
-            <h4 className="text-sm font-semibold text-card-foreground">Koordination</h4>
-            <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-              <p>Erprobungsstufe (Kl. 5-6): Herr Hecker</p>
-              <p>Mittelstufe (Kl. 7-10): Herr Dr. Chee</p>
-              <p>Gymnasiale Oberstufe: Frau Mannebach</p>
-              <p>Verwaltung: Herr Schilling</p>
             </div>
           </div>
         </div>

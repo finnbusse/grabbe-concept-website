@@ -3,17 +3,26 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap } from "lucide-react"
+import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-const links = [
+const contentLinks = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/cms" },
   { icon: FileText, label: "Beitraege", href: "/cms/posts" },
   { icon: BookOpen, label: "Seiten", href: "/cms/pages" },
   { icon: CalendarDays, label: "Termine", href: "/cms/events" },
   { icon: Upload, label: "Dokumente", href: "/cms/documents" },
+]
+
+const inboxLinks = [
   { icon: Mail, label: "Nachrichten", href: "/cms/messages" },
   { icon: GraduationCap, label: "Anmeldungen", href: "/cms/anmeldungen" },
+]
+
+const adminLinks = [
+  { icon: Menu, label: "Navigation", href: "/cms/navigation" },
+  { icon: Settings, label: "Einstellungen", href: "/cms/settings" },
+  { icon: Users, label: "Benutzer", href: "/cms/users" },
 ]
 
 export function CmsSidebar({ userEmail }: { userEmail: string }) {
@@ -39,45 +48,34 @@ export function CmsSidebar({ userEmail }: { userEmail: string }) {
       </div>
 
       <nav className="flex-1 px-3 py-4" aria-label="CMS Navigation">
-        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Inhalte</p>
-        <div className="space-y-1">
-          {links.slice(0, 5).map((link) => {
-            const isActive = pathname === link.href || (link.href !== "/cms" && pathname.startsWith(link.href))
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <link.icon className="h-4 w-4" />
-                {link.label}
-              </Link>
-            )
-          })}
-        </div>
+        {[
+          { title: "Inhalte", items: contentLinks },
+          { title: "Eingaenge", items: inboxLinks },
+          { title: "Verwaltung", items: adminLinks },
+        ].map((section, idx) => (
+          <div key={section.title} className={idx > 0 ? "mt-5" : ""}>
+            <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{section.title}</p>
+            <div className="space-y-1">
+              {section.items.map((link) => {
+                const isActive = pathname === link.href || (link.href !== "/cms" && pathname.startsWith(link.href))
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    <link.icon className="h-4 w-4" />
+                    {link.label}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        ))}
 
-        <p className="mb-2 mt-6 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Eingaenge</p>
-        <div className="space-y-1">
-          {links.slice(5).map((link) => {
-            const isActive = pathname === link.href || pathname.startsWith(link.href)
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                <link.icon className="h-4 w-4" />
-                {link.label}
-              </Link>
-            )
-          })}
-        </div>
-
-        <div className="mt-6 border-t border-border pt-4">
+        <div className="mt-5 border-t border-border pt-4">
           <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
             <Home className="h-4 w-4" />
             Zur Website
