@@ -1,0 +1,168 @@
+"use client"
+
+import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { ArrowLeft, Save } from "lucide-react"
+import Link from "next/link"
+
+interface EventEditorProps {
+  event?: {
+    id: string
+    title: string
+    description: string | null
+    event_date: string
+    event_time: string | null
+    location: string | null
+    published: boolean
+  }
+}
+
+export function EventEditor({ event }: EventEditorProps) {
+  const router = useRouter()
+  const [title, setTitle] = useState(event?.title ?? "")
+  const [description, setDescription] = useState(event?.description ?? "")
+  const [eventDate, setEventDate] = useState(event?.event_date ?? "")
+  const [eventTime, setEventTime] = useState(event?.event_time ?? "")
+  const [location, setLocation] = useState(event?.location ?? "")
+  const [published, setPublished] = useState(event?.published ?? true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSave = async () => {
+    setSaving(true)
+    setError(null)
+
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Nicht angemeldet")
+
+      const payload = {
+        title,
+        description: description || null,
+        event_date: eventDate,
+        event_time: eventTime || null,
+        location: location || null,
+        published,
+        user_id: user.id,
+        updated_at: new Date().toISOString(),
+      }
+
+      if (event) {
+        const { error: updateError } = await supabase
+          .from("events")
+          .update(payload)
+          .eq("id", event.id)
+        if (updateError) throw updateError
+      } else {
+        const { error: insertError } = await supabase
+          .from("events")
+          .insert(payload)
+        if (insertError) throw insertError
+      }
+
+      router.push("/cms/events")
+      router.refresh()
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Fehler beim Speichern")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/cms/events">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <h1 className="font-display text-2xl font-bold text-foreground">
+            {event ? "Termin bearbeiten" : "Neuer Termin"}
+          </h1>
+        </div>
+        <Button onClick={handleSave} disabled={saving || !title || !eventDate}>
+          <Save className="mr-1.5 h-3.5 w-3.5" />
+          {saving ? "Speichern..." : "Speichern"}
+        </Button>
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
+      <div className="mt-6 max-w-2xl space-y-6">
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Titel</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="z.B. Elternabend Klasse 5"
+                className="font-display"
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="event_date">Datum</Label>
+                <Input
+                  id="event_date"
+                  type="date"
+                  value={eventDate}
+                  onChange={(e) => setEventDate(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="event_time">Uhrzeit (optional)</Label>
+                <Input
+                  id="event_time"
+                  value={eventTime}
+                  onChange={(e) => setEventTime(e.target.value)}
+                  placeholder="z.B. 18:00 Uhr"
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="location">Ort (optional)</Label>
+              <Input
+                id="location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="z.B. Aula, Mensa, Sporthalle"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Beschreibung (optional)</Label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Weitere Informationen zum Termin..."
+                className="min-h-[120px] w-full resize-y rounded-lg border border-input bg-background px-4 py-3 text-sm leading-relaxed placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              />
+            </div>
+            <label className="flex cursor-pointer items-center gap-2.5">
+              <input
+                type="checkbox"
+                checked={published}
+                onChange={(e) => setPublished(e.target.checked)}
+                className="h-4 w-4 rounded border-input"
+              />
+              <span className="text-sm text-card-foreground">Termin veroeffentlichen</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
