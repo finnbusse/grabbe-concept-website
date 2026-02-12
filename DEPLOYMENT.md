@@ -52,27 +52,49 @@ After running the script, verify that everything was created successfully:
 
 1. Go to your Vercel project dashboard
 2. Navigate to Settings → Environment Variables
-3. Add the following variables:
+3. Add the Supabase configuration variables
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-   ```
+**Important**: The application supports multiple naming conventions. Choose ONE of these options:
+
+#### Option A: Standard Naming (Recommended)
+```
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+#### Option B: Vercel Supabase Integration Naming
+If you used Vercel's automatic Supabase integration, you may already have:
+```
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your-anon-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+```
+
+**The application will work with either naming convention.**
 
 4. Get these values from Supabase:
    - Go to Project Settings → API
-   - Copy the "Project URL" as `NEXT_PUBLIC_SUPABASE_URL`
-   - Copy the "anon public" key as `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - Copy the "Project URL" 
+   - Copy the "anon public" key (NOT the service_role key)
 
-5. Redeploy your application in Vercel for the changes to take effect
+5. **Important**: Make sure variables are enabled for all environments:
+   - ✅ Production
+   - ✅ Preview
+   - ✅ Development
+
+6. Redeploy your application in Vercel for the changes to take effect
 
 ### 5. Test the Setup
 
 1. After deployment, try accessing your application
 2. Check that:
    - The homepage loads without database errors
-   - The CMS interface can connect to the database
+   - You can log in to the CMS interface
+   - The CMS dashboard loads properly
+   - You can create and save new content (posts, events, pages)
    - Form submissions work (contact, anmeldung)
+
+**If you encounter issues**, see the [CMS Troubleshooting Guide](docs/CMS_TROUBLESHOOTING.md).
 
 ## Database Tables Overview
 
@@ -163,8 +185,24 @@ If you get permission errors:
 
 If the app can't connect to Supabase:
 1. Verify environment variables are set correctly in Vercel
-2. Check that the SUPABASE_URL doesn't have trailing slashes
-3. Confirm the anon key is the "public" anon key, not the service role key
+2. Check that variables are enabled for all environments (Production, Preview, Development)
+3. Check that the SUPABASE_URL doesn't have trailing slashes
+4. Confirm the anon key is the "public" anon key, not the service role key
+5. Redeploy after setting/changing environment variables
+
+**Common Issue**: Cannot save items in CMS
+- Cause: Environment variable mismatch
+- Solution: See [CMS Troubleshooting Guide](docs/CMS_TROUBLESHOOTING.md)
+- The application supports both `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_PUBLISHABLE_KEY`
+
+### CMS Dashboard Issues
+
+If you can't save new content in the CMS:
+1. **Check Browser Console** (F12 → Console) for errors
+2. **Verify Environment Variables** are set in Vercel
+3. **Ensure You're Logged In** to the CMS
+4. **Check Supabase Logs** in the Supabase Dashboard
+5. See the detailed [CMS Troubleshooting Guide](docs/CMS_TROUBLESHOOTING.md)
 
 ## Next Steps
 
