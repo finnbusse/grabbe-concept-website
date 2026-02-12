@@ -32,8 +32,8 @@ export function SiteHeader({
         {/* Start button on far left */}
         <Link 
           href="/" 
-          className={`shrink-0 rounded-full px-3 py-1.5 text-[13px] font-medium transition-all duration-200 hover:bg-white/20 ${
-            pathname === "/" ? "text-foreground" : "text-foreground/80 hover:text-foreground"
+          className={`shrink-0 rounded-full px-5 py-1.5 text-[13px] font-medium transition-all duration-300 hover:bg-white/50 hover:scale-105 hover:shadow-lg ${
+            pathname === "/" ? "text-foreground bg-white/30" : "text-foreground/80 hover:text-foreground"
           }`}
         >
           Start
@@ -52,13 +52,13 @@ export function SiteHeader({
                 onMouseLeave={() => setOpenDropdown(null)}
               >
                 <button
-                  className={`flex items-center gap-1 px-4 h-full text-[13px] font-medium transition-all duration-200 hover:bg-white/20 ${
+                  className={`flex items-center gap-1 px-6 h-full text-[13px] font-medium transition-all duration-300 hover:bg-white/50 hover:scale-105 hover:shadow-lg ${
                     index === 0 ? "rounded-l-full" : ""
                   } ${
                     index === array.length - 1 ? "rounded-r-full" : ""
                   } ${
                     pathname.startsWith(item.href) && item.href !== "/"
-                      ? "text-foreground"
+                      ? "text-foreground bg-white/30"
                       : "text-foreground/80 hover:text-foreground"
                   }`}
                 >
@@ -91,12 +91,12 @@ export function SiteHeader({
               <Link
                 key={item.id}
                 href={item.href}
-                className={`px-4 h-full flex items-center text-[13px] font-medium transition-all duration-200 hover:bg-white/20 ${
+                className={`px-6 h-full flex items-center text-[13px] font-medium transition-all duration-300 hover:bg-white/50 hover:scale-105 hover:shadow-lg ${
                   index === 0 ? "rounded-l-full" : ""
                 } ${
                   index === array.length - 1 ? "rounded-r-full" : ""
                 } ${
-                  pathname === item.href ? "text-foreground" : "text-foreground/80 hover:text-foreground"
+                  pathname === item.href ? "text-foreground bg-white/30" : "text-foreground/80 hover:text-foreground"
                 }`}
               >
                 {item.label}
