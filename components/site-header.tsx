@@ -166,43 +166,7 @@ export function SiteHeader({
             ))}
           </nav>
         </div>
-
-        {/* Mobile nav */}
-        {mobileOpen && (
-          <div className="mx-4 mt-2 rounded-3xl bg-white/15 backdrop-blur-xl border border-white/25 p-3 shadow-xl lg:hidden animate-blur-in">
-            <nav className="flex flex-col gap-1">
-              {navItems.map((item) => (
-                <div key={item.id}>
-                  <Link
-                    href={item.href}
-                    className={`block rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                      pathname === item.href
-                        ? "bg-white/20 text-foreground"
-                        : "text-foreground/80 hover:bg-white/20 hover:text-foreground"
-                    }`}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                  {item.children?.map((child) => (
-                    <Link
-                      key={child.id}
-                      href={child.href}
-                      className={`block rounded-full py-2 pl-7 pr-3 text-sm transition-all duration-200 ${
-                        pathname === child.href
-                          ? "font-medium text-foreground"
-                          : "text-foreground/80 hover:text-foreground"
-                      }`}
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              ))}
-            </nav>
-          </div>
-        )}
+      )}
       </header>
     </>
   )
