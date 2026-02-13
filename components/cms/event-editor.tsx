@@ -15,6 +15,7 @@ interface EventEditorProps {
     title: string
     description: string | null
     event_date: string
+    event_end_date?: string | null
     event_time: string | null
     location: string | null
     published: boolean
@@ -26,6 +27,7 @@ export function EventEditor({ event }: EventEditorProps) {
   const [title, setTitle] = useState(event?.title ?? "")
   const [description, setDescription] = useState(event?.description ?? "")
   const [eventDate, setEventDate] = useState(event?.event_date ?? "")
+  const [eventEndDate, setEventEndDate] = useState(event?.event_end_date ?? "")
   const [eventTime, setEventTime] = useState(event?.event_time ?? "")
   const [location, setLocation] = useState(event?.location ?? "")
   const [category, setCategory] = useState((event as Record<string, unknown>)?.category as string ?? "termin")
@@ -42,7 +44,7 @@ export function EventEditor({ event }: EventEditorProps) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Nicht angemeldet")
 
-      const payload = {
+      const basePayload: Record<string, unknown> = {
         title,
         description: description || null,
         event_date: eventDate,
@@ -54,18 +56,27 @@ export function EventEditor({ event }: EventEditorProps) {
         updated_at: new Date().toISOString(),
       }
 
-      if (event) {
-        const { error: updateError } = await supabase
-          .from("events")
-          .update(payload)
-          .eq("id", event.id)
-        if (updateError) throw updateError
-      } else {
-        const { error: insertError } = await supabase
-          .from("events")
-          .insert(payload)
-        if (insertError) throw insertError
+      // Try with event_end_date first, fall back without it if column doesn't exist
+      const payloadWithEndDate = { ...basePayload, event_end_date: eventEndDate || null }
+
+      const saveWithPayload = async (payload: Record<string, unknown>) => {
+        if (event) {
+          const { error } = await supabase.from("events").update(payload as never).eq("id", event.id)
+          return error
+        } else {
+          const { error } = await supabase.from("events").insert(payload as never)
+          return error
+        }
       }
+
+      let saveError = await saveWithPayload(payloadWithEndDate)
+
+      // If the error mentions event_end_date column, retry without it
+      if (saveError && saveError.message?.includes("event_end_date")) {
+        saveError = await saveWithPayload(basePayload)
+      }
+
+      if (saveError) throw saveError
 
       router.push("/cms/events")
       router.refresh()
@@ -114,14 +125,24 @@ export function EventEditor({ event }: EventEditorProps) {
                 className="font-display"
               />
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="grid gap-2">
-                <Label htmlFor="event_date">Datum</Label>
+                <Label htmlFor="event_date">Startdatum</Label>
                 <Input
                   id="event_date"
                   type="date"
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="event_end_date">Enddatum (optional)</Label>
+                <Input
+                  id="event_end_date"
+                  type="date"
+                  value={eventEndDate}
+                  onChange={(e) => setEventEndDate(e.target.value)}
+                  min={eventDate || undefined}
                 />
               </div>
               <div className="grid gap-2">

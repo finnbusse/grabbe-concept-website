@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Menu, X, ChevronDown } from "lucide-react"
 
 export type NavItemData = {
@@ -27,22 +27,33 @@ export function SiteHeader({
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
-      {/* Centered glass navbar with fully rounded corners - matching hero button style */}
+      {/* School logo - absolute positioned, same size/position on ALL pages */}
+      <Link href="/" className="absolute top-3 left-5 md:left-8 lg:top-4 lg:left-12 z-20">
+        <img
+          src="/images/grabbe-logo.svg"
+          alt={schoolName}
+          className="h-16 w-auto md:h-20 lg:h-24 drop-shadow-lg"
+        />
+      </Link>
+
+      {/* Centered glass navbar */}
       <div className="mx-auto mt-3 flex max-w-3xl items-center justify-between rounded-full px-3 py-1.5 bg-white/15 backdrop-blur-md border border-white/25 shadow-lg transition-all duration-300 hover:bg-white/20 hover:shadow-xl lg:mt-4 lg:px-4 lg:py-2">
-        {/* Start button on far left */}
-        <Link 
-          href="/" 
+        {/* Start button */}
+        <Link
+          href="/"
           className={`shrink-0 rounded-full px-5 py-1.5 text-[13px] font-medium transition-all duration-300 hover:bg-white/50 hover:scale-105 hover:shadow-lg ${
-            pathname === "/" ? "text-foreground bg-white/30" : "text-foreground/80 hover:text-foreground"
+            pathname === "/"
+              ? "text-foreground bg-white/30"
+              : "text-foreground/80 hover:text-foreground"
           }`}
         >
           Start
         </Link>
 
-        {/* Desktop nav - centered */}
+        {/* Desktop nav */}
         <nav className="hidden items-center gap-0 lg:flex flex-1 justify-center" aria-label="Hauptnavigation">
           {navItems
-            .filter(item => item.href !== "/") // Home/Start is handled by dedicated Start button
+            .filter(item => item.href !== "/")
             .map((item, index, array) =>
             item.children && item.children.length > 0 ? (
               <div
@@ -96,7 +107,9 @@ export function SiteHeader({
                 } ${
                   index === array.length - 1 ? "rounded-r-full" : ""
                 } ${
-                  pathname === item.href ? "text-foreground bg-white/30" : "text-foreground/80 hover:text-foreground"
+                  pathname === item.href
+                    ? "text-foreground bg-white/30"
+                    : "text-foreground/80 hover:text-foreground"
                 }`}
               >
                 {item.label}
@@ -117,7 +130,7 @@ export function SiteHeader({
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="mx-4 mt-2 rounded-3xl bg-white/15 backdrop-blur-md border border-white/25 p-3 shadow-xl lg:hidden animate-blur-in">
+        <div className="mx-4 mt-2 rounded-3xl bg-white/15 backdrop-blur-xl border border-white/25 p-3 shadow-xl lg:hidden animate-blur-in">
           <nav className="flex flex-col gap-1">
             {navItems.map((item) => (
               <div key={item.id}>

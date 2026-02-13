@@ -23,6 +23,7 @@ interface PostEditorProps {
     featured: boolean
     image_url: string | null
     author_name: string | null
+    event_date?: string | null
   }
 }
 
@@ -43,6 +44,7 @@ export function PostEditor({ post }: PostEditorProps) {
   const [featured, setFeatured] = useState(post?.featured ?? false)
   const [imageUrl, setImageUrl] = useState(post?.image_url ?? "")
   const [authorName, setAuthorName] = useState(post?.author_name ?? "")
+  const [eventDate, setEventDate] = useState(post?.event_date ?? "")
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
@@ -67,7 +69,7 @@ export function PostEditor({ post }: PostEditorProps) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Nicht angemeldet")
 
-      const payload = {
+      const basePayload: Record<string, unknown> = {
         title, slug, content,
         excerpt: excerpt || null,
         category, published, featured,
@@ -77,13 +79,27 @@ export function PostEditor({ post }: PostEditorProps) {
         updated_at: new Date().toISOString(),
       }
 
-      if (post) {
-        const { error: e } = await supabase.from("posts").update(payload).eq("id", post.id)
-        if (e) throw e
-      } else {
-        const { error: e } = await supabase.from("posts").insert(payload)
-        if (e) throw e
+      const payloadWithDate = { ...basePayload, event_date: eventDate || null }
+
+      const saveWithPayload = async (payload: Record<string, unknown>) => {
+        if (post) {
+          const { error } = await supabase.from("posts").update(payload as never).eq("id", post.id)
+          return error
+        } else {
+          const { error } = await supabase.from("posts").insert(payload as never)
+          return error
+        }
       }
+
+      let saveError = await saveWithPayload(payloadWithDate)
+
+      // If the error mentions event_date column, retry without it
+      if (saveError && saveError.message?.includes("event_date")) {
+        saveError = await saveWithPayload(basePayload)
+      }
+
+      if (saveError) throw saveError
+
       router.push("/cms/posts")
       router.refresh()
     } catch (err: unknown) {
@@ -206,6 +222,11 @@ export function PostEditor({ post }: PostEditorProps) {
             <div className="grid gap-2">
               <Label htmlFor="author">Autor</Label>
               <Input id="author" value={authorName} onChange={(e) => setAuthorName(e.target.value)} placeholder="Name des Autors" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="eventDate">Datum (optional)</Label>
+              <Input id="eventDate" type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} />
+              <p className="text-[10px] text-muted-foreground">Eigenes Datum fuer den Beitrag. Wird statt dem Erstellungsdatum angezeigt.</p>
             </div>
           </div>
 
