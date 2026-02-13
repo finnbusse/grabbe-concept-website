@@ -1,7 +1,7 @@
 "use client"
 
 import { createClient } from "@/lib/supabase/client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Trash2, Download, ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -25,18 +25,20 @@ export default function AnmeldungenPage() {
   const [loaded, setLoaded] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
-  const loadData = async () => {
-    const supabase = createClient()
-    const { data } = await supabase
-      .from("anmeldung_submissions")
-      .select("*")
-      .order("created_at", { ascending: false })
-    setItems((data as Submission[]) || [])
-    setLoaded(true)
-  }
+  useEffect(() => {
+    const loadData = async () => {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from("anmeldung_submissions")
+        .select("*")
+        .order("created_at", { ascending: false })
+      setItems((data as Submission[]) || [])
+      setLoaded(true)
+    }
+    loadData()
+  }, [])
 
   if (!loaded) {
-    loadData()
     return <div className="py-12 text-center text-muted-foreground">Laden...</div>
   }
 
