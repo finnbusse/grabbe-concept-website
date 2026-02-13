@@ -26,18 +26,21 @@ export function SiteHeader({
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50">
-      {/* School logo - absolute positioned, same size/position on ALL pages */}
-      <Link href="/" className="absolute top-3 left-5 md:left-8 lg:top-4 lg:left-12 z-20">
-        <img
-          src="/images/grabbe-logo.svg"
-          alt={schoolName}
-          className="h-16 w-auto md:h-20 lg:h-24 drop-shadow-lg"
-        />
-      </Link>
+    <>
+      {/* School logo - absolute positioned, scrolls with page */}
+      <div className="absolute top-3 left-5 md:left-8 lg:top-4 lg:left-12 z-40">
+        <Link href="/">
+          <img
+            src="/images/grabbe-logo.svg"
+            alt={schoolName}
+            className="h-16 w-auto md:h-20 lg:h-24 drop-shadow-lg"
+          />
+        </Link>
+      </div>
 
-      {/* Centered glass navbar */}
-      <div className="mx-auto mt-3 flex max-w-3xl items-center justify-between rounded-full px-3 py-1.5 bg-white/15 backdrop-blur-md border border-white/25 shadow-lg transition-all duration-300 hover:bg-white/20 hover:shadow-xl lg:mt-4 lg:px-4 lg:py-2">
+      <header className="fixed top-0 left-0 right-0 z-50">
+        {/* Centered glass navbar */}
+        <div className="mx-auto mt-3 flex max-w-3xl items-center justify-between rounded-full px-3 py-1.5 bg-white/15 backdrop-blur-md border border-white/25 shadow-lg transition-all duration-300 hover:bg-white/20 hover:shadow-xl lg:mt-4 lg:px-4 lg:py-2">
         {/* Start button */}
         <Link
           href="/"
@@ -164,6 +167,7 @@ export function SiteHeader({
           </nav>
         </div>
       )}
-    </header>
+      </header>
+    </>
   )
 }
