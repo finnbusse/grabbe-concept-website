@@ -67,17 +67,6 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
           sizes="100vw"
         />
 
-        {/* School logo - aligned with navbar height */}
-        <div className="absolute top-3 left-5 md:left-8 lg:top-4 lg:left-12 z-20">
-          <div className={`transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"}`}>
-            <img
-              src="/images/grabbe-logo.svg"
-              alt="Grabbe-Gymnasium Logo"
-              className="h-16 w-auto md:h-20 lg:h-24 drop-shadow-lg"
-            />
-          </div>
-        </div>
-
         {/* Content overlay -- bottom left, text has its own shadow for readability, NO image darkening */}
         <div
           className="absolute inset-0 z-10 flex flex-col justify-end p-5 md:p-10 lg:p-14"
