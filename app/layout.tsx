@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { GeistPixelSquare } from "geist/font/pixel"
 import { Instrument_Serif, Josefin_Sans } from "next/font/google"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { getSettings } from "@/lib/settings"
 import "./globals.css"
 
@@ -57,7 +58,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" className={`${GeistSans.variable} ${GeistMono.variable} ${GeistPixelSquare.variable} ${_instrumentSerif.variable} ${_josefinSans.variable}`}>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        {children}
+        <SpeedInsights />
+      </body>
     </html>
   )
 }
