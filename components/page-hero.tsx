@@ -8,43 +8,28 @@ function djb2(str: string): number {
   for (let i = 0; i < str.length; i++) {
     h = Math.imul(h, 33) ^ str.charCodeAt(i)
   }
-  return h >>> 0 // unsigned 32-bit
+  return h >>> 0
 }
 
 /**
- * Generate a deterministic ASCII art grid from a seed string.
- * Returns a multi-line string rendered as monospace text.
+ * Generate a small deterministic ASCII art grid for the decorative right panel.
  */
-function generateAsciiGrid(seed: string, cols = 90, rows = 16): string {
+function generateAsciiGrid(seed: string, cols = 36, rows = 8): string {
   const h = djb2(seed)
-
-  // Sparse character set: mostly dots / light symbols with occasional emphasis
-  const glyphs = ["·", "·", "·", "·", ":", ".", " ", " ", " ", " ", " ", " ", "+", "×", "◇", "·"]
-
+  const glyphs = ["·", "·", "·", ":", ".", " ", " ", " ", " ", " ", "+", "×", "◇"]
   const lines: string[] = []
   for (let r = 0; r < rows; r++) {
     let line = ""
     for (let c = 0; c < cols; c++) {
-      // Smooth waves from two superimposed sinusoids — yields a natural-looking sparse field
       const v =
-        Math.sin(((h % 997) * 0.0031 + r * 0.71 + c * 0.29)) *
-        Math.cos(((h % 503) * 0.0017 + r * 0.43 + c * 0.61))
-      line += v > 0.42 ? glyphs[Math.abs(Math.floor(v * 100 + h)) % glyphs.length] : " "
+        Math.sin((h % 997) * 0.0031 + r * 0.71 + c * 0.29) *
+        Math.cos((h % 503) * 0.0017 + r * 0.43 + c * 0.61)
+      line += v > 0.38 ? glyphs[Math.abs(Math.floor(v * 100 + h)) % glyphs.length] : " "
     }
     lines.push(line)
   }
   return lines.join("\n")
 }
-
-// Bright sky-blue gradient palette — matches homepage hsl(200,85%,80%) accent (#7dcef5 family)
-// sky-600 → sky-400 → sky-300 range so they feel like the daytime sky in the homepage photo
-const GRADIENTS = [
-  "linear-gradient(135deg,#0284c7 0%,#38bdf8 55%,#7dd3fc 100%)",
-  "linear-gradient(135deg,#0369a1 0%,#0ea5e9 55%,#38bdf8 100%)",
-  "linear-gradient(150deg,#0ea5e9 0%,#7dd3fc 55%,#38bdf8 100%)",
-  "linear-gradient(135deg,#1d8cc5 0%,#4ec8f4 55%,#7dd3fc 100%)",
-  "linear-gradient(135deg,#0284c7 0%,#0ea5e9 50%,#38bdf8 100%)",
-]
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
@@ -56,73 +41,69 @@ interface PageHeroProps {
   /** Optional subtitle shown below the title */
   subtitle?: string
   /**
-   * Optional hero image URL.
-   * When omitted an ASCII-art fallback pattern is generated deterministically
-   * from the title so every page gets a unique, branded backdrop.
+   * Optional hero image URL shown in the decorative right panel instead of ASCII art.
    */
   imageUrl?: string
 }
 
 export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
-  const gradient = GRADIENTS[djb2(title) % GRADIENTS.length]
   const ascii = imageUrl ? "" : generateAsciiGrid(title)
 
   return (
-    <div className="relative w-full overflow-hidden rounded-b-[1.5rem] sm:rounded-b-[2rem] md:rounded-b-[3rem] h-44 sm:h-52 md:h-64">
-      {/* ── Background ── */}
-      {imageUrl ? (
-        <>
-          <Image src={imageUrl} alt="" fill className="object-cover" sizes="100vw" priority />
-          {/* Gradient overlay so text is always readable on any image */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-black/5" />
-        </>
-      ) : (
-        <div className="absolute inset-0" style={{ background: gradient }}>
-          {/* ASCII art texture layer */}
-          <pre
-            aria-hidden="true"
-            className="absolute inset-0 overflow-hidden font-mono text-[9px] sm:text-[10px] leading-[1.45] text-white/[0.18] select-none pointer-events-none p-3"
-          >
-            {ascii}
-          </pre>
-          {/* Vignette so text at the bottom stays readable against the bright blue */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-sky-900/40" />
-          {/* Subtle horizontal scan line to reinforce the monospace aesthetic */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: "repeating-linear-gradient(to bottom,transparent,transparent 13px,rgba(255,255,255,0.015) 13px,rgba(255,255,255,0.015) 14px)",
-            }}
-          />
-        </div>
-      )}
+    <section className="border-b border-border bg-background">
+      <div className="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
+        <div className="flex items-center justify-between gap-8">
 
-      {/* ── Text overlay ── */}
-      <div className="absolute inset-0 z-10 flex flex-col justify-end p-5 sm:p-8 md:p-10">
-        {label && (
-          <p
-            className="mb-2 text-[10px] sm:text-xs font-sub uppercase tracking-[0.22em] text-white/60"
-            style={{ textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}
+          {/* ── Left: text ── */}
+          <div className="min-w-0 flex-1">
+            {label && (
+              <p className="mb-2 text-xs font-sub uppercase tracking-[0.22em] text-primary">
+                {label}
+              </p>
+            )}
+            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl text-balance">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="mt-3 max-w-xl text-base text-muted-foreground leading-relaxed">
+                {subtitle}
+              </p>
+            )}
+          </div>
+
+          {/* ── Right: decorative sky-blue panel ── */}
+          <div
+            className="hidden sm:flex shrink-0 w-52 md:w-64 lg:w-80 h-28 md:h-32 lg:h-36 rounded-2xl overflow-hidden relative shadow-sm"
+            aria-hidden="true"
           >
-            {label}
-          </p>
-        )}
-        <h1
-          className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white leading-tight"
-          style={{ textShadow: "0 2px 24px rgba(0,0,0,0.55), 0 1px 4px rgba(0,0,0,0.35)" }}
-        >
-          {title}
-        </h1>
-        {subtitle && (
-          <p
-            className="mt-2 text-xs sm:text-sm text-white/80 max-w-2xl leading-relaxed"
-            style={{ textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
-          >
-            {subtitle}
-          </p>
-        )}
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="320px"
+              />
+            ) : (
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: "linear-gradient(135deg,#bae6fd 0%,#38bdf8 50%,#7dd3fc 100%)",
+                }}
+              >
+                {/* ASCII texture */}
+                <pre className="absolute inset-0 p-2.5 font-mono text-[8px] leading-[1.4] text-sky-900/25 select-none overflow-hidden">
+                  {ascii}
+                </pre>
+                {/* Subtle inner glow to the left so it fades into the page */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-transparent" />
+              </div>
+            )}
+          </div>
+
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
+
