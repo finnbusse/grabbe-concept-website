@@ -260,24 +260,91 @@ export const PAGE_DEFAULTS = {
   'oberstufe': {
     page_label: 'Sekundarstufe II',
     page_title: 'Oberstufe',
-    page_subtitle: 'Dein Start in der Oberstufe - Wir freuen uns ueber Ihr/euer Interesse an unserer Schule!',
+    page_subtitle: 'Informationen zur gymnasialen Oberstufe am Grabbe-Gymnasium Detmold',
     hero_image_url: '',
-    portal_title: 'Oberstufen-Portal',
-    portal_text: 'Naehere Informationen ueber unsere Oberstufe finden sich unter dem Oberstufen-Portal, z.B. in der Broschuere, die unter der Rubrik "Laufbahnplanung" zur Verfuegung steht.',
-    anmeldewoche_title: 'Anmeldewoche Oberstufe',
-    anmeldewoche_date: '23. bis 27. Februar 2026',
-    anmeldewoche_text: 'Anders als bei den fuenften Klassen erfolgt die Terminvergabe nicht ueber das Online-Tool, sondern telefonisch oder per Mail.',
-    anmeldewoche_phone: '05231 992617',
-    anmeldewoche_email: 'b.mannebach@grabbe.nrw.schule',
-    documents: 'Anmeldeformular,Einwilligung Datenverarbeitung,Antrag auf Busfahrkarte',
-    voraussetzung_title: 'Voraussetzung fuer die Aufnahme',
-    voraussetzung_text: 'Voraussetzung fuer die Aufnahme in die Sekundarstufe II des Grabbe-Gymnasiums ist das Vorliegen der Berechtigung zum Besuch der gymnasialen Oberstufe, die am Gymnasium durch die Versetzung am Ende der Jahrgangsstufe 10 oder an anderen Schulformen durch den Erwerb des Mittleren Schulabschlusses mit Q-Vermerk erworben wird. Das entsprechende Zeugnis muss vor Beginn der Einfuehrungsphase nachgereicht werden.',
-    koordination_name: 'Frau Mannebach',
-    koordination_text: 'Frau Mannebach steht Ihnen fuer alle Fragen zur Oberstufe zur Verfuegung.',
-    koordination_phone: '05231 992617',
-    koordination_email: 'b.mannebach@grabbe.nrw.schule',
-    hospitationstage_title: 'Hospitationstage',
-    hospitationstage_text: 'Gerne koennen Interessent:innen sich auch im Vorfeld der Anmeldewoche persoenlich oder telefonisch beraten lassen oder einen oder zwei Tage bei uns hospitieren.',
+
+    // Quick access links (comma-separated label:anchor pairs)
+    quicklinks: 'Formulare:#antraege,Klausurplaene:#klausuren,Beratung:#beratung,Fehlzeiten:#fehlzeiten,Laufbahn:#laufbahn,Facharbeit:#facharbeit',
+
+    // Overview section
+    overview_title: 'Die gymnasiale Oberstufe',
+    overview_text: 'Die Regeldauer der gymnasialen Oberstufe betraegt drei Jahre. In der Einfuehrungsphase werden die Schuelerinnen und Schueler mit den inhaltlichen und methodischen Anforderungen der Oberstufe vertraut gemacht. Der Unterricht findet nicht mehr im Klassenverband statt, sondern in Grundkursen. Diese sind in der Regel dreistuendig, in der neu einsetzenden Fremdsprache vierstuendig. Auf der Grundlage der Vorgaben der APO-GOSt koennen Faecher und Schwerpunkte nach individuellen Staerken und Neigungen gewaehlt werden.',
+    overview_quali: 'Zu Beginn der Qualifikationsphase werden aus den bisher belegten Kursen zwei als Leistungskurse ausgewaehlt, die jeweils fuenfstuendig unterrichtet werden. Die zweiaehrige Qualifikationsphase baut auf den in der Einfuehrungsphase erworbenen Grundlagen auf und bereitet auf die Abiturpruefung vor. Die im Laufe der Qualifikationsphase erbrachten Leistungen gehen bereits als Block I in die Abiturendnote ein.',
+    overview_stunden: 'Im Laufe der Oberstufe sind insgesamt 102 Wochenstunden zu belegen, davon 34 in der Einfuehrungsphase. Die Kernunterrichtszeit endet mit der 9. Stunde, in Ausnahmefaellen liegen Kurse aber auch am spaeteren Nachmittag.',
+    overview_stammgruppen: 'Zur Erleichterung des Uebergangs in die Oberstufe wird am Grabbe-Gymnasium der Unterricht in den in der Regel von allen belegten Faechern Deutsch, Mathematik, Englisch und Sport in der Einfuehrungsphase noch in Stammgruppen erteilt, sodass die Schuelerinnen und Schueler in diesen Faechern immer mit derselben Lerngruppe Unterricht haben.',
+    overview_realschule: 'Traditionell liegt uns besonders die Foerderung von Schuelerinnen und Schuelern aus der Realschule am Herzen, die ihre Schullaufbahn in der gymnasialen Oberstufe fortsetzen moechten. Diesen bieten wir individuelle Hospitationsangebote und Beratungstermine an. Vertiefungskurse in Deutsch, Mathematik und Englisch in der Einfuehrungsphase bieten allen Schuelerinnen und Schuelern die Moeglichkeit, Defizite in diesen fuer den Erfolg in der Oberstufe zentralen Faechern aufzuarbeiten.',
+    overview_kooperation: 'Aufgrund der guten Kooperation mit den beiden anderen Detmolder Gymnasien koennen wir unseren Schuelerinnen und Schuelern in der Oberstufe ein breites Leistungskurs-Angebot machen, darunter Kunst, Musik und Sport als Besonderheiten unseres Schulprofils. Im Bereich der Fremdsprachen bieten wir zur Zeit Latein, Spanisch und Franzoesisch als neu einsetzende Fremdsprachen an, Englisch, Franzoesisch und Latein als fortgefuehrte Fremdsprachen.',
+    overview_abschluesse: 'Neben der Allgemeinen Hochschulreife koennen die Schuelerinnen und Schueler in der Oberstufe auch den schulischen Teil der Fachhochschulreife erwerben. Schuelerinnen und Schueler, die Latein gewaehlt haben, koennen zusaetzlich das Latinum erwerben.',
+    overview_extras: 'Darueber hinaus bereitet die Oberstufe durch gezielte Foerderung des wissenschaftspropedeutischen Arbeitens, z.B. im Rahmen der Facharbeitsvorbereitung, und ein vielfaeltiges Angebot an Berufsorientierungsmassnahmen auf das Leben nach der Schule vor. Im Bereich unserer Profilfaecher koennen die Schuelerinnen und Schueler aus einem breiten Angebot an AGs und instrumental- und vokalpraktischen Kursen auswaehlen.',
+
+    // Antraege section
+    antraege_title: 'Antraege & Formulare',
+    antraege_buecher: 'Wer den Termin zur Buecherausgabe verpasst oder ein Schulbuch verloren hat, kann sich direkt an Herrn Rieche wenden. Dieser ist auch fuer die Erstellung der Schuelerausweise zustaendig.',
+    antraege_wlan: 'Schuelerinnen und Schueler, die einen WLAN-Zugang bekommen moechten, koennen diesen bei Frau Knueppel beantragen, indem sie das Antragsformular herunterladen und ausgefuellt im Lehrerzimmer abgeben.',
+    antraege_tablet: 'Wer sein privates Tablet im Unterricht nutzen moechte, kann dies durch Abgabe des unterschriebenen Tablet-Knigges beantragen.',
+    antraege_office: 'Alle Lehrenden und Lernenden unserer Schule haben die Moeglichkeit, Office 365 zu nutzen; dafuer ist kein gesonderter Antrag erforderlich. Die Anmeldedaten von IServ verwenden. Tipp: Bei Anmeldung direkt bei Office den Nutzerinnennamen in der Form mit ...@grabbe-dt.de waehlen.',
+    // Tag IDs for modular tagged content blocks (configured in CMS)
+    antraege_downloads_tag_id: '',
+
+    // Beratung section
+    beratung_title: 'Beratungsangebote',
+    beratung_text: 'Grundlage fuer die Laufbahnberatung sind die Vorgaben der APO-GOSt, deren zentrale Inhalte in der Broschuere zur Gymnasialen Oberstufe zusammengefasst dargestellt werden.',
+    beratung_team: 'EF: Frau Knueppel (j.knueppel@grabbe.nrw.schule) & Frau Wormuth (f.wormuth@grabbe.nrw.schule)\nQ1: Frau Mannebach (b.mannebach@grabbe.nrw.schule) & Frau Seidel (s.seidel@grabbe.nrw.schule)\nKoordination: Frau Mannebach (b.mannebach@grabbe.nrw.schule)',
+    beratung_additional: 'Die Stufenleiterinnen und Stufenleiter sind auch Ansprechpartner bei persoenlichen Problemen; darueber hinaus koennt ihr die Beratungsangebote des Beratungsteams (Frau Moebus und Frau Bossmanns) nutzen. Frau Bossmanns und Frau Holste-Doerksen bieten auch Lerncoaching oder Hilfe beim Umgang mit Pruefungsangst und anderen Lernproblemen an.',
+    beratung_arbeit: 'Zusaetzliche Beratung zu den Themen Ausbildung und Studium bietet Frau Roedding von der Agentur fuer Arbeit an, die regelmaessig eine Sprechstunde am Grabbe abhaelt. (Terminreservierung durch Eintrag in die Liste im BO-Ordner bei IServ.)',
+
+    // Unterrichtsausfall section
+    ausfall_title: 'Verfahren bei Unterrichtsausfall',
+    ausfall_text: 'Die Schuelerinnen und Schueler haben die Pflicht, sich ueber Aufgaben und Inhalt der eigenverantwortlichen Lernzeit zu informieren, und bearbeiten das bereitgestellte Material gewissenhaft und vollstaendig. Diese Leistung fliesst in die sonstige Mitarbeitsnote ein, da sie eine Unterrichtseinheit ersetzt.',
+    ausfall_vorhersehbar: 'Liegt eine vorhersehbare Abwesenheit der Lehrperson vor, bekommen die Schuelerinnen und Schueler in der Regel in der Stunde zuvor Aufgaben und Materialien, an denen sie in den ausfallenden Stunden arbeiten koennen.',
+    ausfall_unvorhersehbar: 'Liegt eine unvorhersehbare Abwesenheit der Lehrperson vor, so stellt diese in der Regel ueber ein im Kurs vereinbartes digitales Distributionsverfahren Material zur Verfuegung (z.B. per E-Mail, ueber das Aufgabenmodul oder den Kursordner auf IServ). Wenn die Lehrperson keine Aufgaben zur Bearbeitung vorgesehen hat, nutzen die Schuelerinnen und Schueler die Lernzeit eigenverantwortlich. Auf dem Vertretungsplan erscheint dann ein entsprechender Vermerk (EVA fuer "eigenverantwortliches Arbeiten").',
+
+    // Vertretungsplan
+    vertretung_title: 'Vertretungsplan',
+    vertretung_text: 'Der Vertretungsplan steht ueber WebUntis zur Verfuegung. Antrag (siehe unter Antraege oder im Dateimanager) ausfuellen und abgeben, dann App (Untis Mobile) herunterladen. Alternativ: Info-Displays im Neubau-Foyer oder im Altbau benutzen!',
+
+    // Laufbahnplanung
+    laufbahn_title: 'Laufbahnplanung',
+    laufbahn_text: 'Weitere Informationen z.B. zum Zentralabitur oder einzelnen Faechern sind auch auf den Seiten des Ministeriums zugaenglich.',
+    laufbahn_links: 'Bildungsportal NRW|https://www.schulministerium.nrw.de,FAQ zur Oberstufe|https://www.schulministerium.nrw.de/themen/schulsystem/schulformen/gymnasium/gymnasiale-oberstufe,Standardsicherung NRW|https://www.standardsicherung.schulministerium.nrw.de',
+    laufbahn_downloads_tag_id: '',
+
+    // Klausuren
+    klausuren_title: 'Klausuren',
+    klausuren_text: 'Die Klausurplaene werden hier jeweils zu Beginn des Halbjahres veroeffentlicht und im Kasten im Neubaufoyer ausgehaengt. Bitte meldet euch umgehend, falls fuer euch trotz sorgfaeltiger Pruefung versehentlich mehr als drei Klausuren pro Woche angesetzt sind oder es andere Terminschwierigkeiten gibt.',
+    klausuren_nachschreiben: 'Schuelerinnen und Schueler, die eine Klausur aus von ihnen zu vertretenden Gruenden versaeumen (z.B. Termin falsch notiert, verschlafen usw.), haben keinen Anspruch auf eine Nachschreibklausur; fuer alle anderen finden jeweils gegen Ende eines Quartals Nachschreibtermine statt.',
+    klausuren_downloads_tag_id: '',
+
+    // Fehlzeiten
+    fehlzeiten_title: 'Fehlzeiten und Beurlaubungen',
+    fehlzeiten_text: 'Das Schulgesetz sieht vor, dass die Schule unverzueglich zu benachrichtigen ist, wenn Schueler:innen durch Krankheit oder aus anderen nicht vorhersehbaren Gruenden verhindert sind, die Schule zu besuchen. Wie in der Sekundarstufe I erfolgt diese Benachrichtigung zunaechst durch die Erziehungsberechtigten ueber deren WebUntis-Zugang. Volljaehrige Schueler:innen koennen die Eintragung selbst vornehmen.',
+    fehlzeiten_entschuldigung: 'Die Erziehungsberechtigten bzw. die volljaehrigen Schueler:innen sind laut Schulgesetz ebenfalls verpflichtet, den Grund fuer das Schulversaeumnis schriftlich mitzuteilen. Dies geschieht ueber das Entschuldigungsformular. Das Entschuldigungsformular muss unmittelbar nach der Rueckkehr in den Unterricht, spaetestens jedoch eine Woche nach dem letzten Krankheitstag, in Papierform bei der Stufenleitung eingereicht werden.',
+    fehlzeiten_beurlaubung: 'Bei allen im Voraus absehbaren Terminen (z.B. nicht akut bedingte Arztbesuche, Fahrpruefung) ist rechtzeitig ein Antrag auf Beurlaubung vom Unterricht zu stellen. Fuer Tage, an denen Klausuren oder andere Pruefungen angesetzt sind, kann eine Beurlaubung nur in begruendeten Ausnahmefaellen gewaehrt werden.',
+    fehlzeiten_hinweis: 'Fehlzeiten, fuer die nicht innerhalb einer Woche nach Rueckkehr in den Unterricht eine Entschuldigung vorgelegt worden ist, gelten als unentschuldigt und koennen als nicht erbrachte Leistungen in die Notengebung einfliessen. Schuelerinnen und Schueler sind verpflichtet, den versaeumten Stoff selbststaendig nachzuarbeiten.',
+    fehlzeiten_downloads_tag_id: '',
+
+    // Facharbeit
+    facharbeit_title: 'Facharbeit',
+    facharbeit_text: 'Alle Informationen zur Facharbeit finden sich hier. Bitte beachtet den Terminplan fuer das aktuelle Schuljahr und die Handreichung zur Facharbeit.',
+    facharbeit_downloads_tag_id: '',
+
+    // Berufsorientierung
+    berufsorientierung_title: 'Berufsorientierung',
+    berufsorientierung_text: 'Umfangreiche Informationen zur Berufsorientierung finden sich in unserem Berufsorientierungsportal.',
+    berufsorientierung_link: '/schulleben/faecher-ags',
+
+    // Studium & Stipendien
+    stipendien_title: 'Studium & Stipendien',
+    stipendien_text: 'Die Bewerbungskriterien ergeben sich oft aus dem Charakter der Stiftungen, z.B. wird haeufig neben guten schulischen Leistungen auch gesellschaftliches oder politisches Engagement erwartet. Einige Angebote richten sich auch an Auszubildende oder sind auf bestimmte Personengruppen beschraenkt.',
+    stipendien_links: 'Studieren ab 15 (Uni Bielefeld)|https://www.uni-bielefeld.de/studium/studienangebot/studieren-ab-15/,Studifinder|https://www.studifinder.de,Stipendienfinder des DAAD|https://www.daad.de/de/studieren-und-forschen-in-deutschland/stipendien-finden/,Studienstiftung des Deutschen Volkes|https://www.studienstiftung.de,Deutschlandstipendium|https://www.deutschlandstipendium.de,Mystipendium|https://www.mystipendium.de',
+
+    // Abitur
+    abitur_title: 'Informationen zum Abitur',
+    abitur_text: 'Im Schuljahr 2025/26 gibt es aufgrund des Wechsels vom G8- zum G9-System keine Abiturpruefungen am Grabbe.',
+
+    // Tagged content block IDs (CMS-configurable)
+    events_tag_id: '',
+    news_tag_id: '',
   },
 
   // Anmeldung
@@ -789,7 +856,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
   {
     id: 'oberstufe',
     title: 'Oberstufe',
-    description: 'Die Seite "Unsere Schule > Oberstufe" mit Informationen zur gymnasialen Oberstufe.',
+    description: 'Die Seite "Unsere Schule > Oberstufe" mit umfassenden Informationen zur gymnasialen Oberstufe.',
     route: '/unsere-schule/oberstufe',
     sections: [
       {
@@ -802,55 +869,145 @@ export const EDITABLE_PAGES: PageDefinition[] = [
         ],
       },
       {
-        id: 'portal',
-        title: 'Oberstufen-Portal',
+        id: 'quicklinks',
+        title: 'Schnellzugriff',
+        description: 'Links fuer den Schnellzugriff oben rechts auf der Seite. Format: Anzeigename:#anker (kommagetrennt)',
         fields: [
-          { key: 'portal_title', label: 'Titel', type: 'text' },
-          { key: 'portal_text', label: 'Text', type: 'textarea' },
+          { key: 'quicklinks', label: 'Schnellzugriff-Links', type: 'textarea', description: 'Format: Anzeigename:#anker,Anzeigename2:#anker2 — Anker muessen zu Abschnitts-IDs auf der Seite passen.' },
         ],
       },
       {
-        id: 'anmeldewoche',
-        title: 'Anmeldewoche',
+        id: 'overview',
+        title: 'Die gymnasiale Oberstufe',
+        description: 'Allgemeine Informationen zur Oberstufe',
         fields: [
-          { key: 'anmeldewoche_title', label: 'Titel', type: 'text' },
-          { key: 'anmeldewoche_date', label: 'Datum', type: 'text' },
-          { key: 'anmeldewoche_text', label: 'Text', type: 'textarea' },
-          { key: 'anmeldewoche_phone', label: 'Telefon', type: 'text' },
-          { key: 'anmeldewoche_email', label: 'E-Mail', type: 'text' },
+          { key: 'overview_title', label: 'Titel', type: 'text' },
+          { key: 'overview_text', label: 'Einfuehrungstext', type: 'textarea' },
+          { key: 'overview_quali', label: 'Qualifikationsphase', type: 'textarea' },
+          { key: 'overview_stunden', label: 'Wochenstunden', type: 'textarea' },
+          { key: 'overview_stammgruppen', label: 'Stammgruppen', type: 'textarea' },
+          { key: 'overview_realschule', label: 'Realschule/Vertiefungskurse', type: 'textarea' },
+          { key: 'overview_kooperation', label: 'Kooperation/Leistungskurse', type: 'textarea' },
+          { key: 'overview_abschluesse', label: 'Abschluesse', type: 'textarea' },
+          { key: 'overview_extras', label: 'Weitere Angebote', type: 'textarea' },
         ],
       },
       {
-        id: 'documents',
-        title: 'Anmeldeunterlagen',
+        id: 'antraege',
+        title: 'Antraege & Formulare',
+        description: 'Informationen zu Buecher, Ausweisen, WLAN, Tablets und Office 365',
         fields: [
-          { key: 'documents', label: 'Dokumente (kommagetrennt)', type: 'textarea', description: 'Dokumentbezeichnungen getrennt durch Komma eingeben.' },
+          { key: 'antraege_title', label: 'Titel', type: 'text' },
+          { key: 'antraege_buecher', label: 'Buecher & Ausweise', type: 'textarea' },
+          { key: 'antraege_wlan', label: 'WLAN-Zugang', type: 'textarea' },
+          { key: 'antraege_tablet', label: 'Tablet-Nutzung', type: 'textarea' },
+          { key: 'antraege_office', label: 'Office 365', type: 'textarea' },
+          { key: 'antraege_downloads_tag_id', label: 'Downloads-Tag (fuer Formulare)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen. Tag-IDs findest du unter CMS > Tags.' },
         ],
       },
       {
-        id: 'voraussetzung',
-        title: 'Voraussetzungen',
+        id: 'beratung',
+        title: 'Beratungsangebote',
         fields: [
-          { key: 'voraussetzung_title', label: 'Titel', type: 'text' },
-          { key: 'voraussetzung_text', label: 'Text', type: 'textarea' },
+          { key: 'beratung_title', label: 'Titel', type: 'text' },
+          { key: 'beratung_text', label: 'Einfuehrungstext', type: 'textarea' },
+          { key: 'beratung_team', label: 'Oberstufenteam (Zeilenumbruch = neue Zeile)', type: 'textarea' },
+          { key: 'beratung_additional', label: 'Weitere Beratung', type: 'textarea' },
+          { key: 'beratung_arbeit', label: 'Agentur fuer Arbeit', type: 'textarea' },
         ],
       },
       {
-        id: 'koordination',
-        title: 'Oberstufen-Koordination',
+        id: 'ausfall',
+        title: 'Unterrichtsausfall',
         fields: [
-          { key: 'koordination_name', label: 'Name', type: 'text' },
-          { key: 'koordination_text', label: 'Beschreibung', type: 'textarea' },
-          { key: 'koordination_phone', label: 'Telefon', type: 'text' },
-          { key: 'koordination_email', label: 'E-Mail', type: 'text' },
+          { key: 'ausfall_title', label: 'Titel', type: 'text' },
+          { key: 'ausfall_text', label: 'Allgemein', type: 'textarea' },
+          { key: 'ausfall_vorhersehbar', label: 'Vorhersehbar', type: 'textarea' },
+          { key: 'ausfall_unvorhersehbar', label: 'Unvorhersehbar', type: 'textarea' },
         ],
       },
       {
-        id: 'hospitationstage',
-        title: 'Hospitationstage',
+        id: 'vertretung',
+        title: 'Vertretungsplan',
         fields: [
-          { key: 'hospitationstage_title', label: 'Titel', type: 'text' },
-          { key: 'hospitationstage_text', label: 'Text', type: 'textarea' },
+          { key: 'vertretung_title', label: 'Titel', type: 'text' },
+          { key: 'vertretung_text', label: 'Text', type: 'textarea' },
+        ],
+      },
+      {
+        id: 'laufbahn',
+        title: 'Laufbahnplanung',
+        fields: [
+          { key: 'laufbahn_title', label: 'Titel', type: 'text' },
+          { key: 'laufbahn_text', label: 'Text', type: 'textarea' },
+          { key: 'laufbahn_links', label: 'Externe Links (Format: Name|URL, kommagetrennt)', type: 'textarea' },
+          { key: 'laufbahn_downloads_tag_id', label: 'Downloads-Tag (fuer Laufbahn-Dokumente)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen.' },
+        ],
+      },
+      {
+        id: 'klausuren',
+        title: 'Klausuren',
+        fields: [
+          { key: 'klausuren_title', label: 'Titel', type: 'text' },
+          { key: 'klausuren_text', label: 'Text', type: 'textarea' },
+          { key: 'klausuren_nachschreiben', label: 'Nachschreiben', type: 'textarea' },
+          { key: 'klausuren_downloads_tag_id', label: 'Downloads-Tag (fuer Klausurplaene)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen.' },
+        ],
+      },
+      {
+        id: 'fehlzeiten',
+        title: 'Fehlzeiten und Beurlaubungen',
+        fields: [
+          { key: 'fehlzeiten_title', label: 'Titel', type: 'text' },
+          { key: 'fehlzeiten_text', label: 'Allgemein', type: 'textarea' },
+          { key: 'fehlzeiten_entschuldigung', label: 'Entschuldigung', type: 'textarea' },
+          { key: 'fehlzeiten_beurlaubung', label: 'Beurlaubung', type: 'textarea' },
+          { key: 'fehlzeiten_hinweis', label: 'Wichtige Hinweise', type: 'textarea' },
+          { key: 'fehlzeiten_downloads_tag_id', label: 'Downloads-Tag (fuer Formulare)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen.' },
+        ],
+      },
+      {
+        id: 'facharbeit',
+        title: 'Facharbeit',
+        fields: [
+          { key: 'facharbeit_title', label: 'Titel', type: 'text' },
+          { key: 'facharbeit_text', label: 'Text', type: 'textarea' },
+          { key: 'facharbeit_downloads_tag_id', label: 'Downloads-Tag (fuer Facharbeit-Dokumente)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen.' },
+        ],
+      },
+      {
+        id: 'berufsorientierung',
+        title: 'Berufsorientierung',
+        fields: [
+          { key: 'berufsorientierung_title', label: 'Titel', type: 'text' },
+          { key: 'berufsorientierung_text', label: 'Text', type: 'textarea' },
+          { key: 'berufsorientierung_link', label: 'Link zum Portal', type: 'text' },
+        ],
+      },
+      {
+        id: 'stipendien',
+        title: 'Studium & Stipendien',
+        fields: [
+          { key: 'stipendien_title', label: 'Titel', type: 'text' },
+          { key: 'stipendien_text', label: 'Text', type: 'textarea' },
+          { key: 'stipendien_links', label: 'Links (Format: Name|URL, kommagetrennt)', type: 'textarea' },
+        ],
+      },
+      {
+        id: 'abitur',
+        title: 'Abitur',
+        fields: [
+          { key: 'abitur_title', label: 'Titel', type: 'text' },
+          { key: 'abitur_text', label: 'Text', type: 'textarea' },
+        ],
+      },
+      {
+        id: 'tagged-content',
+        title: 'Dynamische Inhalte (Tags)',
+        description: 'Hier koennen Tags ausgewaehlt werden, um Termine, News und Downloads automatisch auf der Oberstufenseite anzuzeigen. Tag-IDs findest du unter CMS > Tags.',
+        fields: [
+          { key: 'events_tag_id', label: 'Tag fuer Oberstufen-Termine', type: 'text', description: 'Tag-ID fuer Termine, die auf der Oberstufenseite angezeigt werden sollen.' },
+          { key: 'news_tag_id', label: 'Tag fuer Oberstufen-News', type: 'text', description: 'Tag-ID fuer Beitraege/News, die auf der Oberstufenseite angezeigt werden sollen.' },
         ],
       },
       HERO_IMAGE_SECTION,
