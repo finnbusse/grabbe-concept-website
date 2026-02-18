@@ -6,15 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,7 +27,15 @@ export default function LoginPage() {
         password,
       })
       if (error) throw error
-      router.push("/cms")
+
+      if (rememberMe) {
+        localStorage.setItem("cms_remember_me", "true")
+      } else {
+        localStorage.removeItem("cms_remember_me")
+      }
+
+      // Use full page navigation to ensure middleware properly picks up the new session cookies
+      window.location.href = "/cms"
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Ein Fehler ist aufgetreten")
     } finally {
@@ -83,6 +90,18 @@ export default function LoginPage() {
                 {error && (
                   <p className="text-sm text-destructive">{error}</p>
                 )}
+                <div className="flex items-center gap-2">
+                  <input
+                    id="rememberMe"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-input accent-primary"
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm font-normal text-muted-foreground cursor-pointer">
+                    Angemeldet bleiben
+                  </Label>
+                </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Anmelden..." : "Anmelden"}
                 </Button>

@@ -13,6 +13,12 @@ interface Post {
   image_url: string | null
   author_name: string | null
   created_at: string
+  author_profile?: {
+    first_name?: string
+    last_name?: string
+    title?: string
+    avatar_url?: string | null
+  } | null
 }
 
 export function NewsSection({ posts, content }: { posts: Post[]; content?: Record<string, unknown> }) {
@@ -69,6 +75,19 @@ export function NewsSection({ posts, content }: { posts: Post[]; content?: Recor
                   {featured.category && (
                     <span className="rounded-full bg-primary/10 px-3 py-0.5 font-sub text-[10px] uppercase tracking-wider text-primary">{featured.category}</span>
                   )}
+                  {(featured.author_name || featured.author_profile) && (
+                    <span className="flex items-center gap-1.5">
+                      {featured.author_profile?.avatar_url ? (
+                        <img src={featured.author_profile.avatar_url} alt="" className="h-5 w-5 rounded-full object-cover" />
+                      ) : (
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/10 text-[8px] font-bold text-primary">
+                          {featured.author_profile?.first_name?.charAt(0) || featured.author_name?.charAt(0) || ""}
+                          {featured.author_profile?.last_name?.charAt(0) || ""}
+                        </span>
+                      )}
+                      <span>{featured.author_name || [featured.author_profile?.title, featured.author_profile?.first_name, featured.author_profile?.last_name].filter(Boolean).join(" ")}</span>
+                    </span>
+                  )}
                 </div>
                 <h3 className="mt-4 font-display text-2xl md:text-3xl text-card-foreground group-hover:text-primary transition-colors duration-300">{featured.title}</h3>
                 {featured.excerpt && <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground line-clamp-3">{featured.excerpt}</p>}
@@ -101,6 +120,18 @@ export function NewsSection({ posts, content }: { posts: Post[]; content?: Recor
                     <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                       <time>{new Date(post.created_at).toLocaleDateString("de-DE", { day: "numeric", month: "short", year: "numeric" })}</time>
                       {post.category && <span className="rounded-full bg-primary/10 px-2 py-0.5 font-sub text-[10px] uppercase tracking-wider text-primary">{post.category}</span>}
+                      {(post.author_name || post.author_profile) && (
+                        <span className="flex items-center gap-1">
+                          {post.author_profile?.avatar_url ? (
+                            <img src={post.author_profile.avatar_url} alt="" className="h-4 w-4 rounded-full object-cover" />
+                          ) : (
+                            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-[7px] font-bold text-primary">
+                              {post.author_profile?.first_name?.charAt(0) || post.author_name?.charAt(0) || ""}
+                              {post.author_profile?.last_name?.charAt(0) || ""}
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </div>
                     <h3 className="mt-2 font-display text-lg text-card-foreground line-clamp-2 group-hover:text-primary transition-colors">{post.title}</h3>
                     {post.excerpt && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{post.excerpt}</p>}
