@@ -21,12 +21,21 @@ export default async function AktuellesPage() {
   const userIds = [...new Set((posts || []).map(p => p.user_id).filter(Boolean))]
   let authorProfiles: Record<string, { first_name?: string; last_name?: string; title?: string; avatar_url?: string | null }> = {}
   if (userIds.length > 0) {
-    const { data: profiles } = await supabase
+    const { data: profiles, error: profilesError } = await supabase
       .from("user_profiles")
       .select("user_id, first_name, last_name, title, avatar_url")
       .in("user_id", userIds)
     if (profiles) {
       authorProfiles = Object.fromEntries(profiles.map(p => [p.user_id, p]))
+    } else if (profilesError?.message?.includes("avatar_url")) {
+      // avatar_url column doesn't exist yet - query without it
+      const { data: fallbackProfiles } = await supabase
+        .from("user_profiles")
+        .select("user_id, first_name, last_name, title")
+        .in("user_id", userIds)
+      if (fallbackProfiles) {
+        authorProfiles = Object.fromEntries(fallbackProfiles.map(p => [p.user_id, { ...p, avatar_url: null }]))
+      }
     }
   }
 

@@ -22,12 +22,24 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   // Fetch author profile if post has user_id
   let authorProfile: { first_name?: string; last_name?: string; title?: string; avatar_url?: string | null } | null = null
   if (post.user_id) {
-    const { data } = await supabase
+    const { data, error: profileError } = await supabase
       .from("user_profiles")
       .select("first_name, last_name, title, avatar_url")
       .eq("user_id", post.user_id)
       .single()
-    authorProfile = data
+    if (data) {
+      authorProfile = data
+    } else if (profileError?.message?.includes("avatar_url")) {
+      // avatar_url column doesn't exist yet - query without it
+      const { data: fallbackData } = await supabase
+        .from("user_profiles")
+        .select("first_name, last_name, title")
+        .eq("user_id", post.user_id)
+        .single()
+      if (fallbackData) {
+        authorProfile = { ...fallbackData, avatar_url: null }
+      }
+    }
   }
 
   const authorDisplayName = post.author_name || (

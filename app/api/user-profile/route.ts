@@ -9,14 +9,26 @@ export async function GET(request: NextRequest) {
 
   const userId = request.nextUrl.searchParams.get("userId") || user.id
 
-  const { data: profile, error } = await supabase
+  // Try with all columns first, fall back to without avatar_url if column doesn't exist
+  let profile = null
+  const { data, error } = await supabase
     .from("user_profiles")
-    .select("*")
+    .select("id, user_id, first_name, last_name, title, avatar_url, created_at, updated_at")
     .eq("user_id", userId)
     .single()
 
-  if (error && error.code !== "PGRST116") {
+  if (error && error.message?.includes("avatar_url")) {
+    // avatar_url column doesn't exist yet - query without it
+    const { data: fallbackData } = await supabase
+      .from("user_profiles")
+      .select("id, user_id, first_name, last_name, title, created_at, updated_at")
+      .eq("user_id", userId)
+      .single()
+    profile = fallbackData ? { ...fallbackData, avatar_url: null } : null
+  } else if (error && error.code !== "PGRST116") {
     return NextResponse.json({ error: error.message }, { status: 500 })
+  } else {
+    profile = data
   }
 
   return NextResponse.json({ profile: profile || null })
@@ -67,6 +79,14 @@ export async function POST(request: NextRequest) {
         .update({ avatar_url: blob.url } as never)
         .eq("user_id", targetUserId)
       if (updateError) {
+        // If avatar_url column doesn't exist, the upload still succeeded in blob storage
+        // Return the URL so the client can display it, but warn about the DB issue
+        if (updateError.message?.includes("avatar_url")) {
+          return NextResponse.json({ 
+            avatar_url: blob.url, 
+            warning: "Bitte fuehren Sie die Migration 'migration_add_avatar_url_column.sql' in Supabase aus und laden Sie den Schema-Cache neu." 
+          })
+        }
         return NextResponse.json({ error: `Profil konnte nicht aktualisiert werden: ${updateError.message}` }, { status: 500 })
       }
     } else {
@@ -74,6 +94,16 @@ export async function POST(request: NextRequest) {
         .from("user_profiles")
         .insert({ user_id: targetUserId, avatar_url: blob.url } as never)
       if (insertError) {
+        if (insertError.message?.includes("avatar_url")) {
+          // Try inserting without avatar_url
+          await supabase
+            .from("user_profiles")
+            .insert({ user_id: targetUserId } as never)
+          return NextResponse.json({ 
+            avatar_url: blob.url, 
+            warning: "Bitte fuehren Sie die Migration 'migration_add_avatar_url_column.sql' in Supabase aus und laden Sie den Schema-Cache neu." 
+          })
+        }
         return NextResponse.json({ error: `Profil konnte nicht erstellt werden: ${insertError.message}` }, { status: 500 })
       }
     }
