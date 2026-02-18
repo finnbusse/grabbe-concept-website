@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { NextResponse } from "next/server"
 
 export async function GET() {
@@ -52,14 +53,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "E-Mail und Passwort erforderlich" }, { status: 400 })
   }
 
-  // Use the Supabase admin client to create users
-  // Since we don't have admin access from client, we use signUp
-  const { data, error } = await supabase.auth.signUp({
+  // Use the Supabase admin client to create users without email confirmation
+  const adminClient = createAdminClient()
+  const { data, error } = await adminClient.auth.admin.createUser({
     email,
     password,
-    options: {
-      emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/cms`,
-    }
+    email_confirm: true,
   })
 
   if (error) {
