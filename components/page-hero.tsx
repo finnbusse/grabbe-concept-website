@@ -12,11 +12,12 @@ function djb2(str: string): number {
 }
 
 /**
- * Generate a small deterministic ASCII art grid for the decorative right panel.
+ * Generate a deterministic ASCII art grid for the decorative right panel.
+ * Uses denser glyph set and more visible patterns.
  */
-function generateAsciiGrid(seed: string, cols = 44, rows = 12): string {
+function generateAsciiGrid(seed: string, cols = 56, rows = 16): string {
   const h = djb2(seed)
-  const glyphs = ["·", "·", "·", ":", ".", " ", " ", " ", " ", " ", "+", "×", "◇"]
+  const glyphs = ["·", ":", ".", "+", "×", "◇", "○", "▪", "▫", "◦", "∘", "⊙"]
   const lines: string[] = []
   for (let r = 0; r < rows; r++) {
     let line = ""
@@ -24,7 +25,7 @@ function generateAsciiGrid(seed: string, cols = 44, rows = 12): string {
       const v =
         Math.sin((h % 997) * 0.0031 + r * 0.71 + c * 0.29) *
         Math.cos((h % 503) * 0.0017 + r * 0.43 + c * 0.61)
-      line += v > 0.38 ? glyphs[Math.abs(Math.floor(v * 100 + h)) % glyphs.length] : " "
+      line += v > 0.25 ? glyphs[Math.abs(Math.floor(v * 100 + h)) % glyphs.length] : " "
     }
     lines.push(line)
   }
@@ -71,38 +72,32 @@ export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
             )}
           </div>
 
-          {/* ── Right: decorative / hero image panel ── */}
+          {/* ── Right: decorative / hero image panel (~50% width) ── */}
           <div
-            className="hidden sm:block shrink-0 w-64 md:w-80 lg:w-96 h-40 md:h-52 lg:h-60 rounded-2xl overflow-hidden relative shadow-sm"
+            className="hidden sm:block shrink-0 w-[45%] md:w-[48%] lg:w-[50%] h-48 md:h-60 lg:h-72 overflow-hidden relative"
             aria-hidden={!imageUrl}
           >
             {imageUrl ? (
-              <>
-                <Image
-                  src={imageUrl}
-                  alt=""
-                  fill
-                  className="object-cover"
-                  sizes="384px"
-                />
-                {/* Bottom fade blending into page background */}
-                <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-background via-background/40 to-transparent" />
-              </>
+              <Image
+                src={imageUrl}
+                alt=""
+                fill
+                className="object-cover rounded-lg"
+                sizes="(min-width: 1024px) 50vw, (min-width: 768px) 48vw, 45vw"
+              />
             ) : (
               <div
-                className="absolute inset-0"
+                className="absolute inset-0 rounded-lg"
                 style={{
-                  background: "linear-gradient(135deg,#bae6fd 0%,#38bdf8 50%,#7dd3fc 100%)",
+                  background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 50%, hsl(var(--primary) / 0.4) 100%)",
                 }}
               >
                 {/* ASCII texture */}
-                <pre className="absolute inset-0 p-3 font-mono text-[8px] leading-[1.4] text-sky-900/25 select-none overflow-hidden">
+                <pre className="absolute inset-0 p-4 font-mono text-[9px] leading-[1.5] text-white/20 select-none overflow-hidden">
                   {ascii}
                 </pre>
-                {/* Subtle inner glow to the left so it fades into the page */}
-                <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-transparent" />
-                {/* Bottom fade blending into page background */}
-                <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                {/* Soft left edge blend */}
+                <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-transparent" />
               </div>
             )}
           </div>

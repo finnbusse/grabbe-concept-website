@@ -26,19 +26,35 @@ export default async function NetzwerkPage() {
           imageUrl={(content.hero_image_url as string) || undefined}
         />
 
-        <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {partners.map((partner) => (
-              <div key={partner.name} className="flex items-start gap-4 rounded-xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-md">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Handshake className="h-5 w-5" />
+        <section className="bg-mesh-blue py-28 lg:py-36">
+          <div className="mx-auto max-w-6xl px-4 lg:px-8">
+            <div className="text-center">
+              <span className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
+                Kooperationen
+              </span>
+              <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-foreground">
+                Unser Netzwerk
+              </h2>
+            </div>
+
+            <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {partners.map((partner) => (
+                <div
+                  key={partner.name}
+                  className="group rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.06] hover:-translate-y-1"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:rotate-3 group-hover:scale-110">
+                    <Handshake className="h-6 w-6" />
+                  </div>
+                  <p className="mt-5 font-display text-base font-semibold text-card-foreground">
+                    {partner.name}
+                  </p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                    {partner.category}
+                  </p>
                 </div>
-                <div>
-                  <p className="font-display text-sm font-semibold text-card-foreground">{partner.name}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{partner.category}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
       </main>
