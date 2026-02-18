@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -860,12 +860,12 @@ function TableBlockEditor({ data, onChange }: { data: Record<string, unknown>; o
 function TaggedContentBlockEditor({ type, data, onChange }: { type: string; data: Record<string, unknown>; onChange: (data: Record<string, unknown>) => void }) {
   const [tags, setTags] = useState<Array<{ id: string; name: string; color: string }>>([])
 
-  useState(() => {
+  useEffect(() => {
     fetch("/api/tags")
       .then((r) => r.json())
       .then((d) => { if (Array.isArray(d)) setTags(d) })
       .catch(() => {})
-  })
+  }, [])
 
   const typeLabels: Record<string, string> = {
     'tagged-events': 'Termine',
