@@ -45,6 +45,7 @@ export default async function SchullebenDynamicPage({ params }: Props) {
         <PageHero
           title={page.title}
           label={page.section || undefined}
+          imageUrl={page.hero_image_url || undefined}
         />
 
         <section className="mx-auto max-w-4xl px-4 py-12 lg:px-8">

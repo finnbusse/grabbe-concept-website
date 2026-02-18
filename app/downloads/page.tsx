@@ -1,6 +1,7 @@
 import { SiteLayout } from "@/components/site-layout"
 import { PageHero } from "@/components/page-hero"
 import { createClient } from "@/lib/supabase/server"
+import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
 import { Download, FileText, ImageIcon, ExternalLink } from "lucide-react"
 import { DownloadCategories } from "@/components/download-categories"
 
@@ -10,7 +11,11 @@ export const metadata = {
 }
 
 export default async function DownloadsPage() {
-  const supabase = await createClient()
+  const [heroContent, supabase] = await Promise.all([
+    getPageContent('downloads', PAGE_DEFAULTS['downloads']),
+    createClient(),
+  ])
+  const heroImageUrl = (heroContent.hero_image_url as string) || undefined
   const { data: docs } = await supabase
     .from("documents")
     .select("*")
@@ -35,6 +40,7 @@ export default async function DownloadsPage() {
           title="Downloads"
           label="Materialien"
           subtitle="Hier finden Sie alle Dokumente, Formulare und Materialien zum Herunterladen."
+          imageUrl={heroImageUrl}
         />
 
         <section className="mx-auto max-w-4xl px-4 py-12 lg:px-8">

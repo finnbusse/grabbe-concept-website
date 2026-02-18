@@ -1,6 +1,7 @@
 import { SiteLayout } from "@/components/site-layout"
 import { PageHero } from "@/components/page-hero"
 import { createClient } from "@/lib/supabase/server"
+import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
 import { CalendarDays, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
@@ -10,7 +11,11 @@ export const metadata = {
 }
 
 export default async function AktuellesPage() {
-  const supabase = await createClient()
+  const [heroContent, supabase] = await Promise.all([
+    getPageContent('aktuelles', PAGE_DEFAULTS['aktuelles']),
+    createClient(),
+  ])
+  const heroImageUrl = (heroContent.hero_image_url as string) || undefined
   const { data: posts } = await supabase
     .from("posts")
     .select("*")
@@ -47,6 +52,7 @@ export default async function AktuellesPage() {
           title="Aktuelles"
           label="Neuigkeiten"
           subtitle="Bleiben Sie informiert ueber Veranstaltungen, Projekte und Neuigkeiten am Grabbe-Gymnasium."
+          imageUrl={heroImageUrl}
         />
 
         {/* Posts */}

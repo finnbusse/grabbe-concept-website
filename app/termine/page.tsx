@@ -1,6 +1,7 @@
 import { SiteLayout } from "@/components/site-layout"
 import { PageHero } from "@/components/page-hero"
 import { createClient } from "@/lib/supabase/server"
+import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
 import { CalendarDays, MapPin, Clock, Tag } from "lucide-react"
 
 export const metadata = {
@@ -20,7 +21,11 @@ const categoryColors: Record<string, string> = {
 }
 
 export default async function TerminePage() {
-  const supabase = await createClient()
+  const [heroContent, supabase] = await Promise.all([
+    getPageContent('termine', PAGE_DEFAULTS['termine']),
+    createClient(),
+  ])
+  const heroImageUrl = (heroContent.hero_image_url as string) || undefined
   const { data: events } = await supabase
     .from("events")
     .select("*")
@@ -46,6 +51,7 @@ export default async function TerminePage() {
           title="Termine"
           label="Schulkalender"
           subtitle="Alle kommenden Termine, Veranstaltungen und wichtigen Daten im Ueberblick."
+          imageUrl={heroImageUrl}
         />
 
         <section className="mx-auto max-w-4xl px-4 py-12 lg:px-8">

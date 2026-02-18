@@ -14,7 +14,7 @@ function djb2(str: string): number {
 /**
  * Generate a small deterministic ASCII art grid for the decorative right panel.
  */
-function generateAsciiGrid(seed: string, cols = 36, rows = 8): string {
+function generateAsciiGrid(seed: string, cols = 44, rows = 12): string {
   const h = djb2(seed)
   const glyphs = ["·", "·", "·", ":", ".", " ", " ", " ", " ", " ", "+", "×", "◇"]
   const lines: string[] = []
@@ -71,19 +71,23 @@ export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
             )}
           </div>
 
-          {/* ── Right: decorative sky-blue panel ── */}
+          {/* ── Right: decorative / hero image panel ── */}
           <div
-            className="hidden sm:flex shrink-0 w-52 md:w-64 lg:w-80 h-28 md:h-32 lg:h-36 rounded-2xl overflow-hidden relative shadow-sm"
-            aria-hidden="true"
+            className="hidden sm:block shrink-0 w-64 md:w-80 lg:w-96 h-40 md:h-52 lg:h-60 rounded-2xl overflow-hidden relative shadow-sm"
+            aria-hidden={!imageUrl}
           >
             {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="320px"
-              />
+              <>
+                <Image
+                  src={imageUrl}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="384px"
+                />
+                {/* Bottom fade blending into page background */}
+                <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-background via-background/40 to-transparent" />
+              </>
             ) : (
               <div
                 className="absolute inset-0"
@@ -92,11 +96,13 @@ export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
                 }}
               >
                 {/* ASCII texture */}
-                <pre className="absolute inset-0 p-2.5 font-mono text-[8px] leading-[1.4] text-sky-900/25 select-none overflow-hidden">
+                <pre className="absolute inset-0 p-3 font-mono text-[8px] leading-[1.4] text-sky-900/25 select-none overflow-hidden">
                   {ascii}
                 </pre>
                 {/* Subtle inner glow to the left so it fades into the page */}
                 <div className="absolute inset-0 bg-gradient-to-r from-background/30 via-transparent to-transparent" />
+                {/* Bottom fade blending into page background */}
+                <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-background via-background/40 to-transparent" />
               </div>
             )}
           </div>

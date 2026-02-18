@@ -20,6 +20,7 @@ export default async function OberstufePage() {
           title={content.page_title as string}
           label={content.page_label as string}
           subtitle={content.page_subtitle as string}
+          imageUrl={(content.hero_image_url as string) || undefined}
         />
 
         <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
