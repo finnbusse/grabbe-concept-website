@@ -24,6 +24,8 @@ export function SiteHeader({
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [headerHidden, setHeaderHidden] = useState(false)
+  const lastScrollYRef = useRef(0)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const handleDropdownEnter = useCallback((itemId: string) => {
@@ -51,6 +53,42 @@ export function SiteHeader({
     setOpenDropdown(null)
   }, [pathname])
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerWidth < 1024) {
+        setHeaderHidden(false)
+        lastScrollYRef.current = window.scrollY
+        return
+      }
+
+      const currentScrollY = window.scrollY
+      const scrollDelta = currentScrollY - lastScrollYRef.current
+
+      if (currentScrollY < 80) {
+        setHeaderHidden(false)
+      } else if (scrollDelta > 4) {
+        setHeaderHidden(true)
+      } else if (scrollDelta < -4) {
+        setHeaderHidden(false)
+      }
+
+      lastScrollYRef.current = currentScrollY
+    }
+
+    const handleResize = () => {
+      if (window.innerWidth < 1024) setHeaderHidden(false)
+    }
+
+    lastScrollYRef.current = window.scrollY
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener("resize", handleResize)
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleResize)
+    }
+  }, [])
+
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/"
     return pathname === href || pathname.startsWith(href + "/")
@@ -69,7 +107,11 @@ export function SiteHeader({
         </Link>
       </div>
 
-      <header className="fixed top-0 left-0 right-0 z-50">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${
+          headerHidden ? "-translate-y-full" : "translate-y-0"
+        }`}
+      >
         {/* Centered glass navbar */}
         <div className="mx-auto mt-3 flex max-w-3xl items-center justify-between rounded-full px-3 py-1.5 bg-white/15 backdrop-blur-md border border-white/25 shadow-lg lg:mt-4 lg:px-1 lg:py-1">
         {/* Start button */}
