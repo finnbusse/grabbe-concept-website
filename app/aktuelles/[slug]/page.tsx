@@ -62,8 +62,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         />
 
         <article className="mx-auto max-w-3xl px-4 py-12 lg:px-8 lg:py-16">
-          <h1 className="sr-only">{post.title}</h1>
-          <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <CalendarDays className="h-4 w-4" />
               {new Date(post.event_date || post.created_at).toLocaleDateString("de-DE", {
