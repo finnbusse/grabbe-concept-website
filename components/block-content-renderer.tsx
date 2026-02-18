@@ -43,7 +43,7 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
 
   if (!tagId) {
     return (
-      <div className="mb-8 rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+      <div className="mb-12 rounded-2xl border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
         Kein Tag ausgewaehlt
       </div>
     )
@@ -59,8 +59,8 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
     const { data: eventTags } = await supabase.from("event_tags").select("event_id").eq("tag_id", tagId)
     if (!eventTags || eventTags.length === 0) {
       return (
-        <div className="mb-8">
-          {heading && <h2 className="font-display text-xl font-bold mb-4">{heading}</h2>}
+        <div className="mb-12">
+          {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
           <p className="text-sm text-muted-foreground">Keine Termine mit diesem Tag vorhanden.</p>
         </div>
       )
@@ -76,8 +76,8 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
 
     if (!events || events.length === 0) {
       return (
-        <div className="mb-8">
-          {heading && <h2 className="font-display text-xl font-bold mb-4">{heading}</h2>}
+        <div className="mb-12">
+          {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
           <p className="text-sm text-muted-foreground">Keine anstehenden Termine vorhanden.</p>
         </div>
       )
@@ -86,19 +86,19 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
     const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
 
     return (
-      <div className="mb-8">
-        {heading && <h2 className="font-display text-xl font-bold mb-4">{heading}</h2>}
+      <div className="mb-12">
+        {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
         <div className="space-y-3">
           {events.map((ev) => {
             const d = new Date(ev.event_date)
             return (
-              <div key={ev.id} className="flex gap-4 rounded-xl border bg-card p-4">
+              <div key={ev.id} className="group flex gap-4 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]">
                 <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <span className="text-[10px] font-medium uppercase leading-none">{monthNamesShort[d.getMonth()]}</span>
                   <span className="text-lg font-bold leading-none mt-0.5">{d.getDate()}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display text-sm font-semibold">{ev.title}</h3>
+                  <h3 className="font-display text-sm font-semibold text-foreground">{ev.title}</h3>
                   {ev.description && <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{ev.description}</p>}
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                     {ev.event_time && <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{ev.event_time}</span>}
@@ -117,8 +117,8 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
     const { data: docTags } = await supabase.from("document_tags").select("document_id").eq("tag_id", tagId)
     if (!docTags || docTags.length === 0) {
       return (
-        <div className="mb-8">
-          {heading && <h2 className="font-display text-xl font-bold mb-4">{heading}</h2>}
+        <div className="mb-12">
+          {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
           <p className="text-sm text-muted-foreground">Keine Downloads mit diesem Tag vorhanden.</p>
         </div>
       )
@@ -131,16 +131,16 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
 
     if (!documents || documents.length === 0) {
       return (
-        <div className="mb-8">
-          {heading && <h2 className="font-display text-xl font-bold mb-4">{heading}</h2>}
+        <div className="mb-12">
+          {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
           <p className="text-sm text-muted-foreground">Keine Downloads vorhanden.</p>
         </div>
       )
     }
 
     return (
-      <div className="mb-8">
-        {heading && <h2 className="font-display text-xl font-bold mb-4">{heading}</h2>}
+      <div className="mb-12">
+        {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
         <div className="space-y-2">
           {documents.map((doc) => (
             <a
@@ -148,11 +148,13 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
               href={doc.file_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50"
+              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm px-4 py-3 text-sm transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]"
             >
-              <FileText className="h-5 w-5 text-primary shrink-0" />
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-white">
+                <FileText className="h-4 w-4" />
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">{doc.title}</p>
+                <p className="font-medium text-card-foreground">{doc.title}</p>
                 <p className="text-xs text-muted-foreground">{doc.file_name}</p>
               </div>
               <Download className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -167,8 +169,8 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
     const { data: postTags } = await supabase.from("post_tags").select("post_id").eq("tag_id", tagId)
     if (!postTags || postTags.length === 0) {
       return (
-        <div className="mb-8">
-          {heading && <h2 className="font-display text-xl font-bold mb-4">{heading}</h2>}
+        <div className="mb-12">
+          {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
           <p className="text-sm text-muted-foreground">Keine Beitraege mit diesem Tag vorhanden.</p>
         </div>
       )
@@ -182,24 +184,24 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
 
     if (!posts || posts.length === 0) {
       return (
-        <div className="mb-8">
-          {heading && <h2 className="font-display text-xl font-bold mb-4">{heading}</h2>}
+        <div className="mb-12">
+          {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
           <p className="text-sm text-muted-foreground">Keine Beitraege vorhanden.</p>
         </div>
       )
     }
 
     return (
-      <div className="mb-8">
-        {heading && <h2 className="font-display text-xl font-bold mb-4">{heading}</h2>}
+      <div className="mb-12">
+        {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
         <div className="space-y-3">
           {posts.map((post) => (
             <a
               key={post.id}
               href={`/aktuelles/${post.slug}`}
-              className="block rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50"
+              className="group block rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]"
             >
-              <h3 className="font-display text-sm font-semibold">{post.title}</h3>
+              <h3 className="font-display text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{post.title}</h3>
               {post.excerpt && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{post.excerpt}</p>}
               <p className="mt-2 text-xs text-muted-foreground">
                 {new Date(post.event_date || post.created_at).toLocaleDateString("de-DE", {
@@ -222,20 +224,20 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const heading = block.data.heading as string
       const text = block.data.text as string
       return (
-        <div className="mb-8">
-          {heading && <h2 className="font-display text-xl font-bold mb-3">{heading}</h2>}
-          {text && <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{text}</p>}
+        <div className="mb-12">
+          {heading && <h2 className="font-display text-2xl md:text-3xl tracking-tight text-foreground mb-4">{heading}</h2>}
+          {text && <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{text}</p>}
         </div>
       )
     }
     case 'cards': {
       const cards = (block.data.cards as Array<{ title: string; text: string }>) || []
       return (
-        <div className={`mb-8 grid gap-4 ${cards.length <= 2 ? 'sm:grid-cols-2' : cards.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
+        <div className={`mb-12 grid gap-6 ${cards.length <= 2 ? 'sm:grid-cols-2' : cards.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
           {cards.map((card, i) => (
-            <div key={i} className="rounded-2xl border border-border bg-card p-6">
-              <h3 className="font-display text-lg font-semibold text-card-foreground">{card.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{card.text}</p>
+            <div key={i} className="group rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.06] hover:-translate-y-1">
+              <h3 className="font-display text-xl text-foreground">{card.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{card.text}</p>
             </div>
           ))}
         </div>
@@ -244,14 +246,14 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
     case 'faq': {
       const items = (block.data.items as Array<{ question: string; answer: string }>) || []
       return (
-        <div className="mb-8 space-y-3">
+        <div className="mb-12 space-y-3">
           {items.map((item, i) => (
-            <details key={i} className="group rounded-2xl border border-border bg-card">
-              <summary className="cursor-pointer px-6 py-4 font-display text-sm font-semibold text-card-foreground list-none flex items-center justify-between">
+            <details key={i} className="group rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm">
+              <summary className="cursor-pointer px-6 py-5 font-display text-sm font-semibold text-card-foreground list-none flex items-center justify-between">
                 {item.question}
                 <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
-              <div className="px-6 pb-4 text-sm text-muted-foreground leading-relaxed">
+              <div className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed">
                 {item.answer}
               </div>
             </details>
@@ -263,9 +265,9 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const images = (block.data.images as Array<{ url: string; alt: string }>) || []
       const validImages = images.filter(img => img.url)
       return (
-        <div className={`mb-8 grid gap-4 ${validImages.length <= 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
+        <div className={`mb-12 grid gap-4 ${validImages.length <= 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
           {validImages.map((img, i) => (
-            <div key={i} className="overflow-hidden rounded-2xl border border-border">
+            <div key={i} className="overflow-hidden rounded-2xl border border-border/60">
               <img src={img.url} alt={img.alt || ''} className="w-full h-auto object-cover" />
             </div>
           ))}
@@ -276,16 +278,18 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const heading = block.data.heading as string
       const items = (block.data.items as string[]) || []
       return (
-        <div className="mb-8">
-          {heading && <h3 className="font-display text-lg font-semibold mb-3">{heading}</h3>}
-          <ul className="space-y-2">
-            {items.filter(Boolean).map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                {item}
-              </li>
-            ))}
-          </ul>
+        <div className="mb-12">
+          {heading && <h3 className="font-display text-xl font-semibold mb-4">{heading}</h3>}
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8">
+            <ul className="space-y-3">
+              {items.filter(Boolean).map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )
     }

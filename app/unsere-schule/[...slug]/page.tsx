@@ -48,7 +48,7 @@ export default async function UnsereSchuleDynamicPage({ params }: Props) {
           imageUrl={page.hero_image_url || undefined}
         />
 
-        <section className="mx-auto max-w-4xl px-4 py-12 lg:px-8">
+        <section className="mx-auto max-w-6xl px-4 py-28 lg:py-36 lg:px-8">
           {useBlocks ? (
             <BlockContentRenderer content={page.content} />
           ) : (

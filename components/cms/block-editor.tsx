@@ -942,20 +942,20 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const heading = block.data.heading as string
       const text = block.data.text as string
       return (
-        <div className="mb-8">
-          {heading && <h2 className="font-display text-xl font-bold mb-3">{heading}</h2>}
-          {text && <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{text}</p>}
+        <div className="mb-12">
+          {heading && <h2 className="font-display text-2xl md:text-3xl tracking-tight text-foreground mb-4">{heading}</h2>}
+          {text && <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-line">{text}</p>}
         </div>
       )
     }
     case 'cards': {
       const cards = (block.data.cards as Array<{ title: string; text: string }>) || []
       return (
-        <div className={`mb-8 grid gap-4 ${cards.length <= 2 ? 'sm:grid-cols-2' : cards.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
+        <div className={`mb-12 grid gap-6 ${cards.length <= 2 ? 'sm:grid-cols-2' : cards.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
           {cards.map((card, i) => (
-            <div key={i} className="rounded-2xl border border-border bg-card p-6">
-              <h3 className="font-display text-lg font-semibold text-card-foreground">{card.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{card.text}</p>
+            <div key={i} className="group rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.06] hover:-translate-y-1">
+              <h3 className="font-display text-xl text-foreground">{card.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{card.text}</p>
             </div>
           ))}
         </div>
@@ -964,14 +964,14 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
     case 'faq': {
       const items = (block.data.items as Array<{ question: string; answer: string }>) || []
       return (
-        <div className="mb-8 space-y-3">
+        <div className="mb-12 space-y-3">
           {items.map((item, i) => (
-            <details key={i} className="group rounded-2xl border border-border bg-card">
-              <summary className="cursor-pointer px-6 py-4 font-display text-sm font-semibold text-card-foreground list-none flex items-center justify-between">
+            <details key={i} className="group rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm">
+              <summary className="cursor-pointer px-6 py-5 font-display text-sm font-semibold text-card-foreground list-none flex items-center justify-between">
                 {item.question}
                 <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
-              <div className="px-6 pb-4 text-sm text-muted-foreground leading-relaxed">
+              <div className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed">
                 {item.answer}
               </div>
             </details>
@@ -983,9 +983,9 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const images = (block.data.images as Array<{ url: string; alt: string }>) || []
       const validImages = images.filter(img => img.url)
       return (
-        <div className={`mb-8 grid gap-4 ${validImages.length <= 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
+        <div className={`mb-12 grid gap-4 ${validImages.length <= 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
           {validImages.map((img, i) => (
-            <div key={i} className="overflow-hidden rounded-2xl border border-border">
+            <div key={i} className="overflow-hidden rounded-2xl border border-border/60">
               <img src={img.url} alt={img.alt || ''} className="w-full h-auto object-cover" />
             </div>
           ))}
@@ -996,16 +996,18 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const heading = block.data.heading as string
       const items = (block.data.items as string[]) || []
       return (
-        <div className="mb-8">
-          {heading && <h3 className="font-display text-lg font-semibold mb-3">{heading}</h3>}
-          <ul className="space-y-2">
-            {items.filter(Boolean).map((item, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
-                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                {item}
-              </li>
-            ))}
-          </ul>
+        <div className="mb-12">
+          {heading && <h3 className="font-display text-xl font-semibold mb-4">{heading}</h3>}
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8">
+            <ul className="space-y-3">
+              {items.filter(Boolean).map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )
     }
@@ -1017,15 +1019,15 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const ctaUrl = block.data.ctaUrl as string
       return (
         <div
-          className="mb-8 rounded-2xl border border-border bg-card relative overflow-hidden"
+          className="mb-12 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm relative overflow-hidden"
           style={backgroundImage ? { backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
         >
           {backgroundImage && <div className="absolute inset-0 bg-black/50" />}
-          <div className={`relative px-8 py-16 text-center ${backgroundImage ? 'text-white' : ''}`}>
-            {heading && <h2 className="font-display text-3xl font-bold mb-3">{heading}</h2>}
-            {subheading && <p className={`text-lg ${backgroundImage ? 'text-white/80' : 'text-muted-foreground'}`}>{subheading}</p>}
+          <div className={`relative px-8 py-20 text-center ${backgroundImage ? 'text-white' : ''}`}>
+            {heading && <h2 className="font-display text-4xl md:text-5xl tracking-tight mb-4">{heading}</h2>}
+            {subheading && <p className={`text-base leading-relaxed max-w-xl mx-auto ${backgroundImage ? 'text-white/80' : 'text-muted-foreground'}`}>{subheading}</p>}
             {ctaText && ctaUrl && (
-              <a href={ctaUrl} className="mt-6 inline-block rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors">
+              <a href={ctaUrl} className="mt-8 inline-flex items-center gap-2 rounded-2xl border border-primary/30 bg-primary/5 px-8 py-4 text-xs font-medium uppercase tracking-[0.15em] text-primary transition-all hover:bg-primary hover:text-white">
                 {ctaText}
               </a>
             )}
@@ -1037,18 +1039,18 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const quote = block.data.quote as string
       const author = block.data.author as string
       return (
-        <div className="mb-8">
-          <blockquote className="rounded-2xl border border-border bg-card px-8 py-6">
-            <p className="font-display text-lg italic text-card-foreground leading-relaxed">&ldquo;{quote}&rdquo;</p>
-            {author && <footer className="mt-3 text-sm text-muted-foreground">&mdash; {author}</footer>}
+        <div className="mb-12">
+          <blockquote className="border-l-2 border-primary/40 pl-6 py-2">
+            <p className="font-display text-xl italic text-foreground/80 leading-relaxed">&ldquo;{quote}&rdquo;</p>
+            {author && <footer className="mt-3 font-sub text-xs uppercase tracking-[0.15em] text-muted-foreground">&mdash; {author}</footer>}
           </blockquote>
         </div>
       )
     }
     case 'divider': {
       return (
-        <div className="mb-8 flex items-center justify-center py-4">
-          <hr className="w-full border-t border-border" />
+        <div className="mb-12 flex items-center justify-center py-4">
+          <div className="divider-line w-full" />
         </div>
       )
     }
@@ -1068,9 +1070,9 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
         }
       }
       return (
-        <div className="mb-8">
+        <div className="mb-12">
           {embedUrl && (
-            <div className="overflow-hidden rounded-2xl border border-border">
+            <div className="overflow-hidden rounded-2xl border border-border/60">
               <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
                 <iframe
                   src={embedUrl}
@@ -1093,11 +1095,11 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const buttonUrl = block.data.buttonUrl as string
       const style = (block.data.style as string) || 'light'
       return (
-        <div className={`mb-8 rounded-2xl border border-border px-8 py-12 text-center ${style === 'dark' ? 'bg-foreground text-background' : 'bg-card text-card-foreground'}`}>
-          {heading && <h2 className="font-display text-2xl font-bold mb-3">{heading}</h2>}
-          {text && <p className={`text-sm leading-relaxed mb-6 ${style === 'dark' ? 'text-background/70' : 'text-muted-foreground'}`}>{text}</p>}
+        <div className={`mb-12 rounded-2xl border px-8 py-16 text-center ${style === 'dark' ? 'border-border/60 bg-foreground text-background' : 'border-border/60 bg-card/80 backdrop-blur-sm text-card-foreground'}`}>
+          {heading && <h2 className="font-display text-3xl md:text-4xl tracking-tight mb-4">{heading}</h2>}
+          {text && <p className={`text-sm leading-relaxed mb-8 max-w-xl mx-auto ${style === 'dark' ? 'text-background/70' : 'text-muted-foreground'}`}>{text}</p>}
           {buttonText && buttonUrl && (
-            <a href={buttonUrl} className="inline-block rounded-lg bg-primary px-8 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors">
+            <a href={buttonUrl} className="inline-flex items-center gap-2 rounded-2xl border border-primary/30 bg-primary/5 px-8 py-4 text-xs font-medium uppercase tracking-[0.15em] text-primary transition-all hover:bg-primary hover:text-white">
               {buttonText}
             </a>
           )}
@@ -1108,13 +1110,13 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const left = (block.data.left as { heading: string; text: string }) || { heading: '', text: '' }
       const right = (block.data.right as { heading: string; text: string }) || { heading: '', text: '' }
       return (
-        <div className="mb-8 grid gap-6 sm:grid-cols-2">
-          <div>
-            {left.heading && <h3 className="font-display text-lg font-semibold mb-2">{left.heading}</h3>}
+        <div className="mb-12 grid gap-8 sm:grid-cols-2">
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8">
+            {left.heading && <h3 className="font-display text-xl text-foreground mb-3">{left.heading}</h3>}
             {left.text && <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{left.text}</p>}
           </div>
-          <div>
-            {right.heading && <h3 className="font-display text-lg font-semibold mb-2">{right.heading}</h3>}
+          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8">
+            {right.heading && <h3 className="font-display text-xl text-foreground mb-3">{right.heading}</h3>}
             {right.text && <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{right.text}</p>}
           </div>
         </div>
@@ -1122,20 +1124,20 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
     }
     case 'spacer': {
       const size = (block.data.size as string) || 'medium'
-      const paddingClass = size === 'small' ? 'py-4' : size === 'large' ? 'py-16' : 'py-8'
-      return <div className={`mb-8 ${paddingClass}`} />
+      const paddingClass = size === 'small' ? 'py-6' : size === 'large' ? 'py-20' : 'py-12'
+      return <div className={paddingClass} />
     }
     case 'accordion': {
       const items = (block.data.items as Array<{ title: string; content: string }>) || []
       return (
-        <div className="mb-8 space-y-3">
+        <div className="mb-12 space-y-3">
           {items.map((item, i) => (
-            <details key={i} className="group rounded-2xl border border-border bg-card">
-              <summary className="cursor-pointer px-6 py-4 font-display text-sm font-semibold text-card-foreground list-none flex items-center justify-between">
+            <details key={i} className="group rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm">
+              <summary className="cursor-pointer px-6 py-5 font-display text-sm font-semibold text-card-foreground list-none flex items-center justify-between">
                 {item.title}
                 <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
               </summary>
-              <div className="px-6 pb-4 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+              <div className="px-6 pb-5 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                 {item.content}
               </div>
             </details>
@@ -1147,12 +1149,12 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const rows = (block.data.rows as string[][]) || []
       if (rows.length === 0) return null
       return (
-        <div className="mb-8 overflow-x-auto">
-          <table className="w-full rounded-2xl border border-border text-sm">
+        <div className="mb-12 overflow-x-auto">
+          <table className="w-full rounded-2xl border border-border/60 text-sm">
             <thead>
-              <tr className="border-b border-border bg-muted/50">
+              <tr className="border-b border-border/60 bg-primary/5">
                 {rows[0]?.map((cell, ci) => (
-                  <th key={ci} className="px-4 py-3 text-left font-display font-semibold text-card-foreground">
+                  <th key={ci} className="px-5 py-4 text-left font-display font-semibold text-foreground">
                     {cell}
                   </th>
                 ))}
@@ -1160,9 +1162,9 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
             </thead>
             <tbody>
               {rows.slice(1).map((row, ri) => (
-                <tr key={ri} className="border-b border-border last:border-0">
+                <tr key={ri} className="border-b border-border/60 last:border-0">
                   {row.map((cell, ci) => (
-                    <td key={ci} className="px-4 py-3 text-muted-foreground">
+                    <td key={ci} className="px-5 py-4 text-muted-foreground">
                       {cell}
                     </td>
                   ))}
