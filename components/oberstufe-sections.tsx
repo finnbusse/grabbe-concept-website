@@ -13,8 +13,6 @@ interface QuickLink {
 interface OberstufeSectionsProps {
   content: Record<string, unknown>
   quicklinks: QuickLink[]
-  laufbahnLinks: { name: string; url: string }[]
-  stipendienLinks: { name: string; url: string }[]
 }
 
 const quickLinkIcons: Record<string, ReactNode> = {

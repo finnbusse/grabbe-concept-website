@@ -49,8 +49,6 @@ export default async function OberstufePage() {
         <OberstufeSections
           content={content}
           quicklinks={quicklinks}
-          laufbahnLinks={laufbahnLinks}
-          stipendienLinks={stipendienLinks}
         />
 
         {/* ═══ Beratung Section (blue mesh bg) ═══ */}
