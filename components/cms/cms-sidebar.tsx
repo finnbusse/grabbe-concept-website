@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users, Activity, FileEdit, FolderTree } from "lucide-react"
+import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users, Activity, FileEdit, FolderTree, UserCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const contentLinks = [
@@ -21,6 +21,7 @@ const inboxLinks = [
 ]
 
 const adminLinks = [
+  { icon: UserCircle, label: "Mein Profil", href: "/cms/profil" },
   { icon: FolderTree, label: "Seitenstruktur", href: "/cms/seitenstruktur" },
   { icon: Menu, label: "Navigation", href: "/cms/navigation" },
   { icon: Settings, label: "Einstellungen", href: "/cms/settings" },

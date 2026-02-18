@@ -374,6 +374,47 @@ CREATE TRIGGER update_site_settings_updated_at
   EXECUTE FUNCTION public.update_updated_at_column();
 
 -- ============================================================================
+-- 9. USER PROFILES TABLE
+-- Purpose: Extended user information for teachers (name, title, profile picture)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.user_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  first_name TEXT,
+  last_name TEXT,
+  title TEXT,
+  profile_image_url TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create index for user_id lookups
+CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON public.user_profiles(user_id);
+
+-- Enable RLS
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for user_profiles
+CREATE POLICY "user_profiles_select_all" ON public.user_profiles
+  FOR SELECT USING (true);
+
+CREATE POLICY "user_profiles_insert_own" ON public.user_profiles
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "user_profiles_update_own" ON public.user_profiles
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "user_profiles_delete_own" ON public.user_profiles
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Trigger for updated_at
+DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON public.user_profiles;
+CREATE TRIGGER update_user_profiles_updated_at
+  BEFORE UPDATE ON public.user_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();
+
+-- ============================================================================
 -- COMMENTS FOR DOCUMENTATION
 -- ============================================================================
 
@@ -385,6 +426,7 @@ COMMENT ON TABLE public.navigation_items IS 'Header/Footer navigation (hierarchi
 COMMENT ON TABLE public.site_settings IS 'Key-value configuration store';
 COMMENT ON TABLE public.contact_submissions IS 'Contact form entries';
 COMMENT ON TABLE public.anmeldung_submissions IS 'School registration form entries';
+COMMENT ON TABLE public.user_profiles IS 'Extended teacher information (name, title, profile picture)';
 
 -- ============================================================================
 -- END OF SCHEMA
