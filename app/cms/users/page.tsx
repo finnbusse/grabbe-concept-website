@@ -117,7 +117,7 @@ export default function UsersPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Fehler beim Erstellen")
-      setMessage("Benutzer erfolgreich erstellt.")
+      setMessage("Benutzer erfolgreich erstellt. Der Nutzer erhaelt ggf. eine Bestaetigungsmail.")
       setNewEmail("")
       setNewPassword("")
       setNewFirstName("")

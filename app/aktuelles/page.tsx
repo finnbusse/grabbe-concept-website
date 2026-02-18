@@ -101,7 +101,8 @@ export default async function AktuellesPage() {
                     <ArrowRight className="h-4 w-4 text-primary opacity-0 transition-opacity group-hover:opacity-100" />
                   </div>
                 </Link>
-              )})
+                )
+              })}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border py-20 text-center">

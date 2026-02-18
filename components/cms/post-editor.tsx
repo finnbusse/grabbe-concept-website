@@ -51,18 +51,17 @@ export function PostEditor({ post }: PostEditorProps) {
 
   // Auto-populate author name from user profile for new posts
   useEffect(() => {
-    if (!post && !authorName) {
-      fetch("/api/user-profile")
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (data?.profile) {
-            const parts = [data.profile.title, data.profile.first_name, data.profile.last_name].filter(Boolean)
-            if (parts.length > 0) setAuthorName(parts.join(" "))
-          }
-        })
-        .catch(() => {})
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (post || authorName) return
+    fetch("/api/user-profile")
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.profile) {
+          const parts = [data.profile.title, data.profile.first_name, data.profile.last_name].filter(Boolean)
+          if (parts.length > 0) setAuthorName(parts.join(" "))
+        }
+      })
+      .catch(() => {})
+  }, [post, authorName])
 
   const generateSlug = (text: string) =>
     text.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim()
