@@ -36,13 +36,14 @@ function generateAsciiGrid(seed: string, cols = 90, rows = 16): string {
   return lines.join("\n")
 }
 
-// Blue gradient palette matching the homepage blue tones (hsl(200,…) family)
+// Bright sky-blue gradient palette — matches homepage hsl(200,85%,80%) accent (#7dcef5 family)
+// sky-600 → sky-400 → sky-300 range so they feel like the daytime sky in the homepage photo
 const GRADIENTS = [
-  "linear-gradient(135deg,#0d2140 0%,#1a4a7a 60%,#0d2140 100%)",
-  "linear-gradient(135deg,#0c2a4a 0%,#174e82 60%,#0c2a4a 100%)",
-  "linear-gradient(135deg,#0a1e38 0%,#0f3a68 55%,#163e72 100%)",
-  "linear-gradient(135deg,#102040 0%,#1c4280 55%,#102040 100%)",
-  "linear-gradient(150deg,#0e2238 0%,#1a4470 55%,#0e2238 100%)",
+  "linear-gradient(135deg,#0284c7 0%,#38bdf8 55%,#7dd3fc 100%)",
+  "linear-gradient(135deg,#0369a1 0%,#0ea5e9 55%,#38bdf8 100%)",
+  "linear-gradient(150deg,#0ea5e9 0%,#7dd3fc 55%,#38bdf8 100%)",
+  "linear-gradient(135deg,#1d8cc5 0%,#4ec8f4 55%,#7dd3fc 100%)",
+  "linear-gradient(135deg,#0284c7 0%,#0ea5e9 50%,#38bdf8 100%)",
 ]
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -80,12 +81,12 @@ export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
           {/* ASCII art texture layer */}
           <pre
             aria-hidden="true"
-            className="absolute inset-0 overflow-hidden font-mono text-[9px] sm:text-[10px] leading-[1.45] text-sky-200/[0.10] select-none pointer-events-none p-3"
+            className="absolute inset-0 overflow-hidden font-mono text-[9px] sm:text-[10px] leading-[1.45] text-white/[0.18] select-none pointer-events-none p-3"
           >
             {ascii}
           </pre>
-          {/* Vignette so text area is darker at the bottom */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50" />
+          {/* Vignette so text at the bottom stays readable against the bright blue */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-sky-900/40" />
           {/* Subtle horizontal scan line to reinforce the monospace aesthetic */}
           <div
             aria-hidden="true"
