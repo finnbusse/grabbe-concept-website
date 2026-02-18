@@ -35,6 +35,8 @@ export function CmsSidebar({ userEmail }: { userEmail: string }) {
 
   const handleLogout = async () => {
     const supabase = createClient()
+    // Clear remember me preference
+    localStorage.removeItem("cms_remember_me")
     await supabase.auth.signOut()
     router.push("/")
   }

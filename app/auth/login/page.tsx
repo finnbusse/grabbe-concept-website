@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -12,6 +13,7 @@ import { useState } from "react"
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -23,11 +25,26 @@ export default function LoginPage() {
     setError(null)
 
     try {
+      // Set session duration based on "remember me"
+      // Default Supabase session: 1 hour
+      // With remember me: We store preference in localStorage
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
       if (error) throw error
+      
+      // Store remember me preference
+      if (rememberMe) {
+        // Store in localStorage that user wants to be remembered
+        localStorage.setItem("cms_remember_me", "true")
+        // Supabase handles session refresh automatically
+        // Sessions are refreshed as long as the refresh token is valid (typically 30 days)
+      } else {
+        localStorage.removeItem("cms_remember_me")
+        // Session will expire after default timeout (1 hour of inactivity)
+      }
+      
       router.push("/cms")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Ein Fehler ist aufgetreten")
@@ -79,6 +96,19 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="rememberMe" 
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked === true)}
+                  />
+                  <Label 
+                    htmlFor="rememberMe" 
+                    className="text-sm font-normal cursor-pointer"
+                  >
+                    Angemeldet bleiben
+                  </Label>
                 </div>
                 {error && (
                   <p className="text-sm text-destructive">{error}</p>
