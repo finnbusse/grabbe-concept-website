@@ -36,13 +36,13 @@ function generateAsciiGrid(seed: string, cols = 90, rows = 16): string {
   return lines.join("\n")
 }
 
-// Pre-built dark gradient palette — cycled by hash
+// Blue gradient palette matching the homepage blue tones (hsl(200,…) family)
 const GRADIENTS = [
-  "linear-gradient(135deg,#0f172a 0%,#1e293b 60%,#0f172a 100%)",
-  "linear-gradient(135deg,#111827 0%,#1f2937 60%,#111827 100%)",
-  "linear-gradient(135deg,#09090b 0%,#18181b 55%,#27272a 100%)",
-  "linear-gradient(135deg,#0c0a09 0%,#1c1917 55%,#0c0a09 100%)",
-  "linear-gradient(150deg,#0d0d0d 0%,#1a1a2e 55%,#0d0d0d 100%)",
+  "linear-gradient(135deg,#0d2140 0%,#1a4a7a 60%,#0d2140 100%)",
+  "linear-gradient(135deg,#0c2a4a 0%,#174e82 60%,#0c2a4a 100%)",
+  "linear-gradient(135deg,#0a1e38 0%,#0f3a68 55%,#163e72 100%)",
+  "linear-gradient(135deg,#102040 0%,#1c4280 55%,#102040 100%)",
+  "linear-gradient(150deg,#0e2238 0%,#1a4470 55%,#0e2238 100%)",
 ]
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
           {/* ASCII art texture layer */}
           <pre
             aria-hidden="true"
-            className="absolute inset-0 overflow-hidden font-mono text-[9px] sm:text-[10px] leading-[1.45] text-white/[0.075] select-none pointer-events-none p-3"
+            className="absolute inset-0 overflow-hidden font-mono text-[9px] sm:text-[10px] leading-[1.45] text-sky-200/[0.10] select-none pointer-events-none p-3"
           >
             {ascii}
           </pre>
