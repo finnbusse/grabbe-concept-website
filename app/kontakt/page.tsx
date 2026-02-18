@@ -27,68 +27,129 @@ export default async function KontaktPage() {
           imageUrl={(content.hero_image_url as string) || undefined}
         />
 
-        <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-3">
-            {/* Contact info */}
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="font-display text-lg font-semibold text-card-foreground">Adresse</h2>
-                <div className="mt-4 space-y-4">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="mt-0.5 h-5 w-5 text-primary" />
-                    <div className="text-sm text-muted-foreground">
-                      <p className="font-medium text-card-foreground">{content.address_name}</p>
-                      <p>{content.address_street}</p>
-                      <p>{content.address_city}</p>
+        {/* --- Contact info + Steuergruppe --- */}
+        <section className="bg-mesh-blue py-28 lg:py-36">
+          <div className="mx-auto max-w-6xl px-4 lg:px-8">
+            <div className="grid gap-16 lg:grid-cols-2 lg:items-start">
+              {/* Left column */}
+              <div>
+                <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
+                  Kontakt
+                </p>
+                <h2 className="mt-4 font-display text-4xl tracking-tight text-foreground md:text-5xl">
+                  So erreichen Sie uns
+                </h2>
+
+                <div className="mt-10 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8">
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <MapPin className="h-5 w-5" />
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p className="font-medium text-foreground">{content.address_name}</p>
+                        <p className="mt-1">{content.address_street}</p>
+                        <p>{content.address_city}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-primary" />
-                    <div className="text-sm">
-                      <p className="text-muted-foreground">Telefon: <a href="tel:0523199260" className="text-foreground hover:text-primary">{content.phone}</a></p>
-                      <p className="text-muted-foreground">Fax: {content.fax}</p>
+
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Phone className="h-5 w-5" />
+                      </div>
+                      <div className="text-sm">
+                        <p className="text-muted-foreground">
+                          Telefon:{" "}
+                          <a href="tel:0523199260" className="text-foreground hover:text-primary transition-colors">
+                            {content.phone}
+                          </a>
+                        </p>
+                        <p className="mt-1 text-muted-foreground">Fax: {content.fax}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5 text-primary" />
-                    <a href={`mailto:${content.email}`} className="text-sm text-primary hover:underline">
-                      {content.email}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <p className="text-sm text-muted-foreground">
-                      {content.travel_info}
-                    </p>
+
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Mail className="h-5 w-5" />
+                      </div>
+                      <a href={`mailto:${content.email}`} className="text-sm text-primary hover:underline">
+                        {content.email}
+                      </a>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Clock className="h-5 w-5" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {content.travel_info}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="font-display text-lg font-semibold text-card-foreground">
-                  {content.steuergruppe_title}
-                </h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {content.steuergruppe_text}
-                </p>
+              {/* Right column – Steuergruppe */}
+              <div className="lg:mt-20">
+                <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8">
+                  <h3 className="font-display text-2xl tracking-tight text-foreground">
+                    {content.steuergruppe_title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                    {content.steuergruppe_text}
+                  </p>
+                </div>
               </div>
             </div>
+          </div>
+        </section>
 
-            {/* Contacts grid + Form */}
-            <div className="lg:col-span-2 space-y-8">
-              <div>
-                <h2 className="font-display text-2xl font-bold text-foreground">Ansprechpartner:innen</h2>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  {contacts.map((c) => (
-                    <div key={c.name} className="rounded-xl border border-border bg-card p-5">
-                      <p className="text-xs font-medium uppercase tracking-wider text-primary">{c.role}</p>
-                      <p className="mt-2 font-display text-base font-semibold text-card-foreground">{c.name}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">{c.desc}</p>
-                    </div>
-                  ))}
+        {/* --- Ansprechpartner:innen --- */}
+        <section className="bg-background py-28 lg:py-36">
+          <div className="mx-auto max-w-6xl px-4 lg:px-8">
+            <div className="text-center">
+              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
+                Team
+              </p>
+              <h2 className="mt-4 font-display text-4xl tracking-tight text-foreground md:text-5xl">
+                Ansprechpartner:innen
+              </h2>
+            </div>
+
+            <div className="mt-16 grid gap-6 sm:grid-cols-2">
+              {contacts.map((c) => (
+                <div
+                  key={c.name}
+                  className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.06] hover:-translate-y-1"
+                >
+                  <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
+                    {c.role}
+                  </p>
+                  <p className="mt-3 font-display text-lg tracking-tight text-foreground">
+                    {c.name}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {c.desc}
+                  </p>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
+        {/* --- Contact form --- */}
+        <section className="bg-muted/40 py-28 lg:py-36">
+          <div className="mx-auto max-w-6xl px-4 lg:px-8">
+            <div className="text-center">
+              <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
+                Nachricht
+              </p>
+              <h2 className="mt-4 font-display text-4xl tracking-tight text-foreground md:text-5xl">
+                Schreiben Sie uns
+              </h2>
+            </div>
+
+            <div className="mx-auto mt-16 max-w-2xl">
               <ContactForm />
             </div>
           </div>
