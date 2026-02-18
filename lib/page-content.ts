@@ -134,6 +134,8 @@ export const PAGE_DEFAULTS = {
     cta2_text: 'Profilprojekte entdecken',
     cta2_link: '/unsere-schule/profilprojekte',
     scroll_text: 'Entdecken',
+    hero_image_url: '/images/hero-school.jpg',
+    hero_image_dark_url: '/images/hero-school-dark.jpg',
   },
   'homepage-welcome': {
     label: 'Herzlich willkommen',
@@ -445,6 +447,15 @@ export const EDITABLE_PAGES: PageDefinition[] = [
           { key: 'cta2_text', label: 'Button 2 Text', type: 'text' },
           { key: 'cta2_link', label: 'Button 2 Link', type: 'link' },
           { key: 'scroll_text', label: 'Scroll-Hinweis Text', type: 'text' },
+        ],
+      },
+      {
+        id: 'images',
+        title: 'Hintergrundbilder',
+        description: 'Hintergrundbild fuer den Hero-Bereich. Ohne Eingabe werden lokale Standardbilder aus dem Projekt verwendet.',
+        fields: [
+          { key: 'hero_image_url', label: 'Hero-Bild (Hell)', type: 'image' },
+          { key: 'hero_image_dark_url', label: 'Hero-Bild (Darkmode)', type: 'image' },
         ],
       },
     ],

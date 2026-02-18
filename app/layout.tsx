@@ -23,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const s = await getSettings()
   const title = s.seo_title || "Grabbe-Gymnasium Detmold"
   const description = s.seo_description || "Das Christian-Dietrich-Grabbe-Gymnasium in Detmold - Wir foerdern Deine Talente und staerken Deine Persoenlichkeit."
+  const favicon = s.favicon_url || "/favicon.svg"
   return {
     title: {
       default: title,
@@ -40,6 +41,10 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
+    },
+    icons: {
+      icon: favicon,
+      shortcut: favicon,
     },
     generator: "v0.app",
   }

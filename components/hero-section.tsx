@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, ArrowDown } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTheme } from "next-themes"
 
 function TypingText({ text, delay = 0, speed = 40 }: { text: string; delay?: number; speed?: number }) {
   const [displayed, setDisplayed] = useState("")
@@ -47,6 +48,9 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
   const cta2Text = (c.cta2_text as string) || 'Profilprojekte entdecken'
   const cta2Link = (c.cta2_link as string) || '/unsere-schule/profilprojekte'
   const scrollText = (c.scroll_text as string) || 'Entdecken'
+  const heroImageUrl = (c.hero_image_url as string) || '/images/hero-school.jpg'
+  const heroImageDarkUrl = (c.hero_image_dark_url as string) || '/images/hero-school-dark.jpg'
+  const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -59,7 +63,7 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
       <div className="relative w-full overflow-hidden rounded-b-[1.5rem] sm:rounded-b-[2rem] md:rounded-b-[3rem] aspect-[4/3] sm:aspect-[16/9] lg:aspect-[21/9]">
         {/* The image -- NO dark overlays whatsoever */}
         <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1770907263880.png-LbbwTH3bV3iIeTlN24uWwemZuKXx6y.jpeg"
+          src={mounted && resolvedTheme === "dark" ? heroImageDarkUrl : heroImageUrl}
           alt="Grabbe-Gymnasium Schulgebaeude"
           fill
           className="object-cover"
