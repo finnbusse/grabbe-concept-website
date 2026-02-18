@@ -140,6 +140,20 @@ export interface AnmeldungSubmission {
   created_at: string; // timestamptz
 }
 
+/**
+ * Extended user profiles for CMS users (teachers)
+ */
+export interface UserProfile {
+  id: string; // UUID
+  user_id: string; // UUID, references auth.users
+  first_name: string;
+  last_name: string;
+  title: string; // e.g. "Dr."
+  avatar_url: string | null;
+  created_at: string; // timestamptz
+  updated_at: string; // timestamptz
+}
+
 // ============================================================================
 // Insert Types (for creating new records, excluding auto-generated fields)
 // ============================================================================
@@ -189,6 +203,12 @@ export type AnmeldungSubmissionInsert = Omit<AnmeldungSubmission, 'id' | 'create
   created_at?: string;
 };
 
+export type UserProfileInsert = Omit<UserProfile, 'id' | 'created_at' | 'updated_at'> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
 // ============================================================================
 // Update Types (all fields optional)
 // ============================================================================
@@ -201,6 +221,7 @@ export type NavigationItemUpdate = Partial<Omit<NavigationItem, 'id' | 'created_
 export type SiteSettingUpdate = Partial<Omit<SiteSetting, 'id'>>;
 export type ContactSubmissionUpdate = Partial<Omit<ContactSubmission, 'id' | 'created_at'>>;
 export type AnmeldungSubmissionUpdate = Partial<Omit<AnmeldungSubmission, 'id' | 'created_at'>>;
+export type UserProfileUpdate = Partial<Omit<UserProfile, 'id' | 'created_at'>>;
 
 // ============================================================================
 // Database Schema Type (for Supabase client)
@@ -248,6 +269,11 @@ export interface Database {
         Row: AnmeldungSubmission;
         Insert: AnmeldungSubmissionInsert;
         Update: AnmeldungSubmissionUpdate;
+      };
+      user_profiles: {
+        Row: UserProfile;
+        Insert: UserProfileInsert;
+        Update: UserProfileUpdate;
       };
     };
   };

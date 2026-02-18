@@ -12,6 +12,7 @@ import { useState } from "react"
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -28,6 +29,13 @@ export default function LoginPage() {
         password,
       })
       if (error) throw error
+
+      if (rememberMe) {
+        localStorage.setItem("cms_remember_me", "true")
+      } else {
+        localStorage.removeItem("cms_remember_me")
+      }
+
       router.push("/cms")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Ein Fehler ist aufgetreten")
@@ -83,6 +91,18 @@ export default function LoginPage() {
                 {error && (
                   <p className="text-sm text-destructive">{error}</p>
                 )}
+                <div className="flex items-center gap-2">
+                  <input
+                    id="rememberMe"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-input accent-primary"
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm font-normal text-muted-foreground cursor-pointer">
+                    Angemeldet bleiben
+                  </Label>
+                </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Anmelden..." : "Anmelden"}
                 </Button>

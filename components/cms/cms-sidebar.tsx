@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users, Activity, FileEdit, FolderTree } from "lucide-react"
+import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users, Activity, FileEdit, FolderTree, UserCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const contentLinks = [
@@ -28,12 +28,38 @@ const adminLinks = [
   { icon: Activity, label: "Diagnose", href: "/cms/diagnostic" },
 ]
 
-export function CmsSidebar({ userEmail }: { userEmail: string }) {
+interface UserProfileData {
+  first_name?: string
+  last_name?: string
+  title?: string
+  avatar_url?: string | null
+}
+
+function getInitials(profile: UserProfileData | null, email: string) {
+  if (profile?.first_name || profile?.last_name) {
+    return (
+      (profile.first_name?.charAt(0)?.toUpperCase() || "") +
+      (profile.last_name?.charAt(0)?.toUpperCase() || "")
+    )
+  }
+  return email?.charAt(0)?.toUpperCase() || "?"
+}
+
+function getDisplayName(profile: UserProfileData | null, email: string) {
+  if (profile?.first_name || profile?.last_name) {
+    const parts = [profile.title, profile.first_name, profile.last_name].filter(Boolean)
+    return parts.join(" ")
+  }
+  return email
+}
+
+export function CmsSidebar({ userEmail, userProfile }: { userEmail: string; userProfile?: UserProfileData | null }) {
   const pathname = usePathname()
   const router = useRouter()
 
   const handleLogout = async () => {
     const supabase = createClient()
+    localStorage.removeItem("cms_remember_me")
     await supabase.auth.signOut()
     router.push("/")
   }
@@ -87,8 +113,22 @@ export function CmsSidebar({ userEmail }: { userEmail: string }) {
       </nav>
 
       <div className="border-t border-border px-3 py-4">
-        <p className="mb-2 truncate px-3 text-xs text-muted-foreground">{userEmail}</p>
-        <Button variant="ghost" size="sm" className="w-full justify-start gap-3 text-muted-foreground" onClick={handleLogout}>
+        <Link href="/cms/profil" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted transition-colors">
+          {userProfile?.avatar_url ? (
+            <img src={userProfile.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+              <span className="font-display text-xs font-bold text-primary">{getInitials(userProfile || null, userEmail)}</span>
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-card-foreground">{getDisplayName(userProfile || null, userEmail)}</p>
+            {(userProfile?.first_name || userProfile?.last_name) && (
+              <p className="truncate text-[11px] text-muted-foreground">{userEmail}</p>
+            )}
+          </div>
+        </Link>
+        <Button variant="ghost" size="sm" className="mt-1 w-full justify-start gap-3 text-muted-foreground" onClick={handleLogout}>
           <LogOut className="h-4 w-4" />
           Abmelden
         </Button>

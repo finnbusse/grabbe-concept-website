@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -48,6 +48,21 @@ export function PostEditor({ post }: PostEditorProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
+
+  // Auto-populate author name from user profile for new posts
+  useEffect(() => {
+    if (!post && !authorName) {
+      fetch("/api/user-profile")
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data?.profile) {
+            const parts = [data.profile.title, data.profile.first_name, data.profile.last_name].filter(Boolean)
+            if (parts.length > 0) setAuthorName(parts.join(" "))
+          }
+        })
+        .catch(() => {})
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const generateSlug = (text: string) =>
     text.toLowerCase().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").trim()

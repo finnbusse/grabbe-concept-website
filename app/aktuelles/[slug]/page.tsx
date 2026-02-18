@@ -19,6 +19,27 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
 
   if (!post) notFound()
 
+  // Fetch author profile if post has user_id
+  let authorProfile: { first_name?: string; last_name?: string; title?: string; avatar_url?: string | null } | null = null
+  if (post.user_id) {
+    const { data } = await supabase
+      .from("user_profiles")
+      .select("first_name, last_name, title, avatar_url")
+      .eq("user_id", post.user_id)
+      .single()
+    authorProfile = data
+  }
+
+  const authorDisplayName = post.author_name || (
+    authorProfile
+      ? [authorProfile.title, authorProfile.first_name, authorProfile.last_name].filter(Boolean).join(" ")
+      : null
+  )
+
+  const authorInitials = authorProfile
+    ? (authorProfile.first_name?.charAt(0) || "") + (authorProfile.last_name?.charAt(0) || "")
+    : authorDisplayName?.charAt(0)?.toUpperCase() || ""
+
   return (
     <SiteLayout>
       <main>
@@ -36,10 +57,18 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
                 year: "numeric",
               })}
             </div>
-            {post.author_name && (
-              <div className="flex items-center gap-1.5">
-                <User className="h-4 w-4" />
-                {post.author_name}
+            {authorDisplayName && (
+              <div className="flex items-center gap-2">
+                {authorProfile?.avatar_url ? (
+                  <img src={authorProfile.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+                ) : authorInitials ? (
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
+                    <span className="text-[10px] font-bold text-primary">{authorInitials}</span>
+                  </div>
+                ) : (
+                  <User className="h-4 w-4" />
+                )}
+                {authorDisplayName}
               </div>
             )}
             {post.category && (

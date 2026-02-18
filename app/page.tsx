@@ -24,7 +24,7 @@ export default async function HomePage() {
   const [postsRes, eventsRes, pageContents] = await Promise.all([
     supabase
       .from("posts")
-      .select("id, title, slug, excerpt, category, image_url, author_name, created_at")
+      .select("id, title, slug, excerpt, category, image_url, author_name, created_at, user_id")
       .eq("published", true)
       .order("created_at", { ascending: false })
       .limit(4),
@@ -38,12 +38,30 @@ export default async function HomePage() {
     getMultiplePageContents(pageIds, PAGE_DEFAULTS),
   ])
 
+  // Fetch author profiles for posts
+  const posts = postsRes.data || []
+  const userIds = [...new Set(posts.map(p => p.user_id).filter(Boolean))]
+  let authorProfiles: Record<string, { first_name?: string; last_name?: string; title?: string; avatar_url?: string | null }> = {}
+  if (userIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("user_profiles")
+      .select("user_id, first_name, last_name, title, avatar_url")
+      .in("user_id", userIds)
+    if (profiles) {
+      authorProfiles = Object.fromEntries(profiles.map(p => [p.user_id, p]))
+    }
+  }
+  const postsWithProfiles = posts.map(p => ({
+    ...p,
+    author_profile: p.user_id ? authorProfiles[p.user_id] || null : null,
+  }))
+
   return (
     <SiteLayout>
       <main>
         <HeroSection content={pageContents['homepage-hero']} />
         <WelcomeSection content={pageContents['homepage-welcome']} />
-        <NewsSection posts={postsRes.data || []} content={pageContents['homepage-news']} />
+        <NewsSection posts={postsWithProfiles} content={pageContents['homepage-news']} />
         <ProfileSection content={pageContents['homepage-profiles']} />
         <CalendarPreview events={eventsRes.data || []} content={pageContents['homepage-calendar']} />
         <InfoSection content={pageContents['homepage-info']} />

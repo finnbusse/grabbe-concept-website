@@ -324,6 +324,40 @@ CREATE POLICY "anmeldung_submissions_delete_auth" ON public.anmeldung_submission
   FOR DELETE USING (auth.uid() IS NOT NULL);
 
 -- ============================================================================
+-- 9. USER_PROFILES TABLE
+-- Purpose: Extended user profiles for CMS users (teachers)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.user_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+  first_name TEXT NOT NULL DEFAULT '',
+  last_name TEXT NOT NULL DEFAULT '',
+  title TEXT DEFAULT '',
+  avatar_url TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create indexes
+CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON public.user_profiles(user_id);
+
+-- Enable RLS
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies: any authenticated user can read all profiles, update own
+CREATE POLICY "user_profiles_select_auth" ON public.user_profiles
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "user_profiles_insert_auth" ON public.user_profiles
+  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "user_profiles_update_auth" ON public.user_profiles
+  FOR UPDATE USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "user_profiles_delete_auth" ON public.user_profiles
+  FOR DELETE USING (auth.uid() IS NOT NULL);
+
+-- ============================================================================
 -- TRIGGERS FOR UPDATED_AT TIMESTAMPS
 -- ============================================================================
 
@@ -373,6 +407,12 @@ CREATE TRIGGER update_site_settings_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_user_profiles_updated_at ON public.user_profiles;
+CREATE TRIGGER update_user_profiles_updated_at
+  BEFORE UPDATE ON public.user_profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.update_updated_at_column();
+
 -- ============================================================================
 -- COMMENTS FOR DOCUMENTATION
 -- ============================================================================
@@ -385,6 +425,7 @@ COMMENT ON TABLE public.navigation_items IS 'Header/Footer navigation (hierarchi
 COMMENT ON TABLE public.site_settings IS 'Key-value configuration store';
 COMMENT ON TABLE public.contact_submissions IS 'Contact form entries';
 COMMENT ON TABLE public.anmeldung_submissions IS 'School registration form entries';
+COMMENT ON TABLE public.user_profiles IS 'Extended user profiles for CMS users (teachers)';
 
 -- ============================================================================
 -- END OF SCHEMA
