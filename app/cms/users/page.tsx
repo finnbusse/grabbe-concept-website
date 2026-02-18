@@ -51,7 +51,7 @@ export default function UsersPage() {
         // Merge profiles with users
         const usersWithProfiles = usersList.map((u: UserEntry) => ({
           ...u,
-          user_profiles: profiles?.find(p => p.user_id === u.id) || null
+          user_profiles: profiles?.find((p: any) => p.user_id === u.id) || null
         }))
         setUsers(usersWithProfiles)
       } else {

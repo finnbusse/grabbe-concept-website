@@ -7,6 +7,31 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 
+interface UserProfile {
+  first_name: string | null
+  last_name: string | null
+  title: string | null
+  profile_image_url: string | null
+}
+
+interface PostWithProfile {
+  id: string
+  title: string
+  slug: string
+  content: string
+  excerpt: string | null
+  category: string | null
+  published: boolean
+  featured: boolean
+  image_url: string | null
+  author_name: string | null
+  event_date: string | null
+  user_id: string
+  created_at: string
+  updated_at: string
+  user_profiles: UserProfile | null
+}
+
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const supabase = await createClient()
@@ -27,15 +52,17 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
 
   if (!post) notFound()
 
+  const typedPost = post as unknown as PostWithProfile
+
   // Helper function to get author display name
   const getAuthorName = () => {
-    if (post.user_profiles) {
-      const { first_name, last_name, title } = post.user_profiles
+    if (typedPost.user_profiles) {
+      const { first_name, last_name, title } = typedPost.user_profiles
       if (first_name || last_name) {
         return `${title ? title + ' ' : ''}${first_name || ''} ${last_name || ''}`.trim()
       }
     }
-    return post.author_name || 'Redaktion'
+    return typedPost.author_name || 'Redaktion'
   }
 
   return (
@@ -43,13 +70,13 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       <main>
         <article className="mx-auto max-w-3xl px-4 py-16 lg:px-8 lg:py-24">
           <h1 className="text-balance font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            {post.title}
+            {typedPost.title}
           </h1>
 
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <CalendarDays className="h-4 w-4" />
-              {new Date(post.event_date || post.created_at).toLocaleDateString("de-DE", {
+              {new Date(typedPost.event_date || typedPost.created_at).toLocaleDateString("de-DE", {
                 day: "numeric",
                 month: "long",
                 year: "numeric",
@@ -57,9 +84,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
             </div>
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 overflow-hidden rounded-full border border-border bg-muted shrink-0">
-                {post.user_profiles?.profile_image_url ? (
+                {typedPost.user_profiles?.profile_image_url ? (
                   <Image
-                    src={post.user_profiles.profile_image_url}
+                    src={typedPost.user_profiles.profile_image_url}
                     alt={getAuthorName()}
                     width={24}
                     height={24}
@@ -73,18 +100,18 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
               </div>
               <span>{getAuthorName()}</span>
             </div>
-            {post.category && (
+            {typedPost.category && (
               <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-0.5 text-xs font-medium text-primary">
-                {post.category}
+                {typedPost.category}
               </span>
             )}
           </div>
 
-          {post.image_url && (
+          {typedPost.image_url && (
             <div className="mt-8 overflow-hidden rounded-xl">
               <Image
-                src={post.image_url}
-                alt={post.title}
+                src={typedPost.image_url}
+                alt={typedPost.title}
                 width={800}
                 height={400}
                 className="w-full object-cover"
@@ -92,14 +119,14 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
             </div>
           )}
 
-          {post.excerpt && (
+          {typedPost.excerpt && (
             <p className="mt-8 text-lg leading-relaxed text-muted-foreground font-medium border-l-4 border-primary pl-4">
-              {post.excerpt}
+              {typedPost.excerpt}
             </p>
           )}
 
           <div className="mt-10 max-w-none">
-            <MarkdownContent content={post.content} />
+            <MarkdownContent content={typedPost.content} />
           </div>
 
           <div className="mt-12 border-t pt-6">

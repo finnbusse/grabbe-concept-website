@@ -62,11 +62,11 @@ export default function ProfilPage() {
         console.error("Error loading profile:", error)
         // Profile doesn't exist yet - will be created on first save
       } else if (profileData) {
-        setProfile(profileData)
-        setFirstName(profileData.first_name || "")
-        setLastName(profileData.last_name || "")
-        setTitle(profileData.title || "")
-        setProfileImageUrl(profileData.profile_image_url || "")
+        setProfile(profileData as UserProfile)
+        setFirstName((profileData as UserProfile).first_name || "")
+        setLastName((profileData as UserProfile).last_name || "")
+        setTitle((profileData as UserProfile).title || "")
+        setProfileImageUrl((profileData as UserProfile).profile_image_url || "")
       }
     } catch (err) {
       console.error("Error:", err)
@@ -142,7 +142,7 @@ export default function ProfilPage() {
         // Update existing profile
         const { error } = await supabase
           .from("user_profiles")
-          .update(profileData)
+          .update(profileData as any)
           .eq("id", profile.id)
 
         if (error) throw error
@@ -150,7 +150,7 @@ export default function ProfilPage() {
         // Create new profile
         const { error } = await supabase
           .from("user_profiles")
-          .insert(profileData)
+          .insert(profileData as any)
 
         if (error) throw error
       }

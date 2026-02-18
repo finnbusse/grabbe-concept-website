@@ -9,6 +9,25 @@ export const metadata = {
   description: "Neuigkeiten und aktuelle Meldungen vom Grabbe-Gymnasium Detmold.",
 }
 
+interface UserProfile {
+  first_name: string | null
+  last_name: string | null
+  title: string | null
+  profile_image_url: string | null
+}
+
+interface PostWithProfile {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  category: string | null
+  image_url: string | null
+  author_name: string | null
+  created_at: string
+  user_profiles: UserProfile | null
+}
+
 export default async function AktuellesPage() {
   const supabase = await createClient()
   const { data: posts } = await supabase
@@ -26,8 +45,10 @@ export default async function AktuellesPage() {
     .order("created_at", { ascending: false })
     .limit(20)
 
+  const typedPosts = (posts || []) as unknown as PostWithProfile[]
+
   // Helper function to get author display name
-  const getAuthorName = (post: any) => {
+  const getAuthorName = (post: PostWithProfile) => {
     if (post.user_profiles) {
       const { first_name, last_name, title } = post.user_profiles
       if (first_name || last_name) {
@@ -57,9 +78,9 @@ export default async function AktuellesPage() {
 
         {/* Posts */}
         <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-          {posts && posts.length > 0 ? (
+          {typedPosts && typedPosts.length > 0 ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {posts.map((post) => (
+              {typedPosts.map((post) => (
                 <Link
                   key={post.id}
                   href={`/aktuelles/${post.slug}`}
