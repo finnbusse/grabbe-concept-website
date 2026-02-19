@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users, Activity, FileEdit, FolderTree, UserCircle, Tag } from "lucide-react"
+import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users, Activity, FileEdit, FolderTree, UserCircle, Tag, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const contentLinks = [
@@ -54,7 +54,7 @@ function getDisplayName(profile: UserProfileData | null, email: string) {
   return email
 }
 
-export function CmsSidebar({ userEmail, userProfile }: { userEmail: string; userProfile?: UserProfileData | null }) {
+export function CmsSidebar({ userEmail, userProfile, isOpen, onClose }: { userEmail: string; userProfile?: UserProfileData | null; isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -66,15 +66,24 @@ export function CmsSidebar({ userEmail, userProfile }: { userEmail: string; user
   }
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-card">
+    <aside className={`flex w-64 shrink-0 flex-col border-r border-border bg-card fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 lg:relative lg:translate-x-0 lg:z-auto ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
       <div className="flex items-center gap-3 border-b border-border px-5 py-4">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
           <span className="text-sm font-bold text-primary-foreground font-display">G</span>
         </div>
-        <div>
+        <div className="flex-1">
           <p className="text-sm font-semibold text-card-foreground font-display">Grabbe CMS</p>
           <p className="text-xs text-muted-foreground">Content Management</p>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="lg:hidden rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-label="Menue schliessen"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 px-3 py-4" aria-label="CMS Navigation">
@@ -92,6 +101,7 @@ export function CmsSidebar({ userEmail, userProfile }: { userEmail: string; user
                   <Link
                     key={link.href}
                     href={link.href}
+                    onClick={onClose}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     }`}
@@ -106,7 +116,7 @@ export function CmsSidebar({ userEmail, userProfile }: { userEmail: string; user
         ))}
 
         <div className="mt-5 border-t border-border pt-4">
-          <Link href="/" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+          <Link href="/" onClick={onClose} className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
             <Home className="h-4 w-4" />
             Zur Website
           </Link>
