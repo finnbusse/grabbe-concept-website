@@ -5,6 +5,7 @@ import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
 import { Download, FileText, ImageIcon, ExternalLink } from "lucide-react"
 import { DownloadCategories } from "@/components/download-categories"
 import { generatePageMetadata } from "@/lib/seo"
+import type { Document } from "@/lib/types/database.types"
 import type { Metadata } from "next"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -23,10 +24,11 @@ export default async function DownloadsPage() {
   const heroImageUrl = (heroContent.hero_image_url as string) || undefined
   const { data: docs } = await supabase
     .from("documents")
-    .select("*")
+    .select("id, title, file_url, file_name, file_size, file_type, category")
     .eq("published", true)
     .order("category", { ascending: true })
     .order("created_at", { ascending: false })
+    .returns<Document[]>()
 
   const items = docs || []
 

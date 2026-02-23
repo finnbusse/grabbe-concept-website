@@ -3,6 +3,7 @@ import { PageHero } from "@/components/page-hero"
 import { Breadcrumbs } from "@/components/breadcrumbs"
 import { createClient } from "@/lib/supabase/server"
 import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
+import type { Post } from "@/lib/types/database.types"
 import { CalendarDays, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { generatePageMetadata } from "@/lib/seo"
@@ -24,10 +25,11 @@ export default async function AktuellesPage() {
   const heroImageUrl = (heroContent.hero_image_url as string) || undefined
   const { data: posts } = await supabase
     .from("posts")
-    .select("*")
+    .select("id, title, slug, excerpt, category, author_name, user_id, event_date, created_at")
     .eq("published", true)
     .order("created_at", { ascending: false })
     .limit(20)
+    .returns<Post[]>()
 
   // Fetch author profiles
   const userIds = [...new Set((posts || []).map(p => p.user_id).filter(Boolean))]

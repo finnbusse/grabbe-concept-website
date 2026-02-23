@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { revalidateTag } from "next/cache"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function GET() {
@@ -28,6 +29,7 @@ export async function PUT(request: NextRequest) {
         .update({ value: item.value, updated_at: new Date().toISOString() })
         .eq("key", item.key)
     }
+    revalidateTag("settings")
     return NextResponse.json({ success: true })
   }
 
@@ -37,6 +39,7 @@ export async function PUT(request: NextRequest) {
     .update({ value, updated_at: new Date().toISOString() })
     .eq("key", key)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  revalidateTag("settings")
   return NextResponse.json({ success: true })
 }
 
@@ -56,5 +59,6 @@ export async function POST(request: NextRequest) {
     category: category ?? "allgemein",
   })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  revalidateTag("settings")
   return NextResponse.json({ success: true })
 }
