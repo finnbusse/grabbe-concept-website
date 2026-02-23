@@ -141,8 +141,10 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState("")
+  const [msgType, setMsgType] = useState<"success" | "error" | "">("")
   const [uploadingKey, setUploadingKey] = useState<string | null>(null)
   const loadedRef = useRef(false)
+  const msgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Derive dirty state
   const isDirty = Object.keys(values).some((k) => values[k] !== initial[k])
@@ -153,6 +155,12 @@ export default function SettingsPage() {
     window.addEventListener("beforeunload", handler)
     return () => window.removeEventListener("beforeunload", handler)
   }, [isDirty])
+
+  useEffect(() => {
+    return () => {
+      if (msgTimerRef.current) clearTimeout(msgTimerRef.current)
+    }
+  }, [])
 
   // Load all settings
   useEffect(() => {
@@ -176,6 +184,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true)
     setMsg("")
+    setMsgType("")
     try {
       const keys = Object.keys(values).filter((k) => values[k] !== initial[k])
       const payload = keys.map((key) => ({ key, value: values[key] ?? "" }))
@@ -190,11 +199,17 @@ export default function SettingsPage() {
       }
       setInitial({ ...values })
       setMsg("Gespeichert! Änderungen sind sofort live.")
+      setMsgType("success")
     } catch (error) {
       setMsg(error instanceof Error ? error.message : "Speichern fehlgeschlagen")
+      setMsgType("error")
     } finally {
       setSaving(false)
-      setTimeout(() => setMsg(""), 4000)
+      if (msgTimerRef.current) clearTimeout(msgTimerRef.current)
+      msgTimerRef.current = setTimeout(() => {
+        setMsg("")
+        setMsgType("")
+      }, 4000)
     }
   }
 
@@ -242,7 +257,7 @@ export default function SettingsPage() {
         </div>
         <div className="flex items-center gap-3">
           {msg && (
-            <span className={`text-sm font-medium ${msg.startsWith("Gespeichert") ? "text-green-600" : "text-red-600"}`}>
+            <span className={`text-sm font-medium ${msgType === "success" ? "text-green-600" : "text-red-600"}`}>
               {msg}
             </span>
           )}

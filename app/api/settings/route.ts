@@ -2,6 +2,35 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { NextResponse, type NextRequest } from "next/server"
 
+function revalidateSettingsPages() {
+  revalidatePath("/", "layout")
+  revalidatePath("/kontakt")
+  revalidatePath("/impressum")
+}
+
+function normalizeSettingRow(item: {
+  key: string
+  value?: unknown
+  type?: string
+  label?: string
+  category?: string
+}) {
+  return {
+    key: item.key,
+    value: typeof item.value === "string" ? item.value : "",
+    type: item.type ?? "text",
+    label: item.label ?? item.key,
+    category: item.category ?? "allgemein",
+    updated_at: new Date().toISOString(),
+  }
+}
+
+function isValidSettingItem(item: { key?: unknown; value?: unknown }) {
+  return typeof item?.key === "string" &&
+    item.key.trim().length > 0 &&
+    (item.value === undefined || typeof item.value === "string")
+}
+
 export async function GET() {
   const supabase = await createClient()
   const { data, error } = await supabase
@@ -22,41 +51,32 @@ export async function PUT(request: NextRequest) {
   const body = await request.json()
 
   if (Array.isArray(body)) {
-    const rows = body.map((item) => ({
-      key: item.key,
-      value: item.value ?? "",
-      type: item.type ?? "text",
-      label: item.label ?? item.key,
-      category: item.category ?? "allgemein",
-      updated_at: new Date().toISOString(),
-    }))
+    if (body.some((item) => !isValidSettingItem(item))) {
+      return NextResponse.json({ error: "Invalid payload: each item requires a non-empty key" }, { status: 400 })
+    }
+    const rows = body.map((item) => normalizeSettingRow(item))
     const { error } = await supabase
       .from("site_settings")
-      .upsert(rows, { onConflict: "key" })
+      .upsert(rows as never, { onConflict: "key" })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    revalidatePath("/", "layout")
-    revalidatePath("/kontakt")
-    revalidatePath("/impressum")
+    revalidateSettingsPages()
     return NextResponse.json({ success: true })
   }
 
   const { key, value, type, label, category } = body
+  if (typeof key !== "string" || key.trim().length === 0) {
+    return NextResponse.json({ error: "Invalid payload: key is required" }, { status: 400 })
+  }
+  if (value !== undefined && typeof value !== "string") {
+    return NextResponse.json({ error: "Invalid payload: value must be a string" }, { status: 400 })
+  }
   const { error } = await supabase
     .from("site_settings")
-    .upsert({
-      key,
-      value: value ?? "",
-      type: type ?? "text",
-      label: label ?? key,
-      category: category ?? "allgemein",
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "key" })
+    .upsert(normalizeSettingRow({ key, value, type, label, category }) as never, { onConflict: "key" })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  revalidatePath("/", "layout")
-  revalidatePath("/kontakt")
-  revalidatePath("/impressum")
+  revalidateSettingsPages()
   return NextResponse.json({ success: true })
 }
 
@@ -68,17 +88,21 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const { key, value, type, label, category } = await request.json()
+  if (typeof key !== "string" || key.trim().length === 0) {
+    return NextResponse.json({ error: "Invalid payload: key is required" }, { status: 400 })
+  }
+  if (value !== undefined && typeof value !== "string") {
+    return NextResponse.json({ error: "Invalid payload: value must be a string" }, { status: 400 })
+  }
   const { error } = await supabase.from("site_settings").insert({
     key,
-    value: value ?? "",
+    value: typeof value === "string" ? value : "",
     type: type ?? "text",
     label: label ?? key,
     category: category ?? "allgemein",
-  })
+  } as never)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  revalidatePath("/", "layout")
-  revalidatePath("/kontakt")
-  revalidatePath("/impressum")
+  revalidateSettingsPages()
   return NextResponse.json({ success: true })
 }
