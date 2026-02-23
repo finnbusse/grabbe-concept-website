@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import {
   Settings, Save, Loader2, Upload, Globe, Building2, Mail, Phone,
   MapPin, Share2, Search as SearchIcon, Image as ImageIcon, FileText,
-  Shield, Hash,
+  Shield, Hash, Quote,
 } from "lucide-react"
 
 // ---------------------------------------------------------------------------
@@ -141,8 +141,10 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState("")
+  const [msgType, setMsgType] = useState<"success" | "error" | "">("")
   const [uploadingKey, setUploadingKey] = useState<string | null>(null)
   const loadedRef = useRef(false)
+  const msgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Derive dirty state
   const isDirty = Object.keys(values).some((k) => values[k] !== initial[k])
@@ -153,6 +155,12 @@ export default function SettingsPage() {
     window.addEventListener("beforeunload", handler)
     return () => window.removeEventListener("beforeunload", handler)
   }, [isDirty])
+
+  useEffect(() => {
+    return () => {
+      if (msgTimerRef.current) clearTimeout(msgTimerRef.current)
+    }
+  }, [])
 
   // Load all settings
   useEffect(() => {
@@ -173,29 +181,36 @@ export default function SettingsPage() {
     setValues((prev) => ({ ...prev, [key]: value }))
   }, [])
 
-  // Ensure a setting key exists (upsert)
-  const ensureKey = async (supabase: ReturnType<typeof createClient>, key: string, value: string) => {
-    const { data } = await supabase.from("site_settings").select("id").eq("key", key).maybeSingle()
-    if (data) {
-      await supabase.from("site_settings").update({ value, updated_at: new Date().toISOString() } as never).eq("key", key)
-    } else {
-      await supabase.from("site_settings").insert({
-        key, value, type: "text", label: key, category: "seo",
-      } as never)
-    }
-  }
-
   const handleSave = async () => {
     setSaving(true)
-    const supabase = createClient()
-    const keys = Object.keys(values).filter((k) => values[k] !== initial[k])
-    for (const key of keys) {
-      await ensureKey(supabase, key, values[key])
+    setMsg("")
+    setMsgType("")
+    try {
+      const keys = Object.keys(values).filter((k) => values[k] !== initial[k])
+      const payload = keys.map((key) => ({ key, value: values[key] ?? "" }))
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        throw new Error(err?.error || "Speichern fehlgeschlagen")
+      }
+      setInitial({ ...values })
+      setMsg("Gespeichert! Änderungen sind sofort live.")
+      setMsgType("success")
+    } catch (error) {
+      setMsg(error instanceof Error ? error.message : "Speichern fehlgeschlagen")
+      setMsgType("error")
+    } finally {
+      setSaving(false)
+      if (msgTimerRef.current) clearTimeout(msgTimerRef.current)
+      msgTimerRef.current = setTimeout(() => {
+        setMsg("")
+        setMsgType("")
+      }, 4000)
     }
-    setInitial({ ...values })
-    setMsg("Gespeichert!")
-    setSaving(false)
-    setTimeout(() => setMsg(""), 3000)
   }
 
   const handleImageUpload = (key: string) => {
@@ -241,7 +256,13 @@ export default function SettingsPage() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {msg && <span className="text-sm font-medium text-green-600">{msg}</span>}
+          {msg && (
+            <span className={`text-sm font-medium ${
+              msgType === "success" ? "text-green-600" : "text-red-600"
+            }`}>
+              {msg}
+            </span>
+          )}
           {isDirty && !msg && (
             <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-700">
               Ungespeicherte Änderungen
@@ -263,6 +284,18 @@ export default function SettingsPage() {
         <Field label="Schulname" hint="Wird als Seitenname und in den Meta-Tags verwendet.">
           {field(values, "school_name", set, { placeholder: "Grabbe-Gymnasium Detmold" })}
         </Field>
+        <Field label="Vollständiger Schulname" hint="Wird im Footer und in rechtlichen Bereichen verwendet.">
+          {field(values, "school_name_full", set, { placeholder: "Christian-Dietrich-Grabbe-Gymnasium Detmold" })}
+        </Field>
+        <Field label="Schulstadt" hint="Wird als Ortsangabe in Header/Footer und Fallback für strukturierte Daten genutzt.">
+          {field(values, "school_city", set, { placeholder: "Detmold" })}
+        </Field>
+        <Field label="Kurzbeschreibung" hint="Kurzer Text über die Schule (z. B. im Footer).">
+          {field(values, "school_description", set, {
+            multiline: true,
+            placeholder: "Wir fördern Deine Talente und stärken Deine Persönlichkeit.",
+          })}
+        </Field>
         <ImageField
           label="Logo"
           hint="Quadratisch, mind. 512 x 512 px. Wird im Schema.org und ggf. in Suchergebnissen angezeigt."
@@ -277,30 +310,63 @@ export default function SettingsPage() {
       <Section
         icon={Mail}
         title="Kontakt & Adresse"
-        description="Adresse, Telefon und E-Mail. Wird im Impressum, auf der Kontaktseite und in strukturierten Daten (Schema.org) ausgegeben."
+        description="Zentrale Kontaktdaten der Website. Diese Werte werden auf Kontaktseite, im Impressum, im Footer und als SEO-Fallback verwendet."
       >
+        <Field label="Adresse (eine Zeile)" hint="Wird in Kontaktseite, Impressum und Footer ausgegeben.">
+          {field(values, "school_address", set, { placeholder: "Küster-Meyer-Platz 2, 32756 Detmold" })}
+        </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="E-Mail">
-            {field(values, "seo_org_email", set, { placeholder: "info@grabbe-gymnasium.de" })}
+            {field(values, "school_email", set, { placeholder: "sekretariat@grabbe.nrw.schule" })}
           </Field>
           <Field label="Telefon">
-            {field(values, "seo_org_phone", set, { placeholder: "+49 5231 ..." })}
+            {field(values, "school_phone", set, { placeholder: "05231 - 99260" })}
           </Field>
         </div>
-        <Field label="Strasse">
-          {field(values, "seo_org_address_street", set, { placeholder: "Küsterstr. 2" })}
+        <Field label="Fax">
+          {field(values, "school_fax", set, { placeholder: "05231 - 992616" })}
         </Field>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="PLZ">
-            {field(values, "seo_org_address_zip", set, { placeholder: "32756" })}
+        <div className="rounded-xl border border-border bg-muted/30 px-4 py-3">
+          <p className="text-sm font-medium text-card-foreground">Schema.org-Overrides (optional)</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Falls diese Felder leer sind, werden automatisch die obigen Website-Kontaktdaten verwendet.
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <Field label="Schema-E-Mail">
+              {field(values, "seo_org_email", set, { placeholder: "info@grabbe-gymnasium.de" })}
+            </Field>
+            <Field label="Schema-Telefon">
+              {field(values, "seo_org_phone", set, { placeholder: "+49 5231 ..." })}
+            </Field>
+          </div>
+          <Field label="Schema-Strasse">
+            {field(values, "seo_org_address_street", set, { placeholder: "Küsterstr. 2" })}
           </Field>
-          <Field label="Stadt">
-            {field(values, "seo_org_address_city", set, { placeholder: "Detmold" })}
-          </Field>
-          <Field label="Land (ISO)">
-            {field(values, "seo_org_address_country", set, { placeholder: "DE" })}
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label="Schema-PLZ">
+              {field(values, "seo_org_address_zip", set, { placeholder: "32756" })}
+            </Field>
+            <Field label="Schema-Stadt">
+              {field(values, "seo_org_address_city", set, { placeholder: "Detmold" })}
+            </Field>
+            <Field label="Schema-Land (ISO)">
+              {field(values, "seo_org_address_country", set, { placeholder: "DE" })}
+            </Field>
+          </div>
         </div>
+      </Section>
+
+      {/* ====================== FOOTER ====================== */}
+      <Section
+        icon={Quote}
+        title="Footer"
+        description="Inhalte des Website-Footers."
+      >
+        <Field label="Motto">
+          {field(values, "school_motto", set, {
+            placeholder: "\"Deine Talente. Deine Bühne. Dein Grabbe.\"",
+          })}
+        </Field>
       </Section>
 
       {/* ====================== SEO ====================== */}
