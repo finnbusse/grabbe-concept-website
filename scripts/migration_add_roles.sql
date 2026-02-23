@@ -74,7 +74,7 @@ INSERT INTO public.cms_roles (name, slug, is_system, permissions) VALUES
     "messages": true,
     "anmeldungen": true,
     "diagnostic": true,
-    "roles": { "view": true, "create": true, "edit": true, "delete": true }
+    "roles": { "view": true, "create": false, "edit": false, "delete": false }
   }'::jsonb
 ),
 (

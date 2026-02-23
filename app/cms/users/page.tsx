@@ -28,6 +28,7 @@ interface UserEntry {
 }
 
 interface UserRoleAssignment {
+  user_id: string
   role_id: string
   cms_roles: { slug: string; name: string } | null
 }
@@ -167,14 +168,13 @@ export default function UsersPage() {
     try {
       const { data } = await supabase
         .from("user_roles")
-        .select("user_id, role_id, cms_roles(slug, name)")
+        .select("user_id, role_id")
 
       if (data) {
         const map: Record<string, string[]> = {}
-        for (const row of data as unknown as UserRoleAssignment[]) {
-          const userId = (row as unknown as { user_id: string }).user_id
-          if (!map[userId]) map[userId] = []
-          map[userId].push((row as unknown as { role_id: string }).role_id)
+        for (const row of data as Array<{ user_id: string; role_id: string }>) {
+          if (!map[row.user_id]) map[row.user_id] = []
+          map[row.user_id].push(row.role_id)
         }
         setUserRoleMap(map)
       }
@@ -184,7 +184,7 @@ export default function UsersPage() {
   const loadCmsPages = useCallback(async () => {
     try {
       const { data } = await supabase.from("pages").select("id, title").order("title")
-      if (data) setCmsPages(data)
+      if (data) setCmsPages(data as Array<{ id: string; title: string }>)
     } catch { /* ok */ }
   }, [supabase])
 

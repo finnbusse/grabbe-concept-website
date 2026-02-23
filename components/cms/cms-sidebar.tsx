@@ -89,7 +89,7 @@ export function CmsSidebar({ userEmail, userProfile, isOpen, onClose }: { userEm
   // Build "Meine Seiten" links from page permissions
   const meineSeiten = pagePermissions.map((pp) => ({
     icon: FileStack as LucideIcon,
-    label: pp.page_type === "editable" ? pp.page_id : pp.page_id,
+    label: pp.page_id,
     href: pp.page_type === "editable"
       ? `/cms/seiten-editor/${pp.page_id}`
       : `/cms/pages/${pp.page_id}`,
