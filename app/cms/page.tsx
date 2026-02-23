@@ -188,7 +188,7 @@ export default async function CmsDashboardPage() {
           <li className="flex gap-2"><span className="font-bold text-primary">1.</span> Beiträge verwenden Markdown: **fett**, *kursiv*, [Link](url)</li>
           <li className="flex gap-2"><span className="font-bold text-primary">2.</span> Bilder/PDFs unter &quot;Dokumente&quot; hochladen, URL kopieren und einbinden</li>
           <li className="flex gap-2"><span className="font-bold text-primary">3.</span> &quot;Auf Startseite&quot; bei Beiträgen für prominente Anzeige aktivieren</li>
-          <li className="flex gap-2"><span className="font-bold text-primary">4.</span> Unter &quot;Einstellungen&quot; alle Texte, Namen und SEO-Daten aendern</li>
+          <li className="flex gap-2"><span className="font-bold text-primary">4.</span> Unter &quot;Einstellungen&quot; alle Texte, Namen und SEO-Daten ändern</li>
         </ul>
       </div>
     </div>

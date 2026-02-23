@@ -270,7 +270,7 @@ export const PAGE_DEFAULTS = {
     overview_title: 'Die gymnasiale Oberstufe',
     overview_text: 'Die Regeldauer der gymnasialen Oberstufe beträgt drei Jahre. In der Einführungsphase werden die Schülerinnen und Schüler mit den inhaltlichen und methodischen Anforderungen der Oberstufe vertraut gemacht. Der Unterricht findet nicht mehr im Klassenverband statt, sondern in Grundkursen. Diese sind in der Regel dreistündig, in der neu einsetzenden Fremdsprache vierstündig. Auf der Grundlage der Vorgaben der APO-GOSt können Fächer und Schwerpunkte nach individuellen Stärken und Neigungen gewählt werden.',
     overview_quali: 'Zu Beginn der Qualifikationsphase werden aus den bisher belegten Kursen zwei als Leistungskurse ausgewählt, die jeweils fünfstündig unterrichtet werden. Die zweijährige Qualifikationsphase baut auf den in der Einführungsphase erworbenen Grundlagen auf und bereitet auf die Abiturprüfung vor. Die im Laufe der Qualifikationsphase erbrachten Leistungen gehen bereits als Block I in die Abiturendnote ein.',
-    overview_stunden: 'Im Laufe der Oberstufe sind insgesamt 102 Wochenstunden zu belegen, davon 34 in der Einführungsphase. Die Kernunterrichtszeit endet mit der 9. Stunde, in Ausnahmefaellen liegen Kurse aber auch am späteren Nachmittag.',
+    overview_stunden: 'Im Laufe der Oberstufe sind insgesamt 102 Wochenstunden zu belegen, davon 34 in der Einführungsphase. Die Kernunterrichtszeit endet mit der 9. Stunde, in Ausnahmefällen liegen Kurse aber auch am späteren Nachmittag.',
     overview_stammgruppen: 'Zur Erleichterung des Übergangs in die Oberstufe wird am Grabbe-Gymnasium der Unterricht in den in der Regel von allen belegten Fächern Deutsch, Mathematik, Englisch und Sport in der Einführungsphase noch in Stammgruppen erteilt, sodass die Schülerinnen und Schüler in diesen Fächern immer mit derselben Lerngruppe Unterricht haben.',
     overview_realschule: 'Traditionell liegt uns besonders die Förderung von Schülerinnen und Schülern aus der Realschule am Herzen, die ihre Schullaufbahn in der gymnasialen Oberstufe fortsetzen möchten. Diesen bieten wir individuelle Hospitationsangebote und Beratungstermine an. Vertiefungskurse in Deutsch, Mathematik und Englisch in der Einführungsphase bieten allen Schülerinnen und Schülern die Möglichkeit, Defizite in diesen für den Erfolg in der Oberstufe zentralen Fächern aufzuarbeiten.',
     overview_kooperation: 'Aufgrund der guten Kooperation mit den beiden anderen Detmolder Gymnasien können wir unseren Schülerinnen und Schülern in der Oberstufe ein breites Leistungskurs-Angebot machen, darunter Kunst, Musik und Sport als Besonderheiten unseres Schulprofils. Im Bereich der Fremdsprachen bieten wir zur Zeit Latein, Spanisch und Französisch als neu einsetzende Fremdsprachen an, Englisch, Französisch und Latein als fortgeführte Fremdsprachen.',
@@ -295,7 +295,7 @@ export const PAGE_DEFAULTS = {
 
     // Unterrichtsausfall section
     ausfall_title: 'Verfahren bei Unterrichtsausfall',
-    ausfall_text: 'Die Schülerinnen und Schüler haben die Pflicht, sich über Aufgaben und Inhalt der eigenverantwortlichen Lernzeit zu informieren, und bearbeiten das bereitgestellte Material gewissenhaft und vollständig. Diese Leistung fliesst in die sonstige Mitarbeitsnote ein, da sie eine Unterrichtseinheit ersetzt.',
+    ausfall_text: 'Die Schülerinnen und Schüler haben die Pflicht, sich über Aufgaben und Inhalt der eigenverantwortlichen Lernzeit zu informieren, und bearbeiten das bereitgestellte Material gewissenhaft und vollständig. Diese Leistung fließt in die sonstige Mitarbeitsnote ein, da sie eine Unterrichtseinheit ersetzt.',
     ausfall_vorhersehbar: 'Liegt eine vorhersehbare Abwesenheit der Lehrperson vor, bekommen die Schülerinnen und Schüler in der Regel in der Stunde zuvor Aufgaben und Materialien, an denen sie in den ausfallenden Stunden arbeiten können.',
     ausfall_unvorhersehbar: 'Liegt eine unvorhersehbare Abwesenheit der Lehrperson vor, so stellt diese in der Regel über ein im Kurs vereinbartes digitales Distributionsverfahren Material zur Verfügung (z.B. per E-Mail, über das Aufgabenmodul oder den Kursordner auf IServ). Wenn die Lehrperson keine Aufgaben zur Bearbeitung vorgesehen hat, nutzen die Schülerinnen und Schüler die Lernzeit eigenverantwortlich. Auf dem Vertretungsplan erscheint dann ein entsprechender Vermerk (EVA für "eigenverantwortliches Arbeiten").',
 
@@ -305,22 +305,22 @@ export const PAGE_DEFAULTS = {
 
     // Laufbahnplanung
     laufbahn_title: 'Laufbahnplanung',
-    laufbahn_text: 'Weitere Informationen z.B. zum Zentralabitur oder einzelnen Fächern sind auch auf den Seiten des Ministeriums zugaenglich.',
+    laufbahn_text: 'Weitere Informationen z.B. zum Zentralabitur oder einzelnen Fächern sind auch auf den Seiten des Ministeriums zugänglich.',
     laufbahn_links: 'Bildungsportal NRW|https://www.schulministerium.nrw.de,FAQ zur Oberstufe|https://www.schulministerium.nrw.de/themen/schulsystem/schulformen/gymnasium/gymnasiale-oberstufe,Standardsicherung NRW|https://www.standardsicherung.schulministerium.nrw.de',
     laufbahn_downloads_tag_id: '',
 
     // Klausuren
     klausuren_title: 'Klausuren',
-    klausuren_text: 'Die Klausurpläne werden hier jeweils zu Beginn des Halbjahres veröffentlicht und im Kasten im Neubaufoyer ausgehaengt. Bitte meldet euch umgehend, falls für euch trotz sorgfältiger Prüfung versehentlich mehr als drei Klausuren pro Woche angesetzt sind oder es andere Terminschwierigkeiten gibt.',
+    klausuren_text: 'Die Klausurpläne werden hier jeweils zu Beginn des Halbjahres veröffentlicht und im Kasten im Neubaufoyer ausgehängt. Bitte meldet euch umgehend, falls für euch trotz sorgfältiger Prüfung versehentlich mehr als drei Klausuren pro Woche angesetzt sind oder es andere Terminschwierigkeiten gibt.',
     klausuren_nachschreiben: 'Schülerinnen und Schüler, die eine Klausur aus von ihnen zu vertretenden Gründen versäumen (z.B. Termin falsch notiert, verschlafen usw.), haben keinen Anspruch auf eine Nachschreibklausur; für alle anderen finden jeweils gegen Ende eines Quartals Nachschreibtermine statt.',
     klausuren_downloads_tag_id: '',
 
     // Fehlzeiten
     fehlzeiten_title: 'Fehlzeiten und Beurlaubungen',
     fehlzeiten_text: 'Das Schulgesetz sieht vor, dass die Schule unverzüglich zu benachrichtigen ist, wenn Schüler:innen durch Krankheit oder aus anderen nicht vorhersehbaren Gründen verhindert sind, die Schule zu besuchen. Wie in der Sekundarstufe I erfolgt diese Benachrichtigung zunächst durch die Erziehungsberechtigten über deren WebUntis-Zugang. Volljährige Schüler:innen können die Eintragung selbst vornehmen.',
-    fehlzeiten_entschuldigung: 'Die Erziehungsberechtigten bzw. die volljährigen Schüler:innen sind laut Schulgesetz ebenfalls verpflichtet, den Grund für das Schulversaeumnis schriftlich mitzuteilen. Dies geschieht über das Entschuldigungsformular. Das Entschuldigungsformular muss unmittelbar nach der Rueckkehr in den Unterricht, spätestens jedoch eine Woche nach dem letzten Krankheitstag, in Papierform bei der Stufenleitung eingereicht werden.',
-    fehlzeiten_beurlaubung: 'Bei allen im Voraus absehbaren Terminen (z.B. nicht akut bedingte Arztbesuche, Fahrprüfung) ist rechtzeitig ein Antrag auf Beurlaubung vom Unterricht zu stellen. Für Tage, an denen Klausuren oder andere Prüfungen angesetzt sind, kann eine Beurlaubung nur in begründeten Ausnahmefaellen gewaehrt werden.',
-    fehlzeiten_hinweis: 'Fehlzeiten, für die nicht innerhalb einer Woche nach Rueckkehr in den Unterricht eine Entschuldigung vorgelegt worden ist, gelten als unentschuldigt und können als nicht erbrachte Leistungen in die Notengebung einfliessen. Schülerinnen und Schüler sind verpflichtet, den versäumten Stoff selbstständig nachzuarbeiten.',
+    fehlzeiten_entschuldigung: 'Die Erziehungsberechtigten bzw. die volljährigen Schüler:innen sind laut Schulgesetz ebenfalls verpflichtet, den Grund für das Schulversäumnis schriftlich mitzuteilen. Dies geschieht über das Entschuldigungsformular. Das Entschuldigungsformular muss unmittelbar nach der Rückkehr in den Unterricht, spätestens jedoch eine Woche nach dem letzten Krankheitstag, in Papierform bei der Stufenleitung eingereicht werden.',
+    fehlzeiten_beurlaubung: 'Bei allen im Voraus absehbaren Terminen (z.B. nicht akut bedingte Arztbesuche, Fahrprüfung) ist rechtzeitig ein Antrag auf Beurlaubung vom Unterricht zu stellen. Für Tage, an denen Klausuren oder andere Prüfungen angesetzt sind, kann eine Beurlaubung nur in begründeten Ausnahmefällen gewährt werden.',
+    fehlzeiten_hinweis: 'Fehlzeiten, für die nicht innerhalb einer Woche nach Rückkehr in den Unterricht eine Entschuldigung vorgelegt worden ist, gelten als unentschuldigt und können als nicht erbrachte Leistungen in die Notengebung einfließen. Schülerinnen und Schüler sind verpflichtet, den versäumten Stoff selbstständig nachzuarbeiten.',
     fehlzeiten_downloads_tag_id: '',
 
     // Facharbeit
@@ -335,7 +335,7 @@ export const PAGE_DEFAULTS = {
 
     // Studium & Stipendien
     stipendien_title: 'Studium & Stipendien',
-    stipendien_text: 'Die Bewerbungskriterien ergeben sich oft aus dem Charakter der Stiftungen, z.B. wird häufig neben guten schulischen Leistungen auch gesellschaftliches oder politisches Engagement erwartet. Einige Angebote richten sich auch an Auszubildende oder sind auf bestimmte Personengruppen beschraenkt.',
+    stipendien_text: 'Die Bewerbungskriterien ergeben sich oft aus dem Charakter der Stiftungen, z.B. wird häufig neben guten schulischen Leistungen auch gesellschaftliches oder politisches Engagement erwartet. Einige Angebote richten sich auch an Auszubildende oder sind auf bestimmte Personengruppen beschränkt.',
     stipendien_links: 'Studieren ab 15 (Uni Bielefeld)|https://www.uni-bielefeld.de/studium/studienangebot/studieren-ab-15/,Studifinder|https://www.studifinder.de,Stipendienfinder des DAAD|https://www.daad.de/de/studieren-und-forschen-in-deutschland/stipendien-finden/,Studienstiftung des Deutschen Volkes|https://www.studienstiftung.de,Deutschlandstipendium|https://www.deutschlandstipendium.de,Mystipendium|https://www.mystipendium.de',
 
     // Abitur
@@ -388,8 +388,8 @@ export const PAGE_DEFAULTS = {
     page_title: 'Nachmittags am Grabbe',
     page_subtitle: '"Verlässlich und flexibel" - Beate Bossmanns',
     hero_image_url: '',
-    text_p1: 'Nach Unterrichtsschluss bietet das Grabbe-Gymnasium mit einem breiten Spektrum an Nachmittagsaktivitäten eine verlässliche und flexibel gestaltbare Betreuungszeit bis 15:30 Uhr an. Neben unserer verlässlichen Nachmittagsbetreuung mit offenen Betreuungszeiten in unseren modernen Betreuungsräumen, die von engagierten Betreuungskraeften geleitet wird, kann Ihr Kind aus zahlreichen AG-Angeboten wählen oder in der Hausaufgabenbetreuung unter der Anleitung unserer Schülertutorinnen und -tutoren Hausaufgaben erledigen.',
-    text_p2: 'Alle Angebote sind miteinander kombinierbar, sodass Sie die Nachmittagsgestaltung Ihres Kindes auf Ihre individuellen Betreuungswuensche anpassen können.',
+    text_p1: 'Nach Unterrichtsschluss bietet das Grabbe-Gymnasium mit einem breiten Spektrum an Nachmittagsaktivitäten eine verlässliche und flexibel gestaltbare Betreuungszeit bis 15:30 Uhr an. Neben unserer verlässlichen Nachmittagsbetreuung mit offenen Betreuungszeiten in unseren modernen Betreuungsräumen, die von engagierten Betreuungskräften geleitet wird, kann Ihr Kind aus zahlreichen AG-Angeboten wählen oder in der Hausaufgabenbetreuung unter der Anleitung unserer Schülertutorinnen und -tutoren Hausaufgaben erledigen.',
+    text_p2: 'Alle Angebote sind miteinander kombinierbar, sodass Sie die Nachmittagsgestaltung Ihres Kindes auf Ihre individuellen Betreuungswünsche anpassen können.',
     text_p3: 'Module der Hausaufgabenbetreuung und Arbeitsgemeinschaften werden für ein halbes Jahr gewählt. In der Mensa stehen zudem jeden Tag durch unseren Schulcaterer LKS - Pop & Corn sowohl ein ansprechendes Kioskangebot als auch ein reichhaltiges Mittagsessenangebot in Buffetform zur Verfügung.',
     card1_title: 'Betreuungszeiten',
     card1_text: 'Verlässliche Betreuung bis 15:30 Uhr mit offenen Zeiten in modernen Räumen.',
@@ -902,7 +902,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
           { key: 'antraege_wlan', label: 'WLAN-Zugang', type: 'textarea' },
           { key: 'antraege_tablet', label: 'Tablet-Nutzung', type: 'textarea' },
           { key: 'antraege_office', label: 'Office 365', type: 'textarea' },
-          { key: 'antraege_downloads_tag_id', label: 'Downloads-Tag (für Formulare)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen. Tag-IDs findest du unter CMS > Tags.' },
+          { key: 'antraege_downloads_tag_id', label: 'Downloads-Tag (für Formulare)', type: 'text', description: 'Tag-ID eingeben, um verknüpfte Dokumente automatisch anzuzeigen. Tag-IDs findest du unter CMS > Tags.' },
         ],
       },
       {
@@ -941,7 +941,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
           { key: 'laufbahn_title', label: 'Titel', type: 'text' },
           { key: 'laufbahn_text', label: 'Text', type: 'textarea' },
           { key: 'laufbahn_links', label: 'Externe Links (Format: Name|URL, kommagetrennt)', type: 'textarea' },
-          { key: 'laufbahn_downloads_tag_id', label: 'Downloads-Tag (für Laufbahn-Dokumente)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen.' },
+          { key: 'laufbahn_downloads_tag_id', label: 'Downloads-Tag (für Laufbahn-Dokumente)', type: 'text', description: 'Tag-ID eingeben, um verknüpfte Dokumente automatisch anzuzeigen.' },
         ],
       },
       {
@@ -951,7 +951,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
           { key: 'klausuren_title', label: 'Titel', type: 'text' },
           { key: 'klausuren_text', label: 'Text', type: 'textarea' },
           { key: 'klausuren_nachschreiben', label: 'Nachschreiben', type: 'textarea' },
-          { key: 'klausuren_downloads_tag_id', label: 'Downloads-Tag (für Klausurpläne)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen.' },
+          { key: 'klausuren_downloads_tag_id', label: 'Downloads-Tag (für Klausurpläne)', type: 'text', description: 'Tag-ID eingeben, um verknüpfte Dokumente automatisch anzuzeigen.' },
         ],
       },
       {
@@ -963,7 +963,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
           { key: 'fehlzeiten_entschuldigung', label: 'Entschuldigung', type: 'textarea' },
           { key: 'fehlzeiten_beurlaubung', label: 'Beurlaubung', type: 'textarea' },
           { key: 'fehlzeiten_hinweis', label: 'Wichtige Hinweise', type: 'textarea' },
-          { key: 'fehlzeiten_downloads_tag_id', label: 'Downloads-Tag (für Formulare)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen.' },
+          { key: 'fehlzeiten_downloads_tag_id', label: 'Downloads-Tag (für Formulare)', type: 'text', description: 'Tag-ID eingeben, um verknüpfte Dokumente automatisch anzuzeigen.' },
         ],
       },
       {
@@ -972,7 +972,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
         fields: [
           { key: 'facharbeit_title', label: 'Titel', type: 'text' },
           { key: 'facharbeit_text', label: 'Text', type: 'textarea' },
-          { key: 'facharbeit_downloads_tag_id', label: 'Downloads-Tag (für Facharbeit-Dokumente)', type: 'text', description: 'Tag-ID eingeben, um verknuepfte Dokumente automatisch anzuzeigen.' },
+          { key: 'facharbeit_downloads_tag_id', label: 'Downloads-Tag (für Facharbeit-Dokumente)', type: 'text', description: 'Tag-ID eingeben, um verknüpfte Dokumente automatisch anzuzeigen.' },
         ],
       },
       {
@@ -1036,7 +1036,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
           { key: 'klasse5_title', label: 'Titel', type: 'text' },
           { key: 'klasse5_subtitle', label: 'Untertitel', type: 'text' },
           { key: 'klasse5_text', label: 'Text', type: 'textarea' },
-          { key: 'klasse5_checklist', label: 'Checkliste (kommagetrennt)', type: 'textarea', description: 'Eintraege getrennt durch Komma eingeben.' },
+          { key: 'klasse5_checklist', label: 'Checkliste (kommagetrennt)', type: 'textarea', description: 'Einträge getrennt durch Komma eingeben.' },
         ],
       },
       {
@@ -1047,7 +1047,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
           { key: 'oberstufe_subtitle', label: 'Untertitel', type: 'text' },
           { key: 'oberstufe_text1', label: 'Text 1', type: 'textarea' },
           { key: 'oberstufe_text2', label: 'Text 2', type: 'textarea' },
-          { key: 'oberstufe_checklist', label: 'Checkliste (kommagetrennt)', type: 'textarea', description: 'Eintraege getrennt durch Komma eingeben.' },
+          { key: 'oberstufe_checklist', label: 'Checkliste (kommagetrennt)', type: 'textarea', description: 'Einträge getrennt durch Komma eingeben.' },
           { key: 'oberstufe_hinweis', label: 'Hinweis', type: 'textarea' },
         ],
       },
@@ -1138,7 +1138,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
         title: 'Kombinierbare Angebote',
         fields: [
           { key: 'combined_title', label: 'Titel', type: 'text' },
-          { key: 'combined_items', label: 'Eintraege (kommagetrennt)', type: 'textarea', description: 'Eintraege getrennt durch Komma eingeben.' },
+          { key: 'combined_items', label: 'Einträge (kommagetrennt)', type: 'textarea', description: 'Einträge getrennt durch Komma eingeben.' },
         ],
       },
       HERO_IMAGE_SECTION,
