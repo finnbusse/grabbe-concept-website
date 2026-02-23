@@ -1,29 +1,13 @@
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { NextResponse, type NextRequest } from "next/server"
 
 function revalidateSettingsPages() {
+  revalidateTag("settings", "max")
   revalidatePath("/", "layout")
   revalidatePath("/kontakt")
   revalidatePath("/impressum")
-}
-
-function normalizeSettingRow(item: {
-  key: string
-  value?: unknown
-  type?: string
-  label?: string
-  category?: string
-}) {
-  return {
-    key: item.key,
-    value: typeof item.value === "string" ? item.value : "",
-    type: item.type ?? "text",
-    label: item.label ?? item.key,
-    category: item.category ?? "allgemein",
-    updated_at: new Date().toISOString(),
-  }
 }
 
 function isValidSettingItem(item: { key?: unknown; value?: unknown }) {
@@ -56,20 +40,24 @@ export async function PUT(request: NextRequest) {
     if (body.some((item) => !isValidSettingItem(item))) {
       return NextResponse.json({ error: "Invalid payload: each item requires a non-empty key" }, { status: 400 })
     }
-    const rows = body.map((item) => normalizeSettingRow(item))
-
-    if (rows.length > 0) {
-      const { error } = await adminSupabase
-        .from("site_settings")
-        .upsert(rows as never, { onConflict: "key" })
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    const rows = body.map((item) => ({
+      key: item.key,
+      value: item.value ?? "",
+      type: "text",
+      label: item.key,
+      category: "allgemein",
+      updated_at: new Date().toISOString(),
+    }))
+    const { error } = await adminSupabase
+      .from("site_settings")
+      .upsert(rows as never, { onConflict: "key" })
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     revalidateSettingsPages()
     return NextResponse.json({ success: true })
   }
 
-  const { key, value, type, label, category } = body
+  const { key, value } = body
   if (typeof key !== "string" || key.trim().length === 0) {
     return NextResponse.json({ error: "Invalid payload: key is required" }, { status: 400 })
   }
@@ -78,7 +66,14 @@ export async function PUT(request: NextRequest) {
   }
   const { error } = await adminSupabase
     .from("site_settings")
-    .upsert(normalizeSettingRow({ key, value, type, label, category }) as never, { onConflict: "key" })
+    .upsert({
+      key,
+      value: typeof value === "string" ? value : "",
+      type: "text",
+      label: key,
+      category: "allgemein",
+      updated_at: new Date().toISOString(),
+    } as never, { onConflict: "key" })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   revalidateSettingsPages()
