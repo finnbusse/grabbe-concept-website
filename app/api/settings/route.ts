@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
 import { NextResponse, type NextRequest } from "next/server"
 
@@ -43,6 +44,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   const supabase = await createClient()
+  const adminSupabase = createAdminClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -54,32 +56,17 @@ export async function PUT(request: NextRequest) {
     if (body.some((item) => !isValidSettingItem(item))) {
       return NextResponse.json({ error: "Invalid payload: each item requires a non-empty key" }, { status: 400 })
     }
-    const keys = body.map((item) => item.key.trim())
-    const { data: existing, error: existingError } = await supabase
-      .from("site_settings")
-      .select("key, protected")
-      .in("key", keys)
-    if (existingError) return NextResponse.json({ error: existingError.message }, { status: 500 })
-    const existingRows = (existing as Array<{ key: string; protected: boolean | null }> | null) ?? []
-
-    const protectedKeys = new Set(
-      existingRows.filter((row) => row.protected).map((row) => row.key)
-    )
-    const requestedKeys = new Set(keys)
-    const skippedProtectedKeys = Array.from(protectedKeys).filter((key) => requestedKeys.has(key))
-    const rows = body
-      .filter((item) => !protectedKeys.has(item.key.trim()))
-      .map((item) => normalizeSettingRow(item))
+    const rows = body.map((item) => normalizeSettingRow(item))
 
     if (rows.length > 0) {
-      const { error } = await supabase
+      const { error } = await adminSupabase
         .from("site_settings")
         .upsert(rows as never, { onConflict: "key" })
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     revalidateSettingsPages()
-    return NextResponse.json({ success: true, skippedProtectedKeys })
+    return NextResponse.json({ success: true })
   }
 
   const { key, value, type, label, category } = body
@@ -89,18 +76,7 @@ export async function PUT(request: NextRequest) {
   if (value !== undefined && typeof value !== "string") {
     return NextResponse.json({ error: "Invalid payload: value must be a string" }, { status: 400 })
   }
-  const { data: existingSetting, error: existingError } = await supabase
-    .from("site_settings")
-    .select("protected")
-    .eq("key", key)
-    .maybeSingle()
-  if (existingError) return NextResponse.json({ error: existingError.message }, { status: 500 })
-  const existingSettingRow = existingSetting as { protected: boolean | null } | null
-  if (existingSettingRow?.protected) {
-    return NextResponse.json({ error: `Setting '${key}' ist geschützt und kann nicht geändert werden.` }, { status: 403 })
-  }
-
-  const { error } = await supabase
+  const { error } = await adminSupabase
     .from("site_settings")
     .upsert(normalizeSettingRow({ key, value, type, label, category }) as never, { onConflict: "key" })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -111,6 +87,7 @@ export async function PUT(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
+  const adminSupabase = createAdminClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -123,7 +100,7 @@ export async function POST(request: NextRequest) {
   if (value !== undefined && typeof value !== "string") {
     return NextResponse.json({ error: "Invalid payload: value must be a string" }, { status: 400 })
   }
-  const { error } = await supabase.from("site_settings").insert({
+  const { error } = await adminSupabase.from("site_settings").insert({
     key,
     value: typeof value === "string" ? value : "",
     type: type ?? "text",
