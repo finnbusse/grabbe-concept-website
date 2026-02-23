@@ -32,6 +32,8 @@ export function SiteHeader({
   const lastScrollYRef = useRef(0)
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const navRef = useRef<HTMLElement>(null)
+  // Records the pointer type from onPointerDown so onClick can check it reliably
+  const lastPointerTypeRef = useRef<string>("")
 
   const handleDropdownEnter = useCallback((itemId: string) => {
     if (closeTimeoutRef.current) {
@@ -165,10 +167,11 @@ export function SiteHeader({
                       ? "text-foreground bg-white/30"
                       : "text-foreground/80 hover:text-foreground hover:bg-white/25"
                   }`}
-                  onPointerUp={(e) => {
-                    // On touch devices, first tap opens the dropdown instead of navigating.
+                  onPointerDown={(e) => { lastPointerTypeRef.current = e.pointerType }}
+                  onClick={(e) => {
+                    // On touch: first tap opens dropdown (no navigation).
                     // Second tap (dropdown already open) navigates normally.
-                    if (e.pointerType === "touch" && openDropdown !== item.id) {
+                    if (lastPointerTypeRef.current === "touch" && openDropdown !== item.id) {
                       e.preventDefault()
                       handleDropdownEnter(item.id)
                     }
