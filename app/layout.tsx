@@ -26,19 +26,19 @@ const _josefinSans = Josefin_Sans({
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSEOSettings()
-  const title = seo.siteName
-  const description = seo.defaultDescription
+  const homepageTitle = `${seo.homepageTitlePrefix}${seo.titleSeparator}${seo.titleSuffix}`
+  const description = seo.homepageDescription
 
   return {
     title: {
-      default: title,
+      default: homepageTitle,
       template: `%s${seo.titleSeparator}${seo.titleSuffix}`,
     },
     description,
     metadataBase: new URL(seo.siteUrl),
     alternates: { canonical: "/" },
     openGraph: {
-      title,
+      title: homepageTitle,
       description,
       type: "website",
       locale: "de_DE",
@@ -48,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: seo.ogImage ? "summary_large_image" : "summary",
-      title,
+      title: homepageTitle,
       description,
       ...(seo.ogImage ? { images: [seo.ogImage] } : {}),
     },

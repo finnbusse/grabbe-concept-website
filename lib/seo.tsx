@@ -10,7 +10,9 @@ export interface SEOSettings {
   siteName: string
   titleSeparator: string
   titleSuffix: string
+  homepageTitlePrefix: string
   defaultDescription: string
+  homepageDescription: string
   ogImage: string
   orgName: string
   orgLogo: string
@@ -89,7 +91,13 @@ export async function getSEOSettings(): Promise<SEOSettings> {
     siteName: s.school_name || "Grabbe-Gymnasium Detmold",
     titleSeparator: s.seo_title_separator || " / ",
     titleSuffix: s.seo_title_suffix || "Grabbe-Gymnasium",
+    homepageTitlePrefix: s.seo_homepage_title_prefix || "Start",
     defaultDescription:
+      s.seo_default_description ||
+      s.seo_description ||
+      "Das Christian-Dietrich-Grabbe-Gymnasium in Detmold – Wir foerdern Deine Talente und staerken Deine Persoenlichkeit.",
+    homepageDescription:
+      s.seo_homepage_description ||
       s.seo_default_description ||
       s.seo_description ||
       "Das Christian-Dietrich-Grabbe-Gymnasium in Detmold – Wir foerdern Deine Talente und staerken Deine Persoenlichkeit.",
