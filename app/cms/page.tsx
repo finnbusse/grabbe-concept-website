@@ -2,7 +2,9 @@ import { createClient } from "@/lib/supabase/server"
 import { FileText, CalendarDays, BookOpen, Upload, Mail, GraduationCap, FileEdit, FolderTree, Clock } from "lucide-react"
 import Link from "next/link"
 
-export default async function CmsDashboardPage() {
+export default async function CmsDashboardPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams
+  const error = typeof params.error === "string" ? params.error : undefined
   const supabase = await createClient()
   const [postsRes, pagesRes, eventsRes, docsRes, msgsRes, anmRes, recentPostsRes, recentPagesRes, recentEventsRes] = await Promise.all([
     supabase.from("posts").select("id", { count: "exact", head: true }),
@@ -77,6 +79,11 @@ export default async function CmsDashboardPage() {
 
   return (
     <div>
+      {error === "no_access" && (
+        <div className="mb-6 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          Sie haben keine Berechtigung, auf diesen Bereich zuzugreifen.
+        </div>
+      )}
       <h1 className="font-display text-3xl font-bold text-foreground">Dashboard</h1>
       <p className="mt-2 text-muted-foreground">Willkommen im Content-Management-System des Grabbe-Gymnasiums.</p>
 
