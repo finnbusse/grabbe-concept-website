@@ -6,454 +6,411 @@
 
 1. [Ueberblick](#1-ueberblick)
 2. [Architektur](#2-architektur)
-3. [Zentrale SEO-Einstellungen](#3-zentrale-seo-einstellungen)
-4. [Titel-System](#4-titel-system)
-5. [Meta-Tags und Open Graph](#5-meta-tags-und-open-graph)
-6. [JSON-LD Structured Data](#6-json-ld-structured-data)
-7. [Sitemap](#7-sitemap)
-8. [robots.txt](#8-robotstxt)
-9. [Breadcrumbs](#9-breadcrumbs)
-10. [SEO fuer Beitraege (News)](#10-seo-fuer-beitraege-news)
-11. [SEO fuer eigene Seiten](#11-seo-fuer-eigene-seiten)
-12. [Canonical URLs](#12-canonical-urls)
-13. [Datenbank-Migration](#13-datenbank-migration)
-14. [Technische Referenz](#14-technische-referenz)
-15. [Best Practices fuer Redakteure](#15-best-practices-fuer-redakteure)
+3. [Einstellungen (CMS)](#3-einstellungen-cms)
+4. [URL- und Canonical-Policy](#4-url--und-canonical-policy)
+5. [Titel-System](#5-titel-system)
+6. [Meta-Tags und Open Graph](#6-meta-tags-und-open-graph)
+7. [JSON-LD Structured Data](#7-json-ld-structured-data)
+8. [Sitemap](#8-sitemap)
+9. [robots.txt](#9-robotstxt)
+10. [Breadcrumbs](#10-breadcrumbs)
+11. [Environments / Preview-Schutz](#11-environments--preview-schutz)
+12. [SEO fuer Beitraege (News)](#12-seo-fuer-beitraege-news)
+13. [SEO fuer eigene Seiten](#13-seo-fuer-eigene-seiten)
+14. [SEO QA Tool](#14-seo-qa-tool)
+15. [Go-live Checklist](#15-go-live-checklist)
+16. [Content-Checklist fuer Redakteure](#16-content-checklist-fuer-redakteure)
+17. [Verifikation (How to Verify)](#17-verifikation-how-to-verify)
+18. [Technische Referenz](#18-technische-referenz)
+19. [Datenbank-Migration](#19-datenbank-migration)
 
 ---
 
 ## 1. Ueberblick
 
-Das SEO-System der Grabbe-Gymnasium Website wurde als modulares, dynamisches System entworfen. Alle SEO-relevanten Einstellungen werden zentral in der Datenbank (`site_settings` Tabelle) verwaltet und koennen ueber das CMS-Dashboard unter **Einstellungen > SEO & Open Graph** bearbeitet werden.
-
-### Was wird automatisch generiert?
+Das SEO-System ist modular, umgebungsabhaengig und liefert auf jeder Seite:
+- Konsistente **Seitentitel** via Template (`Seitenname / Grabbe-Gymnasium`)
+- **Canonical URLs** (relativ, aufgeloest ueber `metadataBase`)
+- **Open Graph + Twitter Cards** (automatisch, per Seite ueberschreibbar)
+- **JSON-LD** (Organization + WebSite global, BreadcrumbList + WebPage/NewsArticle per Seite)
+- Automatische **sitemap.xml** und **robots.txt**
+- **Preview-Schutz**: Nicht-Produktionsumgebungen bekommen `noindex`
 
 | Feature | Automatisch | Manuell anpassbar |
 |---------|:-----------:|:-----------------:|
-| Seitentitel (Tab-Leiste) | ✅ | ✅ per Einstellung |
+| Seitentitel | ✅ | ✅ per Einstellung |
 | Meta-Beschreibungen | ✅ (Fallback) | ✅ per Seite/Beitrag |
-| Open Graph Tags | ✅ | ✅ per Seite/Beitrag |
-| Twitter Cards | ✅ | ✅ |
+| Open Graph / Twitter | ✅ | ✅ per Seite/Beitrag |
 | Canonical URLs | ✅ | – |
-| robots.txt | ✅ | ✅ per Einstellung |
+| robots.txt | ✅ | – (hardcoded, sicher) |
 | sitemap.xml | ✅ | – |
-| JSON-LD Organisation | ✅ | ✅ per Einstellung |
-| JSON-LD WebSite | ✅ | ✅ per Einstellung |
-| JSON-LD NewsArticle | ✅ | – |
-| JSON-LD BreadcrumbList | ✅ | – |
-| Breadcrumb-Navigation | ✅ | – |
+| JSON-LD | ✅ | ✅ per Einstellung |
+| Preview noindex | ✅ | – |
+| Breadcrumbs (visuell + JSON-LD) | ✅ | – |
 
 ---
 
 ## 2. Architektur
 
 ```
-lib/seo.ts                  ← Zentrale SEO-Bibliothek
-├── getSEOSettings()        ← Laedt alle Einstellungen aus DB
-├── generatePageMetadata()  ← Generiert Next.js Metadata-Objekt
+lib/seo.tsx                    ← Zentrale SEO-Bibliothek
+├── resolveBaseUrl()           ← Base-URL aus DB → Env-Vars → Fallback
+├── getSEOSettings()           ← Laedt Einstellungen (mit DB-Fehlertoleranz)
+├── generatePageMetadata()     ← Next.js Metadata fuer beliebige Seiten
 ├── generateOrganizationJsonLd()
 ├── generateWebSiteJsonLd()
 ├── generateArticleJsonLd()
 ├── generateBreadcrumbJsonLd()
 ├── generateWebPageJsonLd()
-└── JsonLd                  ← React-Komponente fuer <script type="application/ld+json">
+└── JsonLd                     ← React-Komponente <script type="application/ld+json">
 
-components/breadcrumbs.tsx  ← Breadcrumb-Komponente (visuell + JSON-LD)
+components/breadcrumbs.tsx     ← Breadcrumb-Navigation (visuell + JSON-LD)
 
-app/layout.tsx              ← Root-Metadata + Organisation/WebSite JSON-LD
-app/sitemap.ts              ← Dynamische Sitemap-Generierung
-app/robots.ts               ← Dynamische robots.txt-Generierung
+app/layout.tsx                 ← Root-Metadata + Organization/WebSite JSON-LD
+app/sitemap.ts                 ← Dynamische Sitemap
+app/robots.ts                  ← robots.txt (umgebungsabhaengig)
+app/api/seo-check/route.ts    ← SEO QA Diagnostic API
+middleware.ts                  ← Schliesst sitemap.xml/robots.txt von Rewrites aus
 ```
 
-### Datenfluesse
+### Datenfluss
 
-1. **Einstellungen** werden beim Seitenaufruf aus `site_settings` geladen
-2. **Root Layout** generiert globale Metadata (Titel-Template, Standard-OG, etc.)
-3. **Einzelne Seiten** ueberschreiben den Titel via Next.js `metadata.title`
-4. **Beitraege** nutzen `generateMetadata()` fuer vollstaendige Article-Metadata
-
----
-
-## 3. Zentrale SEO-Einstellungen
-
-Alle Einstellungen befinden sich im CMS unter **Einstellungen > SEO & Open Graph**.
-
-### Verfuegbare Einstellungen
-
-| Schluessel | Bezeichnung | Beschreibung |
-|-----------|-------------|--------------|
-| `seo_title` | SEO-Titel | Standard-Seitentitel (Fallback) |
-| `seo_description` | SEO-Beschreibung | Standard Meta-Beschreibung |
-| `seo_og_image` | OG-Bild | Standard Open-Graph-Vorschaubild |
-| `seo_site_url` | Website-URL | Basis-URL fuer Canonical-Links und Sitemap (z.B. `https://grabbe.de`) |
-| `seo_title_separator` | Titel-Trennzeichen | Zeichen zwischen Seitentitel und Suffix (z.B. ` / `) |
-| `seo_title_suffix` | Titel-Suffix | Erscheint nach dem Trennzeichen (z.B. `Grabbe-Gymnasium`) |
-| `seo_default_description` | Standard-Beschreibung | Fallback fuer Seiten ohne eigene Beschreibung |
-| `seo_robots_txt` | robots.txt Inhalt | Vollstaendiger Inhalt der robots.txt |
-| `seo_org_name` | Organisationsname | Name fuer Schema.org EducationalOrganization |
-| `seo_org_logo` | Logo-URL | Logo fuer Schema.org |
-| `seo_org_email` | E-Mail | Kontakt-E-Mail fuer Schema.org |
-| `seo_org_phone` | Telefon | Telefonnummer fuer Schema.org |
-| `seo_org_address_street` | Strasse | Strassenadresse fuer Schema.org |
-| `seo_org_address_city` | Stadt | Stadt fuer Schema.org |
-| `seo_org_address_zip` | PLZ | Postleitzahl fuer Schema.org |
-| `seo_org_address_country` | Land | ISO-Laendercode fuer Schema.org (z.B. `DE`) |
-| `seo_social_instagram` | Instagram-URL | Social-Media-Link fuer Schema.org sameAs |
-| `seo_social_facebook` | Facebook-URL | Social-Media-Link fuer Schema.org sameAs |
-| `seo_social_youtube` | YouTube-URL | Social-Media-Link fuer Schema.org sameAs |
+1. `resolveBaseUrl()` liefert **immer** eine gueltige URL:
+   - DB-Wert `seo_site_url` → `NEXT_PUBLIC_SITE_URL` → `VERCEL_PROJECT_PRODUCTION_URL` → `VERCEL_URL` → `localhost:3000`
+2. Root Layout setzt `metadataBase`, dadurch werden **alle relativen Canonicals automatisch absolut**
+3. Jede Seite exportiert nur `title` + relativen `canonical` – der Rest erbt vom Root Layout
 
 ---
 
-## 4. Titel-System
+## 3. Einstellungen (CMS)
 
-Das Titel-System nutzt das Next.js Metadata Template-System:
+Im CMS unter **Verwaltung → Einstellungen** befindet sich eine intuitive, nach Bereichen gegliederte Seite:
 
-### Beispiele
+### Bereiche
 
-| Seite | Angezeigter Titel (Tab-Leiste) |
-|-------|-------------------------------|
-| Startseite | Grabbe-Gymnasium Detmold |
-| Aktuelles | Aktuelles / Grabbe-Gymnasium |
-| Oberstufe | Oberstufe / Grabbe-Gymnasium |
-| Beitrag "Mathe-Olympiade" | Mathe-Olympiade / Grabbe-Gymnasium |
-| Impressum | Impressum / Grabbe-Gymnasium |
+| Bereich | Felder |
+|---------|--------|
+| **Allgemein** | Schulname, Logo |
+| **Kontakt & Adresse** | E-Mail, Telefon, Strasse, PLZ, Stadt, Land |
+| **Suchmaschinen (SEO)** | Website-URL, Titel-Trennzeichen, Titel-Suffix, Standard-Beschreibung, Standard OG-Bild |
+| **Social Media** | Instagram, Facebook, YouTube |
+| **Erweitert** | Organisationsname (Schema.org), Info zu auto-generierten Dateien |
 
-### Konfiguration
+Alle Felder werden ueber die `site_settings`-Tabelle in der Datenbank gespeichert (Key-Value).
 
-- **Trennzeichen** aendern: Einstellung `seo_title_separator` (z.B. ` | ` oder ` - `)
-- **Suffix** aendern: Einstellung `seo_title_suffix` (z.B. `Grabbe-Gymnasium Detmold`)
+---
 
-### Technisch
+## 4. URL- und Canonical-Policy
 
+- **Canonical**: Jede Seite hat `alternates.canonical` als **relativen Pfad** (z.B. `/aktuelles`)
+- `metadataBase` im Root Layout sorgt dafuer, dass der Pfad zu einer absoluten URL aufgeloest wird
+- **Kein Trailing Slash** – Next.js Standard
+- **HTTPS** – erzwungen durch Vercel
+- **Keine Duplikate**: Redirect-Seiten (`/unsere-schule`, `/schulleben`, `/unsere-schule/wer-was-wo`) leiten serverseitig weiter (302)
+- **Query-Parameter**: Werden von Next.js nicht in Canonicals aufgenommen (korrekt)
+
+---
+
+## 5. Titel-System
+
+Das Root Layout definiert:
 ```tsx
-// app/layout.tsx
 title: {
   default: "Grabbe-Gymnasium Detmold",     // Startseite
-  template: `%s / Grabbe-Gymnasium`,        // Alle anderen Seiten
+  template: "%s / Grabbe-Gymnasium",         // Alle Unterseiten
 }
-
-// Einzelne Seiten
-export const metadata = { title: "Aktuelles" }
-// → Ergebnis: "Aktuelles / Grabbe-Gymnasium"
 ```
+
+| Seite | Tab-Titel |
+|-------|-----------|
+| Startseite | Grabbe-Gymnasium Detmold |
+| Aktuelles | Aktuelles / Grabbe-Gymnasium |
+| Beitrag X | Beitrag X / Grabbe-Gymnasium |
+| Impressum | Impressum / Grabbe-Gymnasium |
+
+Trennzeichen und Suffix sind in den Einstellungen aenderbar.
 
 ---
 
-## 5. Meta-Tags und Open Graph
+## 6. Meta-Tags und Open Graph
 
-### Automatisch generierte Tags
-
-Auf jeder Seite werden folgende Tags generiert:
+Jede Seite liefert automatisch:
 
 ```html
 <title>Aktuelles / Grabbe-Gymnasium</title>
 <meta name="description" content="..." />
+<link rel="canonical" href="https://grabbe-gymnasium.de/aktuelles" />
 <meta property="og:title" content="Aktuelles / Grabbe-Gymnasium" />
 <meta property="og:description" content="..." />
 <meta property="og:type" content="website" />
 <meta property="og:locale" content="de_DE" />
 <meta property="og:site_name" content="Grabbe-Gymnasium Detmold" />
-<meta property="og:url" content="https://grabbe.de/aktuelles" />
+<meta property="og:url" content="https://grabbe-gymnasium.de/aktuelles" />
 <meta property="og:image" content="..." />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="..." />
-<meta name="twitter:description" content="..." />
-<link rel="canonical" href="https://grabbe.de/aktuelles" />
 ```
 
-### Zusaetzlich bei Beitraegen (Article-Typ)
-
+Bei Beitraegen zusaetzlich:
 ```html
 <meta property="og:type" content="article" />
 <meta property="article:published_time" content="2026-01-15T10:00:00Z" />
 <meta property="article:modified_time" content="2026-01-16T12:00:00Z" />
-<meta property="article:section" content="aktuelles" />
 ```
 
 ---
 
-## 6. JSON-LD Structured Data
+## 7. JSON-LD Structured Data
 
-### Organisation (auf jeder Seite)
+### Global (auf jeder Seite via Root Layout)
 
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "EducationalOrganization",
-  "name": "Grabbe-Gymnasium Detmold",
-  "url": "https://grabbe.de",
-  "logo": "https://...",
-  "email": "info@grabbe.de",
-  "telephone": "+49 5231 ...",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "...",
-    "addressLocality": "Detmold",
-    "postalCode": "32756",
-    "addressCountry": "DE"
-  },
-  "sameAs": ["https://instagram.com/...", "https://facebook.com/..."]
-}
-```
-
-### WebSite (auf jeder Seite)
+**EducationalOrganization** + **WebSite** – immer vorhanden.
 
 ```json
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Grabbe-Gymnasium Detmold",
-  "url": "https://grabbe.de",
-  "inLanguage": "de-DE"
-}
+{ "@type": "EducationalOrganization", "name": "...", "url": "...", "logo": { "@type": "ImageObject", "url": "..." }, ... }
+{ "@type": "WebSite", "name": "...", "url": "...", "inLanguage": "de-DE", ... }
 ```
 
-### NewsArticle (auf Beitragsseiten)
+### Unterseiten
 
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "NewsArticle",
-  "headline": "Mathe-Olympiade 2026",
-  "description": "...",
-  "datePublished": "2026-01-15T10:00:00Z",
-  "dateModified": "2026-01-16T12:00:00Z",
-  "author": { "@type": "Person", "name": "Dr. Max Mustermann" },
-  "publisher": {
-    "@type": "EducationalOrganization",
-    "name": "Grabbe-Gymnasium Detmold"
-  },
-  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://grabbe.de/aktuelles/..." }
-}
-```
+- **BreadcrumbList** (auf Seiten mit Breadcrumbs)
+- **WebPage** (statische Seiten)
 
-### BreadcrumbList (auf Unterseiten)
+### News-Detail (`/aktuelles/[slug]`)
 
-```json
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Start", "item": "https://grabbe.de/" },
-    { "@type": "ListItem", "position": 2, "name": "Aktuelles", "item": "https://grabbe.de/aktuelles" },
-    { "@type": "ListItem", "position": 3, "name": "Mathe-Olympiade", "item": "https://grabbe.de/aktuelles/mathe-olympiade" }
-  ]
-}
-```
+- **NewsArticle** mit `headline`, `datePublished`, `dateModified`, `author`, `publisher`, `articleSection`, `image`
+
+### Validierung
+
+Logo wird als `ImageObject` ausgegeben (nicht als String), was dem Schema.org-Standard entspricht.
 
 ---
 
-## 7. Sitemap
+## 8. Sitemap
 
-Die Sitemap wird automatisch unter `/sitemap.xml` generiert.
+`/sitemap.xml` wird dynamisch generiert und enthaelt:
 
-### Enthaltene Seiten
+- **Startseite** (priority 1.0, daily)
+- **Alle statischen Seiten** (Aktuelles, Termine, Kontakt, etc.)
+- **Alle veroeffentlichten Beitraege** (mit `lastModified` aus DB)
+- **Alle veroeffentlichten eigenen Seiten** (mit korrekten Pfaden)
 
-- **Startseite** (Prioritaet 1.0, taegliche Aktualisierung)
-- **Statische Seiten** (Aktuelles, Termine, Kontakt, etc.)
-- **Alle veroeffentlichten Beitraege** mit `lastModified` Zeitstempel
-- **Alle veroeffentlichten eigenen Seiten** mit korrekten Pfaden
+Die Base-URL wird ueber `resolveBaseUrl()` ermittelt (DB → Env → Fallback).
 
-### Voraussetzung
+### Wichtig
 
-Die Einstellung `seo_site_url` muss gesetzt sein (z.B. `https://grabbe.de`), damit die Sitemap generiert wird.
+- Nur veroeffentlichte Inhalte (published = true)
+- `priority` und `changeFrequency` sind Hinweise, nicht bindend
+- Sitemap-URL wird in `robots.txt` referenziert
 
 ---
 
-## 8. robots.txt
+## 9. robots.txt
 
-Die robots.txt wird automatisch unter `/robots.txt` generiert.
+`/robots.txt` wird statisch generiert:
 
-### Standard-Inhalt
-
+**Produktion:**
 ```
 User-agent: *
 Allow: /
 Disallow: /cms/
 Disallow: /auth/
 Disallow: /api/
+Disallow: /protected/
 
-Sitemap: https://grabbe.de/sitemap.xml
+Sitemap: https://grabbe-gymnasium.de/sitemap.xml
 ```
 
-### Anpassung
+**Preview/Staging:**
+```
+User-agent: *
+Disallow: /
+```
 
-Der Inhalt kann in den Einstellungen unter `seo_robots_txt` frei bearbeitet werden.
-
----
-
-## 9. Breadcrumbs
-
-Visuelle Breadcrumb-Navigation wird auf folgenden Seiten angezeigt:
-
-- `/aktuelles` → Start > Aktuelles
-- `/aktuelles/[slug]` → Start > Aktuelles > Beitragstitel
-- `/seiten/[slug]` → Start > Seitentitel
-- `/unsere-schule/[slug]` → Start > Unsere Schule > Seitentitel
-- `/schulleben/[slug]` → Start > Schulleben > Seitentitel
-
-Jede Breadcrumb-Navigation generiert automatisch auch das passende `BreadcrumbList` JSON-LD.
+→ robots.txt ist **nicht** ueber die Einstellungen konfigurierbar, um Fehlkonfiguration zu vermeiden.
 
 ---
 
-## 10. SEO fuer Beitraege (News)
+## 10. Breadcrumbs
 
-### Automatisch
-
-Beim Erstellen eines Beitrags wird folgendes automatisch fuer SEO verwendet:
-
-- **Titel** → `og:title`, `twitter:title`, JSON-LD `headline`
-- **Kurztext (Excerpt)** → `meta description`, `og:description`
-- **Beitragsbild** → `og:image`, JSON-LD `image`
-- **Autor** → JSON-LD `author`
-- **Erstellungsdatum** → `article:published_time`, JSON-LD `datePublished`
-- **Kategorie** → `article:section`, JSON-LD `articleSection`
-
-### Optional ueberschreibbar
-
-Im Beitrags-Editor gibt es einen **SEO (optional)** Bereich:
-
-- **Meta-Beschreibung**: Eigene Beschreibung fuer Suchmaschinen (empfohlen: max. 160 Zeichen). Falls leer, wird der Kurztext verwendet.
-- **Social-Media Bild (OG-Image)**: Eigenes Vorschaubild fuer Social Media. Falls leer, wird das Beitragsbild verwendet.
-
-> **Tipp**: Fuer die meisten Beitraege muessen keine SEO-Felder manuell ausgefuellt werden!
+Visuelle Breadcrumbs + BreadcrumbList JSON-LD auf:
+- `/aktuelles` (Start > Aktuelles)
+- `/aktuelles/[slug]` (Start > Aktuelles > Titel)
+- `/seiten/[slug]` (Start > Titel)
+- `/unsere-schule/[slug]` (Start > Unsere Schule > Titel)
+- `/schulleben/[slug]` (Start > Schulleben > Titel)
 
 ---
 
-## 11. SEO fuer eigene Seiten
+## 11. Environments / Preview-Schutz
 
-### Automatisch
-
-- **Seitentitel** → im Tab nach dem Template angezeigt
-- **Standard-Beschreibung** → aus den globalen SEO-Einstellungen
-
-### Optional ueberschreibbar
-
-Im Seiten-Editor gibt es einen **SEO (optional)** Bereich:
-
-- **Meta-Beschreibung**: Eigene Beschreibung fuer Suchmaschinen
-- **Social-Media Bild**: Eigenes OG-Bild
+| Umgebung | `VERCEL_ENV` | robots meta | robots.txt | Sitemap |
+|----------|-------------|-------------|------------|---------|
+| Production | `production` | index, follow | Allow / | Alle URLs |
+| Preview | `preview` | noindex, nofollow | Disallow / | Alle URLs (aber irrelevant) |
+| Development | `development` | noindex, nofollow | Disallow / | Alle URLs |
+| Lokal | – (undefined) | index, follow | Allow / | Alle URLs |
 
 ---
 
-## 12. Canonical URLs
+## 12. SEO fuer Beitraege (News)
 
-Canonical URLs werden automatisch auf allen Seiten gesetzt:
+Beim Erstellen eines Beitrags wird automatisch verwendet:
+- **Titel** → og:title, JSON-LD headline
+- **Kurztext (excerpt)** → Meta-Beschreibung (Fallback)
+- **Beitragsbild** → OG-Image (Fallback)
+- **Autor** → JSON-LD author
+- **Erstellungsdatum** → datePublished
+- **Kategorie** → articleSection
 
-- Startseite: `https://grabbe.de/`
-- Statische Seiten: `https://grabbe.de/aktuelles`
-- Beitraege: `https://grabbe.de/aktuelles/mein-beitrag`
-- Eigene Seiten: `https://grabbe.de/seiten/meine-seite`
-
-### Voraussetzung
-
-Die `metadataBase` wird im Root Layout gesetzt, wenn `seo_site_url` konfiguriert ist. Alle relativen `canonical`-Pfade werden dann automatisch zu absoluten URLs aufgeloest.
+Optional im Editor ueberschreibbar:
+- **Meta-Beschreibung** (eigene SEO-Beschreibung)
+- **SEO OG-Bild** (eigenes Social-Media-Bild)
 
 ---
 
-## 13. Datenbank-Migration
+## 13. SEO fuer eigene Seiten
 
-### SQL-Migration ausfuehren
+Im Seiten-Editor optional:
+- **Meta-Beschreibung**
+- **SEO OG-Bild**
 
-Die Migration befindet sich in `scripts/migration_seo.sql` und fuegt folgende Aenderungen hinzu:
+Falls leer, wird die Standard-Beschreibung aus den Einstellungen verwendet.
 
-#### Neue Spalten
+---
 
-| Tabelle | Spalte | Typ | Beschreibung |
-|---------|--------|-----|-------------|
-| `posts` | `meta_description` | TEXT | Eigene Meta-Beschreibung |
-| `posts` | `seo_og_image` | TEXT | Eigenes OG-Bild |
-| `pages` | `meta_description` | TEXT | Eigene Meta-Beschreibung |
-| `pages` | `seo_og_image` | TEXT | Eigenes OG-Bild |
+## 14. SEO QA Tool
 
-#### Neue Einstellungen
+**API-Route:** `GET /api/seo-check?url=/aktuelles`
 
-19 neue Einstellungen in der Kategorie `seo` (siehe Kapitel 3).
+Gibt zurueck:
+- `checkedPath` – gepruefter Pfad
+- `environment` – isPreview, siteUrl, vercelEnv
+- `titlePolicy` – Template + Default-Titel
+- `resolvedCanonical` – aufgeloeste kanonische URL
+- `robotsHint` – ob index oder noindex
+- `defaultOgImage` – Standard-OG-Bild
+- `matchedContent` – ob Post oder Page gefunden wurde
+- `jsonLdTypes` – erwartete JSON-LD Typen
+- `tips` – Hinweise fuer Verbesserungen
 
-### Ausfuehrung
+---
 
-```sql
--- In der Supabase SQL-Konsole ausfuehren:
--- Inhalt von scripts/migration_seo.sql einfuegen und ausfuehren
+## 15. Go-live Checklist
+
+- [ ] `seo_site_url` in Einstellungen auf die Produktions-URL setzen (z.B. `https://grabbe-gymnasium.de`)
+- [ ] Logo hochladen (Einstellungen > Allgemein)
+- [ ] Standard OG-Bild hochladen (1200 x 630 px)
+- [ ] Kontaktdaten pruefen (E-Mail, Telefon, Adresse)
+- [ ] Social-Media Links eintragen
+- [ ] In Google Search Console verifizieren
+- [ ] Sitemap in Search Console einreichen: `/sitemap.xml`
+- [ ] Mit URL-Inspektion pruefen: `/`, `/aktuelles`, ein Beitrag
+- [ ] Rich Results Test fuer die Startseite ausfuehren
+- [ ] OG-Debugger (Facebook / Twitter / LinkedIn) testen
+- [ ] Preview-Deploy pruefen: `robots.txt` muss `Disallow: /` zeigen
+- [ ] Alle wichtigen Seiten per `/api/seo-check?url=/pfad` pruefen
+
+---
+
+## 16. Content-Checklist fuer Redakteure
+
+### Neuer Beitrag
+- [ ] Aussagekraeftiger Titel (max. 60 Zeichen)
+- [ ] Kurztext / Excerpt (wird als Meta-Beschreibung verwendet, 120–160 Zeichen)
+- [ ] Beitragsbild hochladen (wird fuer Social Media verwendet)
+- [ ] Kategorie waehlen
+- [ ] Optional: Eigene Meta-Beschreibung im SEO-Bereich
+- [ ] Slug pruefen (kurz, ohne Umlaute, keine Sonderzeichen)
+
+### Neue Seite
+- [ ] Seitentitel klar und beschreibend
+- [ ] URL-Pfad (Slug) kurz und eindeutig
+- [ ] Optional: Meta-Beschreibung im SEO-Bereich
+- [ ] Seite veroeffentlichen (sonst nicht in Sitemap)
+
+---
+
+## 17. Verifikation (How to Verify)
+
+### 1. Search Console
+1. Eigentumsrecht verifizieren (DNS oder HTML-Tag)
+2. Sitemap einreichen unter **Sitemaps** → `/sitemap.xml`
+3. URL-Inspektion fuer wichtige Seiten
+
+### 2. Rich Results Test
+- https://search.google.com/test/rich-results
+- Startseite pruefen (EducationalOrganization + WebSite)
+- Einen Beitrag pruefen (NewsArticle)
+
+### 3. Schema Validator
+- https://validator.schema.org/
+- JSON-LD aus dem Quelltext kopieren und validieren
+
+### 4. OG Debugger
+- **Facebook**: https://developers.facebook.com/tools/debug/
+- **Twitter**: https://cards-dev.twitter.com/validator
+- **LinkedIn**: https://www.linkedin.com/post-inspector/
+
+### 5. Lokale Pruefung
+```bash
+# Sitemap pruefen
+curl https://grabbe-gymnasium.de/sitemap.xml
+
+# robots.txt pruefen
+curl https://grabbe-gymnasium.de/robots.txt
+
+# SEO QA API
+curl "https://grabbe-gymnasium.de/api/seo-check?url=/aktuelles"
 ```
 
 ---
 
-## 14. Technische Referenz
+## 18. Technische Referenz
 
 ### Dateien
 
 | Datei | Funktion |
 |-------|----------|
-| `lib/seo.ts` | Zentrale SEO-Bibliothek |
+| `lib/seo.tsx` | Zentrale SEO-Bibliothek |
 | `app/layout.tsx` | Root-Metadata + JSON-LD |
 | `app/sitemap.ts` | Sitemap-Generierung |
 | `app/robots.ts` | robots.txt-Generierung |
 | `components/breadcrumbs.tsx` | Breadcrumb-Komponente |
 | `components/cms/post-editor.tsx` | SEO-Felder im Beitrags-Editor |
 | `components/cms/page-editor.tsx` | SEO-Felder im Seiten-Editor |
+| `app/cms/settings/page.tsx` | Einstellungsseite (CMS) |
+| `app/api/seo-check/route.ts` | SEO QA API |
+| `middleware.ts` | Schliesst sitemap/robots von Rewrites aus |
 | `scripts/migration_seo.sql` | Datenbank-Migration |
 
-### SEO-Settings Typ
+### resolveBaseUrl() Fallback-Kette
 
-```typescript
-interface SEOSettings {
-  siteUrl: string          // Basis-URL
-  siteName: string         // Seitenname
-  titleSeparator: string   // z.B. " / "
-  titleSuffix: string      // z.B. "Grabbe-Gymnasium"
-  defaultDescription: string
-  ogImage: string          // Standard-OG-Bild
-  orgName: string          // Organisationsname
-  orgLogo: string
-  orgEmail: string
-  orgPhone: string
-  orgStreet: string
-  orgCity: string
-  orgZip: string
-  orgCountry: string
-  socialInstagram: string
-  socialFacebook: string
-  socialYoutube: string
-  robotsTxt: string
-}
 ```
-
-### JSON-LD Funktionen
-
-```typescript
-generateOrganizationJsonLd(seo: SEOSettings)  // EducationalOrganization
-generateWebSiteJsonLd(seo: SEOSettings)        // WebSite
-generateArticleJsonLd({...})                    // NewsArticle
-generateBreadcrumbJsonLd(seo, items)            // BreadcrumbList
-generateWebPageJsonLd({...})                    // WebPage
+1. DB: seo_site_url
+2. Env: NEXT_PUBLIC_SITE_URL
+3. Env: VERCEL_PROJECT_PRODUCTION_URL (→ https://)
+4. Env: VERCEL_URL (→ https://)
+5. Fallback: http://localhost:3000
 ```
 
 ---
 
-## 15. Best Practices fuer Redakteure
+## 19. Datenbank-Migration
 
-### Beim Erstellen von Beitraegen
+Die Migration `scripts/migration_seo.sql` fuegt hinzu:
 
-1. **Aussagekraeftigen Titel** waehlen (wird als Tab-Titel und in Suchergebnissen angezeigt)
-2. **Kurztext (Excerpt)** ausfuellen – dieser wird als Meta-Beschreibung in Suchmaschinen angezeigt
-3. **Beitragsbild** hochladen – dieses wird als Vorschaubild in Social Media verwendet
-4. Kategorie korrekt waehlen
-5. **SEO-Felder** nur ausfuellen, wenn die automatischen Werte nicht passen
+### Neue Spalten (posts + pages)
+- `meta_description TEXT`
+- `seo_og_image TEXT`
 
-### Beim Erstellen von Seiten
+### Neue Einstellungen (site_settings)
+- `seo_site_url`, `seo_title_separator`, `seo_title_suffix`
+- `seo_default_description`, `seo_og_image`
+- `seo_org_name`, `seo_org_logo`, `seo_org_email`, `seo_org_phone`
+- `seo_org_address_street`, `seo_org_address_city`, `seo_org_address_zip`, `seo_org_address_country`
+- `seo_social_instagram`, `seo_social_facebook`, `seo_social_youtube`
 
-1. Eindeutigen, beschreibenden **Seitentitel** waehlen
-2. URL-Pfad/Slug kurz und aussagekraeftig halten
-3. Bei Bedarf eine **Meta-Beschreibung** im SEO-Bereich eintragen
-
-### Allgemeine Tipps
-
-- Meta-Beschreibungen sollten 120-160 Zeichen lang sein
-- Titel sollten unter 60 Zeichen bleiben
-- OG-Bilder sollten 1200x630 Pixel gross sein
-- Die Website-URL (`seo_site_url`) muss gesetzt sein, damit Sitemap und Canonical URLs funktionieren
-
----
-
-*Diese Dokumentation beschreibt das SEO-System der Grabbe-Gymnasium Website. Bei Fragen oder Problemen wenden Sie sich an die Webadministration.*
+Migration ausfuehren:
+```sql
+-- In Supabase SQL-Konsole: Inhalt von scripts/migration_seo.sql einfuegen
+```
