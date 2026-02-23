@@ -1,5 +1,6 @@
 import { SiteLayout } from "@/components/site-layout"
 import { PageHero } from "@/components/page-hero"
+import { Breadcrumbs } from "@/components/breadcrumbs"
 import { MarkdownContent } from "@/components/markdown-content"
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
@@ -125,6 +126,10 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           label={post.category || "Aktuelles"}
           imageUrl={post.image_url || undefined}
         />
+        <Breadcrumbs items={[
+          { name: "Aktuelles", href: "/aktuelles" },
+          { name: post.title, href: `/aktuelles/${slug}` },
+        ]} />
 
         <article className="mx-auto max-w-3xl px-4 py-12 lg:px-8 lg:py-16">
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
