@@ -35,15 +35,15 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s${seo.titleSeparator}${seo.titleSuffix}`,
     },
     description,
-    metadataBase: seo.siteUrl ? new URL(seo.siteUrl) : undefined,
-    ...(seo.siteUrl ? { alternates: { canonical: "/" } } : {}),
+    metadataBase: new URL(seo.siteUrl),
+    alternates: { canonical: "/" },
     openGraph: {
       title,
       description,
       type: "website",
       locale: "de_DE",
       siteName: seo.siteName,
-      ...(seo.siteUrl ? { url: seo.siteUrl } : {}),
+      url: seo.siteUrl,
       ...(seo.ogImage ? { images: [{ url: seo.ogImage, width: 1200, height: 630, alt: seo.siteName }] } : {}),
     },
     twitter: {
@@ -52,17 +52,19 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       ...(seo.ogImage ? { images: [seo.ogImage] } : {}),
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
+    robots: seo.isPreview
+      ? { index: false, follow: false }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+          },
+        },
   }
 }
 

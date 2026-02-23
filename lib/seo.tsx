@@ -24,6 +24,7 @@ export interface SEOSettings {
   socialFacebook: string
   socialYoutube: string
   robotsTxt: string
+  isPreview: boolean
 }
 
 export interface PageSEO {
@@ -45,20 +46,53 @@ export interface BreadcrumbItem {
 }
 
 // ============================================================================
+// Helpers
+// ============================================================================
+
+/** Resolve the canonical base URL – always returns a usable URL */
+export function resolveBaseUrl(dbValue?: string): string {
+  const fromDb = (dbValue || "").replace(/\/$/, "")
+  if (fromDb) return fromDb
+
+  const pubUrl = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "")
+  if (pubUrl) return pubUrl
+
+  const vercelProd = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  if (vercelProd) return `https://${vercelProd}`
+
+  const vercelUrl = process.env.VERCEL_URL
+  if (vercelUrl) return `https://${vercelUrl}`
+
+  return "http://localhost:3000"
+}
+
+/** True on non-production Vercel deploys (preview / dev) */
+function isPreviewEnvironment(): boolean {
+  const env = process.env.VERCEL_ENV
+  if (!env) return false
+  return env !== "production"
+}
+
+// ============================================================================
 // Settings Loader
 // ============================================================================
 
 export async function getSEOSettings(): Promise<SEOSettings> {
-  const s = await getSettings()
+  let s: Record<string, string> = {}
+  try {
+    s = await getSettings()
+  } catch {
+    // DB unavailable – degrade gracefully
+  }
   return {
-    siteUrl: (s.seo_site_url || "").replace(/\/$/, ""),
+    siteUrl: resolveBaseUrl(s.seo_site_url),
     siteName: s.school_name || "Grabbe-Gymnasium Detmold",
     titleSeparator: s.seo_title_separator || " / ",
     titleSuffix: s.seo_title_suffix || "Grabbe-Gymnasium",
     defaultDescription:
       s.seo_default_description ||
       s.seo_description ||
-      "Das Christian-Dietrich-Grabbe-Gymnasium in Detmold - Wir foerdern Deine Talente und staerken Deine Persoenlichkeit.",
+      "Das Christian-Dietrich-Grabbe-Gymnasium in Detmold – Wir foerdern Deine Talente und staerken Deine Persoenlichkeit.",
     ogImage: s.seo_og_image || "",
     orgName: s.seo_org_name || s.school_name || "Grabbe-Gymnasium Detmold",
     orgLogo: s.seo_org_logo || "",
@@ -74,6 +108,7 @@ export async function getSEOSettings(): Promise<SEOSettings> {
     robotsTxt:
       s.seo_robots_txt ||
       "User-agent: *\nAllow: /\nDisallow: /cms/\nDisallow: /auth/\nDisallow: /api/",
+    isPreview: isPreviewEnvironment(),
   }
 }
 
@@ -84,21 +119,21 @@ export async function getSEOSettings(): Promise<SEOSettings> {
 export async function generatePageMetadata(page: PageSEO): Promise<Metadata> {
   const seo = await getSEOSettings()
   const description = page.description || seo.defaultDescription
-  const canonicalUrl = seo.siteUrl ? `${seo.siteUrl}${page.path}` : undefined
   const ogImage = page.ogImage || seo.ogImage
+  const shouldNoIndex = seo.isPreview || page.noIndex
 
   const metadata: Metadata = {
     title: page.title,
     description,
-    ...(canonicalUrl ? { alternates: { canonical: canonicalUrl } } : {}),
-    ...(page.noIndex ? { robots: { index: false, follow: false } } : {}),
+    alternates: { canonical: page.path },
+    ...(shouldNoIndex ? { robots: { index: false, follow: false } } : {}),
     openGraph: {
       title: `${page.title}${seo.titleSeparator}${seo.titleSuffix}`,
       description,
       type: page.type === "article" ? "article" : "website",
       locale: "de_DE",
       siteName: seo.siteName,
-      ...(canonicalUrl ? { url: canonicalUrl } : {}),
+      url: `${seo.siteUrl}${page.path}`,
       ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630, alt: page.title }] } : {}),
       ...(page.type === "article"
         ? {
@@ -129,8 +164,10 @@ export function generateOrganizationJsonLd(seo: SEOSettings) {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
     name: seo.orgName,
-    ...(seo.siteUrl ? { url: seo.siteUrl } : {}),
-    ...(seo.orgLogo ? { logo: seo.orgLogo } : {}),
+    url: seo.siteUrl,
+    ...(seo.orgLogo
+      ? { logo: { "@type": "ImageObject", url: seo.orgLogo } }
+      : {}),
     ...(seo.orgEmail ? { email: seo.orgEmail } : {}),
     ...(seo.orgPhone ? { telephone: seo.orgPhone } : {}),
   }
@@ -159,8 +196,8 @@ export function generateWebSiteJsonLd(seo: SEOSettings) {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: seo.siteName,
-    ...(seo.siteUrl ? { url: seo.siteUrl } : {}),
-    ...(seo.defaultDescription ? { description: seo.defaultDescription } : {}),
+    url: seo.siteUrl,
+    description: seo.defaultDescription,
     inLanguage: "de-DE",
     publisher: {
       "@type": "EducationalOrganization",
@@ -185,7 +222,7 @@ export function generateArticleJsonLd(opts: {
     "@type": "NewsArticle",
     headline: opts.title,
     description: opts.description,
-    ...(opts.url ? { url: opts.url } : {}),
+    url: opts.url,
     ...(opts.imageUrl ? { image: opts.imageUrl } : {}),
     datePublished: opts.publishedTime,
     dateModified: opts.modifiedTime,
@@ -199,10 +236,7 @@ export function generateArticleJsonLd(opts: {
       ...(opts.seo.orgLogo ? { logo: { "@type": "ImageObject", url: opts.seo.orgLogo } } : {}),
     },
     ...(opts.section ? { articleSection: opts.section } : {}),
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      ...(opts.url ? { "@id": opts.url } : {}),
-    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": opts.url },
   }
 }
 
@@ -214,7 +248,7 @@ export function generateBreadcrumbJsonLd(seo: SEOSettings, items: BreadcrumbItem
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      ...(seo.siteUrl ? { item: `${seo.siteUrl}${item.href}` } : {}),
+      item: `${seo.siteUrl}${item.href}`,
     })),
   }
 }
@@ -231,12 +265,12 @@ export function generateWebPageJsonLd(opts: {
     "@type": "WebPage",
     name: opts.title,
     description: opts.description,
-    ...(opts.url ? { url: opts.url } : {}),
+    url: opts.url,
     inLanguage: "de-DE",
     isPartOf: {
       "@type": "WebSite",
       name: opts.seo.siteName,
-      ...(opts.seo.siteUrl ? { url: opts.seo.siteUrl } : {}),
+      url: opts.seo.siteUrl,
     },
     ...(opts.breadcrumbs
       ? { breadcrumb: generateBreadcrumbJsonLd(opts.seo, opts.breadcrumbs) }

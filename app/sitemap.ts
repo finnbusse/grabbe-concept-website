@@ -1,13 +1,9 @@
 import type { MetadataRoute } from "next"
 import { createClient } from "@/lib/supabase/server"
-import { getSEOSettings } from "@/lib/seo"
+import { resolveBaseUrl } from "@/lib/seo"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const seo = await getSEOSettings()
-  const baseUrl = seo.siteUrl
-
-  if (!baseUrl) return []
-
+  const baseUrl = resolveBaseUrl()
   const supabase = await createClient()
 
   // Fetch all published posts
@@ -35,19 +31,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Static pages
   const staticPages = [
-    { path: "/aktuelles", priority: 0.9, changeFrequency: "daily" as const },
-    { path: "/termine", priority: 0.8, changeFrequency: "weekly" as const },
-    { path: "/kontakt", priority: 0.7, changeFrequency: "monthly" as const },
-    { path: "/downloads", priority: 0.6, changeFrequency: "weekly" as const },
-    { path: "/impressum", priority: 0.3, changeFrequency: "yearly" as const },
-    { path: "/datenschutz", priority: 0.3, changeFrequency: "yearly" as const },
-    { path: "/unsere-schule/erprobungsstufe", priority: 0.7, changeFrequency: "monthly" as const },
-    { path: "/unsere-schule/oberstufe", priority: 0.7, changeFrequency: "monthly" as const },
-    { path: "/unsere-schule/profilprojekte", priority: 0.7, changeFrequency: "monthly" as const },
-    { path: "/unsere-schule/anmeldung", priority: 0.8, changeFrequency: "monthly" as const },
-    { path: "/schulleben/faecher-ags", priority: 0.6, changeFrequency: "monthly" as const },
-    { path: "/schulleben/nachmittag", priority: 0.6, changeFrequency: "monthly" as const },
-    { path: "/schulleben/netzwerk", priority: 0.6, changeFrequency: "monthly" as const },
+    { path: "/aktuelles", changeFrequency: "daily" as const, priority: 0.9 },
+    { path: "/termine", changeFrequency: "weekly" as const, priority: 0.8 },
+    { path: "/kontakt", changeFrequency: "monthly" as const, priority: 0.7 },
+    { path: "/downloads", changeFrequency: "weekly" as const, priority: 0.6 },
+    { path: "/unsere-schule/erprobungsstufe", changeFrequency: "monthly" as const, priority: 0.7 },
+    { path: "/unsere-schule/oberstufe", changeFrequency: "monthly" as const, priority: 0.7 },
+    { path: "/unsere-schule/profilprojekte", changeFrequency: "monthly" as const, priority: 0.7 },
+    { path: "/unsere-schule/anmeldung", changeFrequency: "monthly" as const, priority: 0.8 },
+    { path: "/unsere-schule/wer-was-wo", changeFrequency: "monthly" as const, priority: 0.6 },
+    { path: "/schulleben/faecher-ags", changeFrequency: "monthly" as const, priority: 0.6 },
+    { path: "/schulleben/nachmittag", changeFrequency: "monthly" as const, priority: 0.6 },
+    { path: "/schulleben/netzwerk", changeFrequency: "monthly" as const, priority: 0.6 },
+    { path: "/impressum", changeFrequency: "yearly" as const, priority: 0.3 },
+    { path: "/datenschutz", changeFrequency: "yearly" as const, priority: 0.3 },
   ]
 
   for (const page of staticPages) {
