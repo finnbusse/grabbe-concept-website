@@ -370,6 +370,24 @@ export interface Database {
         Update: PostTag;
         Relationships: [];
       };
+      cms_roles: {
+        Row: CmsRoleRow;
+        Insert: CmsRoleInsert;
+        Update: CmsRoleUpdate;
+        Relationships: [];
+      };
+      user_roles: {
+        Row: UserRoleRow;
+        Insert: UserRoleInsert;
+        Update: Partial<UserRoleRow>;
+        Relationships: [];
+      };
+      user_page_permissions: {
+        Row: UserPagePermissionRow;
+        Insert: UserPagePermissionInsert;
+        Update: Partial<UserPagePermissionRow>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -377,6 +395,52 @@ export interface Database {
     CompositeTypes: Record<string, never>;
   };
 }
+
+// ============================================================================
+// RBAC Types
+// ============================================================================
+
+/**
+ * CMS role definitions (system + custom)
+ */
+export interface CmsRoleRow {
+  id: string; // UUID
+  name: string;
+  slug: string;
+  is_system: boolean;
+  permissions: Record<string, unknown>; // JSONB
+  created_at: string; // timestamptz
+}
+
+/**
+ * User ↔ role assignment
+ */
+export interface UserRoleRow {
+  id: string; // UUID
+  user_id: string; // UUID, references auth.users
+  role_id: string; // UUID, references cms_roles
+}
+
+/**
+ * Per-user page access assignment
+ */
+export interface UserPagePermissionRow {
+  id: string; // UUID
+  user_id: string; // UUID
+  page_type: "editable" | "cms";
+  page_id: string;
+}
+
+export type CmsRoleInsert = Omit<CmsRoleRow, 'id' | 'created_at'> & {
+  id?: string;
+  created_at?: string;
+};
+
+export type CmsRoleUpdate = Partial<Omit<CmsRoleRow, 'id' | 'created_at'>>;
+
+export type UserRoleInsert = Omit<UserRoleRow, 'id'> & { id?: string };
+
+export type UserPagePermissionInsert = Omit<UserPagePermissionRow, 'id'> & { id?: string };
 
 // ============================================================================
 // Helper Types

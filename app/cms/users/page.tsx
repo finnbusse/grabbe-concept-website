@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { UserPlus, Trash2, Shield, Mail, Pencil, X, Save, Loader2, Camera, Search, Users } from "lucide-react"
+import { UserPlus, Trash2, Shield, Mail, Pencil, X, Save, Loader2, Camera, Search, Users, ShieldCheck, FileStack } from "lucide-react"
+import { usePermissions } from "@/components/cms/permissions-context"
+import type { CmsRole } from "@/lib/permissions-shared"
 
 interface UserProfile {
   user_id: string
@@ -23,6 +25,17 @@ interface UserEntry {
   last_sign_in_at: string | null
   role: string | null
   profile: UserProfile | null
+}
+
+interface UserRoleAssignment {
+  user_id: string
+  role_id: string
+  cms_roles: { slug: string; name: string } | null
+}
+
+interface PagePermEntry {
+  page_type: "editable" | "cms"
+  page_id: string
 }
 
 function getInitials(profile: UserProfile | null, email: string) {
@@ -68,8 +81,35 @@ function compressImage(file: File, maxWidth: number, quality: number): Promise<B
   })
 }
 
+// Known editable page IDs for the page permissions UI
+const EDITABLE_PAGE_OPTIONS = [
+  { id: "homepage-hero", label: "Startseite: Hero" },
+  { id: "homepage-welcome", label: "Startseite: Willkommen" },
+  { id: "homepage-profiles", label: "Startseite: Profilprojekte" },
+  { id: "homepage-info", label: "Startseite: Info" },
+  { id: "homepage-nachmittag", label: "Startseite: Nachmittag" },
+  { id: "homepage-partners", label: "Startseite: Partner" },
+  { id: "homepage-news", label: "Startseite: News" },
+  { id: "homepage-calendar", label: "Startseite: Kalender" },
+  { id: "erprobungsstufe", label: "Erprobungsstufe" },
+  { id: "profilprojekte", label: "Profilprojekte" },
+  { id: "oberstufe", label: "Oberstufe" },
+  { id: "anmeldung", label: "Anmeldung" },
+  { id: "faecher-ags", label: "Fächer & AGs" },
+  { id: "nachmittag", label: "Nachmittag" },
+  { id: "netzwerk", label: "Netzwerk" },
+  { id: "kontakt", label: "Kontakt" },
+  { id: "impressum", label: "Impressum" },
+  { id: "datenschutz", label: "Datenschutz" },
+]
+
 export default function UsersPage() {
   const supabase = createClient()
+  const { permissions, roleSlugs: currentRoleSlugs } = usePermissions()
+  const isCurrentAdmin = currentRoleSlugs.includes("administrator")
+  const isCurrentSchulleitung = currentRoleSlugs.includes("schulleitung")
+  const canManageRoles = permissions.users.assignRoles
+
   const [users, setUsers] = useState<UserEntry[]>([])
   const [currentUser, setCurrentUser] = useState<string | null>(null)
   const [newEmail, setNewEmail] = useState("")
@@ -77,6 +117,7 @@ export default function UsersPage() {
   const [newFirstName, setNewFirstName] = useState("")
   const [newLastName, setNewLastName] = useState("")
   const [newTitle, setNewTitle] = useState("")
+  const [newRoleId, setNewRoleId] = useState("")
   const [creating, setCreating] = useState(false)
   const [message, setMessage] = useState("")
   const [showForm, setShowForm] = useState(false)
@@ -90,6 +131,19 @@ export default function UsersPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  // Role management state
+  const [allRoles, setAllRoles] = useState<CmsRole[]>([])
+  const [userRoleMap, setUserRoleMap] = useState<Record<string, string[]>>({}) // userId -> roleId[]
+  const [roleEditingId, setRoleEditingId] = useState<string | null>(null)
+  const [roleEditSelection, setRoleEditSelection] = useState<string[]>([])
+  const [roleSaving, setRoleSaving] = useState(false)
+
+  // Page permissions state
+  const [pageEditingId, setPageEditingId] = useState<string | null>(null)
+  const [pageEditSelection, setPageEditSelection] = useState<PagePermEntry[]>([])
+  const [pageSaving, setPageSaving] = useState(false)
+  const [cmsPages, setCmsPages] = useState<Array<{ id: string; title: string }>>([])
+
   const loadUsers = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) setCurrentUser(user.id)
@@ -100,7 +154,46 @@ export default function UsersPage() {
     }
   }, [supabase])
 
-  useEffect(() => { loadUsers() }, [loadUsers])
+  const loadRoles = useCallback(async () => {
+    try {
+      const res = await fetch("/api/roles")
+      if (res.ok) {
+        const data = await res.json()
+        setAllRoles(data.roles || [])
+      }
+    } catch { /* roles table may not exist */ }
+  }, [])
+
+  const loadUserRoles = useCallback(async () => {
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("user_id, role_id")
+
+      if (data) {
+        const map: Record<string, string[]> = {}
+        for (const row of data as Array<{ user_id: string; role_id: string }>) {
+          if (!map[row.user_id]) map[row.user_id] = []
+          map[row.user_id].push(row.role_id)
+        }
+        setUserRoleMap(map)
+      }
+    } catch { /* table may not exist */ }
+  }, [supabase])
+
+  const loadCmsPages = useCallback(async () => {
+    try {
+      const { data } = await supabase.from("pages").select("id, title").order("title")
+      if (data) setCmsPages(data as Array<{ id: string; title: string }>)
+    } catch { /* ok */ }
+  }, [supabase])
+
+  useEffect(() => {
+    loadUsers()
+    loadRoles()
+    loadUserRoles()
+    loadCmsPages()
+  }, [loadUsers, loadRoles, loadUserRoles, loadCmsPages])
 
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) return users
@@ -111,6 +204,19 @@ export default function UsersPage() {
       return name.includes(q) || email.includes(q)
     })
   }, [users, searchQuery])
+
+  function getRoleNames(userId: string): string[] {
+    const roleIds = userRoleMap[userId] || []
+    return roleIds
+      .map((rid) => allRoles.find((r) => r.id === rid)?.name)
+      .filter((n): n is string => !!n)
+  }
+
+  // Available roles for assignment (Schulleitung can't assign admin/schulleitung)
+  const assignableRoles = useMemo(() => {
+    if (isCurrentAdmin) return allRoles
+    return allRoles.filter((r) => !["administrator", "schulleitung"].includes(r.slug))
+  }, [allRoles, isCurrentAdmin])
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -130,14 +236,26 @@ export default function UsersPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Fehler beim Erstellen")
+
+      // Assign role if selected
+      if (newRoleId && data.user?.id) {
+        await fetch("/api/user-roles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: data.user.id, roleIds: [newRoleId] }),
+        })
+      }
+
       setMessage("Benutzer erfolgreich erstellt. Der Nutzer erhält ggf. eine Bestätigungsmail.")
       setNewEmail("")
       setNewPassword("")
       setNewFirstName("")
       setNewLastName("")
       setNewTitle("")
+      setNewRoleId("")
       setShowForm(false)
       loadUsers()
+      loadUserRoles()
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Unbekannter Fehler")
     } finally {
@@ -196,6 +314,73 @@ export default function UsersPage() {
     }
   }
 
+  // Role editing
+  function startRoleEdit(userId: string) {
+    setRoleEditingId(userId)
+    setRoleEditSelection(userRoleMap[userId] || [])
+  }
+
+  async function saveRoleEdit(userId: string) {
+    setRoleSaving(true)
+    try {
+      const res = await fetch("/api/user-roles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, roleIds: roleEditSelection }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Fehler")
+      }
+      setRoleEditingId(null)
+      loadUserRoles()
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Fehler beim Speichern der Rollen")
+    } finally {
+      setRoleSaving(false)
+    }
+  }
+
+  // Page permissions editing
+  async function startPageEdit(userId: string) {
+    setPageEditingId(userId)
+    try {
+      const res = await fetch(`/api/user-page-permissions?userId=${userId}`)
+      if (res.ok) {
+        const data = await res.json()
+        setPageEditSelection((data.permissions || []).map((p: PagePermEntry) => ({ page_type: p.page_type, page_id: p.page_id })))
+      }
+    } catch { /* ok */ }
+  }
+
+  async function savePageEdit(userId: string) {
+    setPageSaving(true)
+    try {
+      const res = await fetch("/api/user-page-permissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, pages: pageEditSelection }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Fehler")
+      }
+      setPageEditingId(null)
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Fehler beim Speichern der Seitenzuweisungen")
+    } finally {
+      setPageSaving(false)
+    }
+  }
+
+  function togglePagePerm(pageType: "editable" | "cms", pageId: string) {
+    setPageEditSelection((prev) => {
+      const exists = prev.some((p) => p.page_type === pageType && p.page_id === pageId)
+      if (exists) return prev.filter((p) => !(p.page_type === pageType && p.page_id === pageId))
+      return [...prev, { page_type: pageType, page_id: pageId }]
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -203,10 +388,12 @@ export default function UsersPage() {
           <h1 className="font-display text-2xl font-bold text-foreground">Benutzerverwaltung</h1>
           <p className="text-sm text-muted-foreground">Lehrer-Accounts für das CMS erstellen und verwalten</p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} className="gap-2">
-          <UserPlus className="h-4 w-4" />
-          Neuer Benutzer
-        </Button>
+        {permissions.users.create && (
+          <Button onClick={() => setShowForm(!showForm)} className="gap-2">
+            <UserPlus className="h-4 w-4" />
+            Neuer Benutzer
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-3">
@@ -261,6 +448,22 @@ export default function UsersPage() {
                   <Input id="password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Mind. 6 Zeichen" minLength={6} required />
                 </div>
               </div>
+              {canManageRoles && assignableRoles.length > 0 && (
+                <div className="grid gap-2">
+                  <Label htmlFor="newUserRole">Rolle zuweisen</Label>
+                  <select
+                    id="newUserRole"
+                    value={newRoleId}
+                    onChange={(e) => setNewRoleId(e.target.value)}
+                    className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="">Keine Rolle</option>
+                    {assignableRoles.map((r) => (
+                      <option key={r.id} value={r.id}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex justify-end">
                 <Button type="submit" disabled={creating}>{creating ? "Erstelle..." : "Account erstellen"}</Button>
               </div>
@@ -314,6 +517,91 @@ export default function UsersPage() {
                   </Button>
                 </div>
               </div>
+            ) : roleEditingId === u.id ? (
+              /* Role edit mode */
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Rollen für {getDisplayName(u.profile, u.email)}</span>
+                </div>
+                <div className="grid gap-1.5 sm:grid-cols-2">
+                  {assignableRoles.map((role) => (
+                    <label key={role.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={roleEditSelection.includes(role.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setRoleEditSelection([...roleEditSelection, role.id])
+                          else setRoleEditSelection(roleEditSelection.filter((id) => id !== role.id))
+                        }}
+                        className="rounded border-border"
+                      />
+                      {role.name}
+                      {role.is_system && <span className="text-[10px] text-muted-foreground">(System)</span>}
+                    </label>
+                  ))}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => setRoleEditingId(null)}>
+                    <X className="mr-1 h-3.5 w-3.5" />Abbrechen
+                  </Button>
+                  <Button size="sm" onClick={() => saveRoleEdit(u.id)} disabled={roleSaving}>
+                    {roleSaving ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1 h-3.5 w-3.5" />}
+                    Rollen speichern
+                  </Button>
+                </div>
+              </div>
+            ) : pageEditingId === u.id ? (
+              /* Page permissions edit mode */
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <FileStack className="h-5 w-5 text-primary" />
+                  <span className="text-sm font-medium">Seitenzuweisungen für {getDisplayName(u.profile, u.email)}</span>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Editierbare Seiten</p>
+                  <div className="grid gap-1.5 sm:grid-cols-2">
+                    {EDITABLE_PAGE_OPTIONS.map((page) => (
+                      <label key={page.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={pageEditSelection.some((p) => p.page_type === "editable" && p.page_id === page.id)}
+                          onChange={() => togglePagePerm("editable", page.id)}
+                          className="rounded border-border"
+                        />
+                        {page.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {cmsPages.length > 0 && (
+                  <div>
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">CMS-Seiten</p>
+                    <div className="grid gap-1.5 sm:grid-cols-2">
+                      {cmsPages.map((page) => (
+                        <label key={page.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={pageEditSelection.some((p) => p.page_type === "cms" && p.page_id === page.id)}
+                            onChange={() => togglePagePerm("cms", page.id)}
+                            className="rounded border-border"
+                          />
+                          {page.title}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => setPageEditingId(null)}>
+                    <X className="mr-1 h-3.5 w-3.5" />Abbrechen
+                  </Button>
+                  <Button size="sm" onClick={() => savePageEdit(u.id)} disabled={pageSaving}>
+                    {pageSaving ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1 h-3.5 w-3.5" />}
+                    Seiten speichern
+                  </Button>
+                </div>
+              </div>
             ) : (
               /* View mode */
               <div className="flex items-center justify-between">
@@ -331,12 +619,12 @@ export default function UsersPage() {
                       {u.id === currentUser && (
                         <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">Du</span>
                       )}
-                      {u.role && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      {getRoleNames(u.id).map((rn) => (
+                        <span key={rn} className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                           <Shield className="h-2.5 w-2.5" />
-                          {u.role}
+                          {rn}
                         </span>
-                      )}
+                      ))}
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Mail className="h-3 w-3" />
@@ -355,7 +643,17 @@ export default function UsersPage() {
                   <Button variant="ghost" size="sm" onClick={() => startEdit(u)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  {u.id !== currentUser && (
+                  {canManageRoles && (
+                    <Button variant="ghost" size="sm" title="Rollen bearbeiten" onClick={() => startRoleEdit(u.id)}>
+                      <ShieldCheck className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {canManageRoles && (
+                    <Button variant="ghost" size="sm" title="Seitenzuweisungen" onClick={() => startPageEdit(u.id)}>
+                      <FileStack className="h-4 w-4" />
+                    </Button>
+                  )}
+                  {u.id !== currentUser && permissions.users.delete && (
                     <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                       disabled={deletingId === u.id}
                       onClick={async () => {

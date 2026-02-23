@@ -3,30 +3,42 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users, Activity, FileEdit, FolderTree, UserCircle, Tag, X } from "lucide-react"
+import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users, Activity, FileEdit, FolderTree, UserCircle, Tag, X, ShieldCheck, FileStack } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { usePermissions } from "@/components/cms/permissions-context"
+import { checkPermission } from "@/lib/permissions-shared"
+import type { CmsPermissions } from "@/lib/permissions-shared"
+import type { LucideIcon } from "lucide-react"
 
-const contentLinks = [
+interface SidebarLink {
+  icon: LucideIcon
+  label: string
+  href: string
+  permCheck?: (p: CmsPermissions) => boolean
+}
+
+const contentLinks: SidebarLink[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/cms" },
-  { icon: FileEdit, label: "Seiten-Editor", href: "/cms/seiten-editor" },
-  { icon: FileText, label: "Beiträge", href: "/cms/posts" },
-  { icon: BookOpen, label: "Eigene Seiten", href: "/cms/pages" },
-  { icon: CalendarDays, label: "Termine", href: "/cms/events" },
-  { icon: Upload, label: "Dokumente", href: "/cms/documents" },
-  { icon: Tag, label: "Tags", href: "/cms/tags" },
+  { icon: FileEdit, label: "Seiten-Editor", href: "/cms/seiten-editor", permCheck: (p) => checkPermission(p, "seitenEditor") },
+  { icon: FileText, label: "Beiträge", href: "/cms/posts", permCheck: (p) => checkPermission(p, "posts") },
+  { icon: BookOpen, label: "Eigene Seiten", href: "/cms/pages", permCheck: (p) => p.pages.edit },
+  { icon: CalendarDays, label: "Termine", href: "/cms/events", permCheck: (p) => checkPermission(p, "events") },
+  { icon: Upload, label: "Dokumente", href: "/cms/documents", permCheck: (p) => checkPermission(p, "documents") },
+  { icon: Tag, label: "Tags", href: "/cms/tags", permCheck: (p) => checkPermission(p, "tags") },
 ]
 
-const inboxLinks = [
-  { icon: Mail, label: "Nachrichten", href: "/cms/messages" },
-  { icon: GraduationCap, label: "Anmeldungen", href: "/cms/anmeldungen" },
+const inboxLinks: SidebarLink[] = [
+  { icon: Mail, label: "Nachrichten", href: "/cms/messages", permCheck: (p) => checkPermission(p, "messages") },
+  { icon: GraduationCap, label: "Anmeldungen", href: "/cms/anmeldungen", permCheck: (p) => checkPermission(p, "anmeldungen") },
 ]
 
-const adminLinks = [
-  { icon: FolderTree, label: "Seitenstruktur", href: "/cms/seitenstruktur" },
-  { icon: Menu, label: "Navigation", href: "/cms/navigation" },
-  { icon: Settings, label: "Einstellungen", href: "/cms/settings" },
-  { icon: Users, label: "Benutzer", href: "/cms/users" },
-  { icon: Activity, label: "Diagnose", href: "/cms/diagnostic" },
+const adminLinks: SidebarLink[] = [
+  { icon: FolderTree, label: "Seitenstruktur", href: "/cms/seitenstruktur", permCheck: (p) => checkPermission(p, "seitenstruktur") },
+  { icon: Menu, label: "Navigation", href: "/cms/navigation", permCheck: (p) => checkPermission(p, "navigation") },
+  { icon: Settings, label: "Einstellungen", href: "/cms/settings", permCheck: (p) => checkPermission(p, "settings") },
+  { icon: Users, label: "Benutzer", href: "/cms/users", permCheck: (p) => checkPermission(p, "users") },
+  { icon: ShieldCheck, label: "Rollen", href: "/cms/roles", permCheck: (p) => checkPermission(p, "roles") },
+  { icon: Activity, label: "Diagnose", href: "/cms/diagnostic", permCheck: (p) => checkPermission(p, "diagnostic") },
 ]
 
 interface UserProfileData {
@@ -54,9 +66,14 @@ function getDisplayName(profile: UserProfileData | null, email: string) {
   return email
 }
 
+function filterLinks(links: SidebarLink[], permissions: CmsPermissions): SidebarLink[] {
+  return links.filter((link) => !link.permCheck || link.permCheck(permissions))
+}
+
 export function CmsSidebar({ userEmail, userProfile, isOpen, onClose }: { userEmail: string; userProfile?: UserProfileData | null; isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
+  const { permissions, pagePermissions } = usePermissions()
 
   const handleLogout = async () => {
     const supabase = createClient()
@@ -64,6 +81,26 @@ export function CmsSidebar({ userEmail, userProfile, isOpen, onClose }: { userEm
     await supabase.auth.signOut()
     router.push("/")
   }
+
+  const visibleContent = filterLinks(contentLinks, permissions)
+  const visibleInbox = filterLinks(inboxLinks, permissions)
+  const visibleAdmin = filterLinks(adminLinks, permissions)
+
+  // Build "Meine Seiten" links from page permissions
+  const meineSeiten = pagePermissions.map((pp) => ({
+    icon: FileStack as LucideIcon,
+    label: pp.page_id,
+    href: pp.page_type === "editable"
+      ? `/cms/seiten-editor/${pp.page_id}`
+      : `/cms/pages/${pp.page_id}`,
+  }))
+
+  const sections = [
+    { title: "Inhalte", items: visibleContent },
+    ...(meineSeiten.length > 0 ? [{ title: "Meine Seiten", items: meineSeiten }] : []),
+    ...(visibleInbox.length > 0 ? [{ title: "Eingänge", items: visibleInbox }] : []),
+    ...(visibleAdmin.length > 0 ? [{ title: "Verwaltung", items: visibleAdmin }] : []),
+  ]
 
   return (
     <aside className={`flex w-64 shrink-0 flex-col border-r border-border bg-card fixed inset-y-0 left-0 z-30 transform transition-transform duration-300 lg:relative lg:translate-x-0 lg:z-auto ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
@@ -87,11 +124,7 @@ export function CmsSidebar({ userEmail, userProfile, isOpen, onClose }: { userEm
       </div>
 
       <nav className="flex-1 px-3 py-4" aria-label="CMS Navigation">
-        {[
-          { title: "Inhalte", items: contentLinks },
-          { title: "Eingänge", items: inboxLinks },
-          { title: "Verwaltung", items: adminLinks },
-        ].map((section, idx) => (
+        {sections.map((section, idx) => (
           <div key={section.title} className={idx > 0 ? "mt-5" : ""}>
             <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{section.title}</p>
             <div className="space-y-1">
