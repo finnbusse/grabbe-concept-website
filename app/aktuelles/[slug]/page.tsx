@@ -6,6 +6,49 @@ import { notFound } from "next/navigation"
 import { CalendarDays, ArrowLeft, User } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import type { Metadata } from "next"
+import {
+  getSEOSettings,
+  generateArticleJsonLd,
+  generateBreadcrumbJsonLd,
+  JsonLd,
+} from "@/lib/seo"
+
+async function getPost(slug: string) {
+  const supabase = await createClient()
+  const { data: post } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("slug", slug)
+    .eq("published", true)
+    .single()
+  return post
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const post = await getPost(slug)
+  if (!post) return {}
+
+  const description = post.meta_description || post.excerpt || ""
+
+  return {
+    title: post.title,
+    description,
+    alternates: { canonical: `/aktuelles/${post.slug}` },
+    openGraph: {
+      type: "article",
+      title: post.title,
+      description,
+      publishedTime: post.created_at,
+      modifiedTime: post.updated_at,
+      ...(post.category ? { section: post.category } : {}),
+      ...(post.seo_og_image || post.image_url
+        ? { images: [{ url: (post.seo_og_image || post.image_url)!, width: 1200, height: 630, alt: post.title }] }
+        : {}),
+    },
+  }
+}
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -52,9 +95,31 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
     ? (authorProfile.first_name?.charAt(0) || "") + (authorProfile.last_name?.charAt(0) || "")
     : authorDisplayName?.charAt(0)?.toUpperCase() || ""
 
+  // JSON-LD structured data
+  const seo = await getSEOSettings()
+  const postUrl = seo.siteUrl ? `${seo.siteUrl}/aktuelles/${slug}` : ""
+  const articleJsonLd = generateArticleJsonLd({
+    seo,
+    title: post.title,
+    description: post.meta_description || post.excerpt || "",
+    url: postUrl,
+    imageUrl: post.seo_og_image || post.image_url || undefined,
+    publishedTime: post.created_at,
+    modifiedTime: post.updated_at,
+    authorName: authorDisplayName || undefined,
+    section: post.category || undefined,
+  })
+  const breadcrumbJsonLd = generateBreadcrumbJsonLd(seo, [
+    { name: "Start", href: "/" },
+    { name: "Aktuelles", href: "/aktuelles" },
+    { name: post.title, href: `/aktuelles/${slug}` },
+  ])
+
   return (
     <SiteLayout>
       <main>
+        <JsonLd data={articleJsonLd} />
+        <JsonLd data={breadcrumbJsonLd} />
         <PageHero
           title={post.title}
           label={post.category || "Aktuelles"}
