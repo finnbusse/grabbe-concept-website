@@ -14,11 +14,16 @@ export function SiteFooter({
 }) {
   const name = settings.school_name || "Grabbe-Gymnasium"
   const fullName =
-    settings.school_name_full || "Christian-Dietrich-Grabbe-Gymnasium Detmold"
+    settings.school_name_full || settings.seo_org_name || "Christian-Dietrich-Grabbe-Gymnasium Detmold"
   const address =
-    settings.school_address || "Küster-Meyer-Platz 2, 32756 Detmold"
-  const phone = settings.school_phone || "05231 - 99260"
-  const email = settings.school_email || "sekretariat@grabbe.nrw.schule"
+    settings.school_address ||
+    [settings.seo_org_address_street, settings.seo_org_address_zip, settings.seo_org_address_city]
+      .filter(Boolean)
+      .join(", ") ||
+    "Küster-Meyer-Platz 2, 32756 Detmold"
+  const phone = settings.school_phone || settings.seo_org_phone || "05231 - 99260"
+  const email = settings.school_email || settings.seo_org_email || "sekretariat@grabbe.nrw.schule"
+  const motto = settings.school_motto || '"Deine Talente. Deine Bühne. Dein Grabbe."'
   const year = new Date().getFullYear()
 
   return (
@@ -43,11 +48,12 @@ export function SiteFooter({
             </div>
             <p className="mt-3 max-w-sm text-sm leading-relaxed text-primary-foreground/50">
               {settings.school_description ||
+                settings.seo_homepage_description ||
                 "Wir fördern Deine Talente und stärken Deine Persönlichkeit."}
             </p>
           </div>
           <p className="font-sub text-[10px] uppercase tracking-[0.3em] text-primary-foreground/30">
-            {settings.school_city || "Detmold"}, NRW
+            {settings.school_city || settings.seo_org_address_city || "Detmold"}, NRW
           </p>
         </div>
 
@@ -88,7 +94,7 @@ export function SiteFooter({
               <li className="flex items-center gap-3">
                 <Phone className="h-4 w-4 shrink-0 text-primary-foreground/30" />
                 <a
-                  href={`tel:${phone.replace(/[\s-]/g, "")}`}
+                  href={`tel:${phone.replace(/[^\d+]/g, "")}`}
                   className="text-sm text-primary-foreground/60 hover:text-[hsl(200,90%,80%)] transition-colors"
                 >
                   {phone}
@@ -132,7 +138,7 @@ export function SiteFooter({
             </h3>
             <blockquote className="mt-5">
               <p className="font-display text-xl italic text-primary-foreground/70 leading-relaxed">
-                {'"'}Deine Talente. Deine Bühne. Dein Grabbe.{'"'}
+                {motto}
               </p>
             </blockquote>
           </div>

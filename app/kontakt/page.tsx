@@ -3,6 +3,7 @@ import { PageHero } from "@/components/page-hero"
 import { ContactForm } from "@/components/contact-form"
 import { Mail, Phone, MapPin, Clock } from "lucide-react"
 import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
+import { getSettings } from "@/lib/settings"
 import { generatePageMetadata } from "@/lib/seo"
 import type { Metadata } from "next"
 
@@ -15,7 +16,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function KontaktPage() {
-  const content = await getPageContent('kontakt', PAGE_DEFAULTS['kontakt'])
+  const [content, settings] = await Promise.all([
+    getPageContent('kontakt', PAGE_DEFAULTS['kontakt']),
+    getSettings(),
+  ])
+
+  const schoolAddress = (settings.school_address || "").trim()
+  const [addressStreetFromSettings, ...addressRest] = schoolAddress.split(",")
+  const addressStreet = schoolAddress ? addressStreetFromSettings.trim() : (content.address_street as string)
+  const addressCity = schoolAddress ? addressRest.join(",").trim() || (content.address_city as string) : (content.address_city as string)
+  const phone = settings.school_phone || (content.phone as string)
+  const fax = settings.school_fax || (content.fax as string)
+  const email = settings.school_email || (content.email as string)
+  const addressName =
+    settings.school_name_full ||
+    settings.school_name ||
+    (content.address_name as string)
 
   const contacts = (content.contacts as string).split(',').map((entry) => {
     const [role, name, desc] = entry.split('|')
@@ -52,9 +68,9 @@ export default async function KontaktPage() {
                         <MapPin className="h-5 w-5" />
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        <p className="font-medium text-foreground">{content.address_name}</p>
-                        <p className="mt-1">{content.address_street}</p>
-                        <p>{content.address_city}</p>
+                        <p className="font-medium text-foreground">{addressName}</p>
+                        <p className="mt-1">{addressStreet}</p>
+                        <p>{addressCity}</p>
                       </div>
                     </div>
 
@@ -65,11 +81,11 @@ export default async function KontaktPage() {
                       <div className="text-sm">
                         <p className="text-muted-foreground">
                           Telefon:{" "}
-                          <a href="tel:0523199260" className="text-foreground hover:text-primary transition-colors">
-                            {content.phone}
+                          <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="text-foreground hover:text-primary transition-colors">
+                            {phone}
                           </a>
                         </p>
-                        <p className="mt-1 text-muted-foreground">Fax: {content.fax}</p>
+                        <p className="mt-1 text-muted-foreground">Fax: {fax}</p>
                       </div>
                     </div>
 
@@ -77,8 +93,8 @@ export default async function KontaktPage() {
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                         <Mail className="h-5 w-5" />
                       </div>
-                      <a href={`mailto:${content.email}`} className="text-sm text-primary hover:underline">
-                        {content.email}
+                      <a href={`mailto:${email}`} className="text-sm text-primary hover:underline">
+                        {email}
                       </a>
                     </div>
 
