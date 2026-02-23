@@ -5,7 +5,7 @@ import { Menu } from "lucide-react"
 import { CmsSidebar } from "@/components/cms/cms-sidebar"
 import { Button } from "@/components/ui/button"
 import { PermissionsProvider } from "@/components/cms/permissions-context"
-import type { CmsPermissions, UserPagePermission } from "@/lib/permissions"
+import type { CmsPermissions, UserPagePermission } from "@/lib/permissions-shared"
 
 interface UserProfileData {
   first_name?: string

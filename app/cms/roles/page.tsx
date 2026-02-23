@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { ShieldCheck, Plus, Trash2, Pencil, X, Save, Loader2 } from "lucide-react"
-import { EMPTY_PERMISSIONS } from "@/lib/permissions"
-import type { CmsPermissions, CmsRole } from "@/lib/permissions"
+import { EMPTY_PERMISSIONS } from "@/lib/permissions-shared"
+import type { CmsPermissions, CmsRole } from "@/lib/permissions-shared"
 
 const PERMISSION_LABELS: Array<{ key: string; label: string; section: string }> = [
   { key: "posts.create", label: "Beiträge erstellen", section: "Inhalte" },

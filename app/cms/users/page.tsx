@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { UserPlus, Trash2, Shield, Mail, Pencil, X, Save, Loader2, Camera, Search, Users, ShieldCheck, FileStack } from "lucide-react"
 import { usePermissions } from "@/components/cms/permissions-context"
-import type { CmsRole } from "@/lib/permissions"
+import type { CmsRole } from "@/lib/permissions-shared"
 
 interface UserProfile {
   user_id: string

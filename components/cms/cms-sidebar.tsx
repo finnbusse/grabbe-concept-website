@@ -6,8 +6,8 @@ import { createClient } from "@/lib/supabase/client"
 import { FileText, CalendarDays, Home, LogOut, LayoutDashboard, BookOpen, Upload, Mail, GraduationCap, Settings, Menu, Users, Activity, FileEdit, FolderTree, UserCircle, Tag, X, ShieldCheck, FileStack } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { usePermissions } from "@/components/cms/permissions-context"
-import { checkPermission } from "@/lib/permissions"
-import type { CmsPermissions } from "@/lib/permissions"
+import { checkPermission } from "@/lib/permissions-shared"
+import type { CmsPermissions } from "@/lib/permissions-shared"
 import type { LucideIcon } from "lucide-react"
 
 interface SidebarLink {

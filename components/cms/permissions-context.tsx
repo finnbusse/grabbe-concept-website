@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext } from "react"
-import type { CmsPermissions, UserPagePermission } from "@/lib/permissions"
+import type { CmsPermissions, UserPagePermission } from "@/lib/permissions-shared"
 
 export interface PermissionsContextValue {
   permissions: CmsPermissions
