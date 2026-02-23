@@ -90,7 +90,7 @@ export async function getMultiplePageContents(
   const result: Record<string, Record<string, unknown>> = {}
   
   try {
-    const cacheKey = pageIds.sort().join(',')
+    const cacheKey = [...pageIds].sort().join(',')
     const rows = await unstable_cache(
       async () => {
         const supabase = createStaticClient()

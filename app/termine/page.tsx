@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server"
 import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
 import { CalendarDays, MapPin, Clock, Tag } from "lucide-react"
 import { generatePageMetadata } from "@/lib/seo"
-import type { Event } from "@/lib/types/database.types"
+import type { EventListItem } from "@/lib/types/database.types"
 import type { Metadata } from "next"
 
 export const revalidate = 300
@@ -40,7 +40,7 @@ export default async function TerminePage() {
     .eq("published", true)
     .gte("event_date", new Date().toISOString().split("T")[0])
     .order("event_date", { ascending: true })
-    .returns<Event[]>()
+    .returns<EventListItem[]>()
 
   const items = events || []
 

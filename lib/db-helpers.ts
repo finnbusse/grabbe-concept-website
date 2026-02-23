@@ -6,12 +6,12 @@
  */
 
 import { createClient as createServerClient } from '@/lib/supabase/server'
-import { createClient as createBrowserClient } from '@/lib/supabase/client'
 import { createStaticClient } from '@/lib/supabase/static'
 import { unstable_cache } from 'next/cache'
 import type {
   Page,
   Post,
+  PostListItem,
   Event,
   Document,
   NavigationItem,
@@ -120,7 +120,7 @@ export async function getPublishedPosts(limit?: number) {
 
       const { data, error } = await query
       if (error) throw error
-      return data as Post[]
+      return data as PostListItem[]
     },
     ['published-posts', String(limit ?? 'all')],
     { revalidate: 300, tags: ['posts'] }
@@ -143,7 +143,7 @@ export async function getFeaturedPosts(limit: number = 3) {
         .limit(limit)
 
       if (error) throw error
-      return data as Post[]
+      return data as PostListItem[]
     },
     ['featured-posts', String(limit)],
     { revalidate: 300, tags: ['posts'] }
@@ -192,7 +192,7 @@ export async function getPostsByCategory(category: string, limit?: number) {
 
       const { data, error } = await query
       if (error) throw error
-      return data as Post[]
+      return data as PostListItem[]
     },
     ['posts-by-category', category, String(limit ?? 'all')],
     { revalidate: 300, tags: ['posts'] }
@@ -385,44 +385,40 @@ export async function getNavigationItems(
 // ============================================================================
 
 /**
- * Get all site settings as a key-value map (cached)
+ * Get all site settings as full rows (cached).
+ * Used internally by getSiteSetting() and getSiteSettingValue().
  */
-export const getAllSiteSettings = unstable_cache(
-  async (): Promise<Record<string, string>> => {
+const getAllSiteSettingsRows = unstable_cache(
+  async (): Promise<SiteSetting[]> => {
     const supabase = createStaticClient()
-    const { data, error } = await supabase.from('site_settings').select('key, value')
+    const { data, error } = await supabase.from('site_settings').select('*')
 
     if (error) throw error
-
-    const settings: Record<string, string> = {}
-    data.forEach((setting) => {
-      settings[setting.key] = setting.value
-    })
-
-    return settings
+    return data as SiteSetting[]
   },
-  ['all-site-settings'],
+  ['all-site-settings-rows'],
   { revalidate: 3600, tags: ['settings'] }
 )
 
 /**
- * Get a site setting by key (uses the cached batch query)
+ * Get all site settings as a key-value map (cached)
+ */
+export async function getAllSiteSettings(): Promise<Record<string, string>> {
+  const rows = await getAllSiteSettingsRows()
+  const settings: Record<string, string> = {}
+  rows.forEach((row) => {
+    settings[row.key] = row.value
+  })
+  return settings
+}
+
+/**
+ * Get a site setting by key (uses the cached batch query, returns real SiteSetting)
  */
 export async function getSiteSetting(key: string): Promise<SiteSetting | null> {
   try {
-    const settings = await getAllSiteSettings()
-    if (!(key in settings)) return null
-    // Return a minimal SiteSetting-compatible object
-    return {
-      id: '',
-      key,
-      value: settings[key],
-      type: 'text',
-      label: null,
-      category: '',
-      updated_at: '',
-      protected: false,
-    } as SiteSetting
+    const rows = await getAllSiteSettingsRows()
+    return rows.find((row) => row.key === key) ?? null
   } catch {
     return null
   }
@@ -433,8 +429,9 @@ export async function getSiteSetting(key: string): Promise<SiteSetting | null> {
  */
 export async function getSiteSettingValue(key: string): Promise<string | null> {
   try {
-    const settings = await getAllSiteSettings()
-    return settings[key] ?? null
+    const rows = await getAllSiteSettingsRows()
+    const row = rows.find((r) => r.key === key)
+    return row?.value ?? null
   } catch {
     return null
   }

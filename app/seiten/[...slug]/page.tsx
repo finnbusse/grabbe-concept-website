@@ -22,10 +22,15 @@ export async function generateStaticParams() {
     .select("slug, route_path")
     .eq("published", true)
     .returns<Array<{ slug: string; route_path: string | null }>>()
-  return (data ?? []).map((page) => {
-    const prefix = page.route_path ? page.route_path.replace(/^\//, '').split('/') : []
-    return { slug: [...prefix, page.slug] }
-  })
+
+  // Exclude pages served by known filesystem routes (unsere-schule, schulleben)
+  const knownPrefixes = ["/unsere-schule", "/schulleben"]
+  return (data ?? [])
+    .filter((page) => !knownPrefixes.some((p) => page.route_path?.startsWith(p)))
+    .map((page) => {
+      const prefix = page.route_path ? page.route_path.replace(/^\//, '').split('/') : []
+      return { slug: [...prefix, page.slug] }
+    })
 }
 
 /**

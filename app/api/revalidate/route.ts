@@ -2,6 +2,26 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 
+/** Allowed path prefixes for revalidation */
+const ALLOWED_PATH_PREFIXES = [
+  "/aktuelles/",
+  "/termine",
+  "/downloads",
+  "/kontakt",
+  "/impressum",
+  "/datenschutz",
+  "/unsere-schule/",
+  "/schulleben/",
+  "/seiten/",
+  "/",
+]
+
+function isValidRevalidationPath(path: string): boolean {
+  if (!path.startsWith("/")) return false
+  if (path.includes("?") || path.includes("#") || path.includes("..")) return false
+  return ALLOWED_PATH_PREFIXES.some((prefix) => path === prefix || path.startsWith(prefix))
+}
+
 /**
  * POST /api/revalidate
  *
@@ -20,11 +40,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const body = await request.json()
+  let body: unknown
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
+  }
+
   const { type, path } = body as { type?: string; path?: string }
 
   if (!type) {
     return NextResponse.json({ error: "type is required" }, { status: 400 })
+  }
+
+  // Validate path if provided
+  if (path && !isValidRevalidationPath(path)) {
+    return NextResponse.json(
+      { error: "Invalid path. Must start with / and be a known public route." },
+      { status: 400 }
+    )
   }
 
   switch (type) {

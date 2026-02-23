@@ -5,7 +5,7 @@ import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
 import { Download, FileText, ImageIcon, ExternalLink } from "lucide-react"
 import { DownloadCategories } from "@/components/download-categories"
 import { generatePageMetadata } from "@/lib/seo"
-import type { Document } from "@/lib/types/database.types"
+import type { DocumentListItem } from "@/lib/types/database.types"
 import type { Metadata } from "next"
 
 export const revalidate = 300
@@ -30,7 +30,7 @@ export default async function DownloadsPage() {
     .eq("published", true)
     .order("category", { ascending: true })
     .order("created_at", { ascending: false })
-    .returns<Document[]>()
+    .returns<DocumentListItem[]>()
 
   const items = docs || []
 
