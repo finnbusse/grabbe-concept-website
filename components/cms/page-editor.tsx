@@ -420,7 +420,7 @@ export function PageEditor({ page }: PageEditorProps) {
                 id="metaDesc"
                 value={metaDescription}
                 onChange={(e) => setMetaDescription(e.target.value)}
-                placeholder="Eigene Beschreibung fuer Suchmaschinen (max. 160 Zeichen)..."
+                placeholder="Eigene Beschreibung fuer Suchmaschinen (empfohlen: max. 160 Zeichen)..."
                 maxLength={320}
                 rows={3}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
