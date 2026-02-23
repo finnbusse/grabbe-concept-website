@@ -190,7 +190,7 @@ export function SiteHeader({
                     onMouseEnter={() => handleDropdownEnter(item.id)}
                     onMouseLeave={handleDropdownLeave}
                   >
-                    <div className="min-w-[220px] bg-white/15 backdrop-blur-xl border border-white/25 rounded-2xl p-1.5 shadow-xl animate-blur-in">
+                    <div className="min-w-[220px] bg-white/85 backdrop-blur-xl border border-white/25 rounded-2xl p-1.5 shadow-xl animate-blur-in">
                       {item.children.map((child) => (
                         <Link
                           key={child.id}
