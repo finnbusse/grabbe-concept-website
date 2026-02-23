@@ -213,23 +213,31 @@ function coercePermissions(raw: unknown): CmsPermissions {
 export async function getUserPermissions(userId: string): Promise<CmsPermissions> {
   const supabase = await createClient()
 
-  // Fetch user role assignments + joined role data
-  const { data: userRoles, error } = await supabase
+  // Fetch user role assignments
+  const { data: userRoles, error: urError } = await supabase
     .from("user_roles")
-    .select("role_id, cms_roles(permissions)")
+    .select("role_id")
     .eq("user_id", userId)
 
-  if (error || !userRoles || userRoles.length === 0) {
-    // No roles assigned — return empty permissions
+  if (urError || !userRoles || userRoles.length === 0) {
+    return { ...EMPTY_PERMISSIONS }
+  }
+
+  const roleIds = (userRoles as Array<{ role_id: string }>).map((ur) => ur.role_id)
+
+  // Fetch role permissions
+  const { data: roles, error: rError } = await supabase
+    .from("cms_roles")
+    .select("permissions")
+    .in("id", roleIds)
+
+  if (rError || !roles || roles.length === 0) {
     return { ...EMPTY_PERMISSIONS }
   }
 
   let merged = { ...EMPTY_PERMISSIONS }
-  for (const ur of userRoles) {
-    const roleData = ur.cms_roles as unknown as { permissions: unknown } | null
-    if (roleData?.permissions) {
-      merged = mergePermissions(merged, coercePermissions(roleData.permissions))
-    }
+  for (const role of roles as Array<{ permissions: unknown }>) {
+    merged = mergePermissions(merged, coercePermissions(role.permissions))
   }
 
   return merged
@@ -241,18 +249,25 @@ export async function getUserPermissions(userId: string): Promise<CmsPermissions
 
 export async function getUserRoleSlugs(userId: string): Promise<string[]> {
   const supabase = await createClient()
-  const { data } = await supabase
+
+  // Fetch role IDs for user
+  const { data: userRoles } = await supabase
     .from("user_roles")
-    .select("cms_roles(slug)")
+    .select("role_id")
     .eq("user_id", userId)
 
-  if (!data) return []
-  return data
-    .map((r) => {
-      const role = r.cms_roles as unknown as { slug: string } | null
-      return role?.slug
-    })
-    .filter((s): s is string => !!s)
+  if (!userRoles || userRoles.length === 0) return []
+
+  const roleIds = (userRoles as Array<{ role_id: string }>).map((ur) => ur.role_id)
+
+  // Fetch role slugs
+  const { data: roles } = await supabase
+    .from("cms_roles")
+    .select("slug")
+    .in("id", roleIds)
+
+  if (!roles) return []
+  return (roles as Array<{ slug: string }>).map((r) => r.slug)
 }
 
 // ============================================================================
@@ -379,10 +394,17 @@ export async function getAllRoles(): Promise<CmsRole[]> {
     .order("name")
 
   if (error || !data) return []
-  return data.map((r) => ({
-    ...r,
-    permissions: coercePermissions(r.permissions),
-  })) as CmsRole[]
+  return data.map((r) => {
+    const row = r as { id: string; name: string; slug: string; is_system: boolean; permissions: unknown; created_at: string }
+    return {
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      is_system: row.is_system,
+      permissions: coercePermissions(row.permissions),
+      created_at: row.created_at,
+    }
+  })
 }
 
 // ============================================================================

@@ -30,7 +30,8 @@ export async function POST(request: Request) {
         .in("id", roleIds)
 
       const restrictedSlugs = ["administrator", "schulleitung"]
-      const hasRestricted = roles?.some((r) => restrictedSlugs.includes(r.slug))
+      const roleList = (roles ?? []) as Array<{ id: string; slug: string }>
+      const hasRestricted = roleList.some((r) => restrictedSlugs.includes(r.slug))
       if (hasRestricted) {
         return NextResponse.json({ error: "Schulleitung kann keine Administrator- oder Schulleitungs-Rollen zuweisen" }, { status: 403 })
       }

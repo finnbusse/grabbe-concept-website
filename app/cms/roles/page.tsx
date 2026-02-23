@@ -55,9 +55,9 @@ function getPermValue(perms: CmsPermissions, key: string): boolean {
 
   const parts = key.split(".")
   if (parts.length === 1) {
-    return (perms as Record<string, unknown>)[key] === true
+    return (perms as unknown as Record<string, unknown>)[key] === true
   }
-  const parent = (perms as Record<string, unknown>)[parts[0]]
+  const parent = (perms as unknown as Record<string, unknown>)[parts[0]]
   if (typeof parent === "object" && parent !== null) {
     const val = (parent as Record<string, unknown>)[parts[1]]
     return val === true || val === "all"
@@ -81,9 +81,9 @@ function setPermValue(perms: CmsPermissions, key: string, value: boolean): CmsPe
 
   const parts = key.split(".")
   if (parts.length === 1) {
-    ;(copy as Record<string, unknown>)[key] = value
+    ;(copy as unknown as Record<string, unknown>)[key] = value
   } else {
-    const parent = (copy as Record<string, unknown>)[parts[0]]
+    const parent = (copy as unknown as Record<string, unknown>)[parts[0]]
     if (typeof parent === "object" && parent !== null) {
       ;(parent as Record<string, unknown>)[parts[1]] = value
     }
