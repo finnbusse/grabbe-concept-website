@@ -141,7 +141,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState("")
-  const [msgType, setMsgType] = useState<"success" | "error" | "">("")
+  const [msgType, setMsgType] = useState<"success" | "error" | "warning" | "">("")
   const [uploadingKey, setUploadingKey] = useState<string | null>(null)
   const loadedRef = useRef(false)
   const msgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -197,9 +197,18 @@ export default function SettingsPage() {
         const err = await res.json().catch(() => null)
         throw new Error(err?.error || "Speichern fehlgeschlagen")
       }
+      const data = await res.json().catch(() => null)
       setInitial({ ...values })
-      setMsg("Gespeichert! Änderungen sind sofort live.")
-      setMsgType("success")
+      if (Array.isArray(data?.skippedProtectedKeys) && data.skippedProtectedKeys.length > 0) {
+        const skipped = data.skippedProtectedKeys as string[]
+        const preview = skipped.slice(0, 3).join(", ")
+        const more = skipped.length > 3 ? ` (+${skipped.length - 3} weitere)` : ""
+        setMsg(`Teilweise gespeichert. Geschützte Felder unverändert: ${preview}${more}`)
+        setMsgType("warning")
+      } else {
+        setMsg("Gespeichert! Änderungen sind sofort live.")
+        setMsgType("success")
+      }
     } catch (error) {
       setMsg(error instanceof Error ? error.message : "Speichern fehlgeschlagen")
       setMsgType("error")
@@ -257,7 +266,9 @@ export default function SettingsPage() {
         </div>
         <div className="flex items-center gap-3">
           {msg && (
-            <span className={`text-sm font-medium ${msgType === "success" ? "text-green-600" : "text-red-600"}`}>
+            <span className={`text-sm font-medium ${
+              msgType === "success" ? "text-green-600" : msgType === "warning" ? "text-amber-700" : "text-red-600"
+            }`}>
               {msg}
             </span>
           )}
