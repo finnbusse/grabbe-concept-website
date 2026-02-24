@@ -93,9 +93,10 @@ function buildFolder(
   const directStatic = staticInCat.filter(
     (p) => !childPrefixes.some((prefix) => p.route.startsWith(`${prefix}/`) || p.route === prefix),
   )
-  const directCustom = customInCat.filter(
-    (p) => !childPrefixes.some((prefix) => (p.routePath || "").startsWith(`${prefix}/`) || (p.routePath || "") === prefix),
-  )
+  const directCustom = customInCat.filter((p) => {
+    const rp = p.routePath || ""
+    return !childPrefixes.some((prefix) => rp.startsWith(`${prefix}/`) || rp === prefix)
+  })
 
   const children = cat.children.map((child) => buildFolder(child, staticPages, customPages))
 
