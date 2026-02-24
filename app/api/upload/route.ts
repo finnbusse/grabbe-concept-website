@@ -1,7 +1,46 @@
-import { put } from "@vercel/blob"
+import { list, put } from "@vercel/blob"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+
+export async function GET(request: NextRequest) {
+  try {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json({ blobs: [] })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const cursor = searchParams.get("cursor") || undefined
+    const limitParam = searchParams.get("limit")
+    const limit = limitParam ? Math.min(parseInt(limitParam, 10) || 50, 100) : 50
+
+    const result = await list({
+      prefix: "schulwebsite/",
+      limit,
+      cursor,
+    })
+
+    // Filter to images only for the media library
+    const imageBlobs = result.blobs.filter((blob) => {
+      const ext = blob.pathname.split(".").pop()?.toLowerCase() || ""
+      return ["jpg", "jpeg", "png", "gif", "webp", "svg", "avif"].includes(ext)
+    })
+
+    return NextResponse.json({
+      blobs: imageBlobs.map((b) => ({
+        url: b.url,
+        pathname: b.pathname,
+        size: b.size,
+        uploadedAt: b.uploadedAt,
+      })),
+      cursor: result.cursor,
+      hasMore: result.hasMore,
+    })
+  } catch (error: unknown) {
+    console.error("Blob list error:", error)
+    return NextResponse.json({ blobs: [], error: "Mediathek konnte nicht geladen werden" })
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

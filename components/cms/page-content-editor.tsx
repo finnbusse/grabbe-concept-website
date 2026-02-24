@@ -116,7 +116,7 @@ export function PageContentEditor({ page }: PageContentEditorProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/cms/seiten-editor"><ArrowLeft className="h-4 w-4" /></Link>
+            <Link href="/cms/seiten"><ArrowLeft className="h-4 w-4" /></Link>
           </Button>
           <div>
             <h1 className="font-display text-2xl font-bold">{page.title}</h1>
