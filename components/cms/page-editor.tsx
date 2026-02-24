@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,6 +11,7 @@ import { ArrowLeft, Save, Eye, EyeOff, Loader2, Blocks, FileText, ImageIcon, X, 
 import { FileUploader, FileListItem } from "./file-uploader"
 import { BlockEditor, renderBlocks, type ContentBlock } from "./block-editor"
 import { ImagePicker } from "./image-picker"
+import { PublishCelebration } from "./publish-celebration"
 import Link from "next/link"
 
 interface PageEditorProps {
@@ -61,12 +62,12 @@ export function PageEditor({ page }: PageEditorProps) {
   const [heroImageUrl, setHeroImageUrl] = useState(page?.hero_image_url ?? "")
   const [metaDescription, setMetaDescription] = useState(page?.meta_description ?? "")
   const [seoOgImage, setSeoOgImage] = useState(page?.seo_og_image ?? "")
-  const [heroUploading, setHeroUploading] = useState(false)
-  const heroInputRef = useRef<HTMLInputElement>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [attachedFiles, setAttachedFiles] = useState<AttachedFile[]>([])
   const [showPreview, setShowPreview] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
+  const wasPublished = page?.published ?? true
 
   // Determine editor mode based on content format
   const existingBlocks = parseBlocks(content)
@@ -140,7 +141,12 @@ export function PageEditor({ page }: PageEditorProps) {
         }
       }
       if (saveError) throw saveError
-      router.push("/cms/seiten")
+      // Show celebration when publishing for first time
+      if (!wasPublished && published) {
+        setShowCelebration(true)
+      } else {
+        router.push("/cms/seiten")
+      }
       router.refresh()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Fehler beim Speichern")
@@ -403,6 +409,18 @@ export function PageEditor({ page }: PageEditorProps) {
           </div>
         </div>
       </div>
+
+      {/* Publish Celebration */}
+      {showCelebration && (
+        <PublishCelebration
+          title={title}
+          url={routePath ? `${routePath}/${slug}` : `/seiten/${slug}`}
+          onClose={() => {
+            setShowCelebration(false)
+            router.push("/cms/seiten")
+          }}
+        />
+      )}
     </div>
   )
 }

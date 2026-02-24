@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch"
 import { ArrowLeft, Save, Loader2, Trash2, ChevronDown, Lock } from "lucide-react"
 import { TagSelector } from "@/components/cms/tag-selector"
 import { ImagePicker } from "@/components/cms/image-picker"
+import { PublishCelebration } from "@/components/cms/publish-celebration"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 
@@ -54,6 +55,8 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
   const [success, setSuccess] = useState(false)
   const [showDanger, setShowDanger] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(false)
+  const wasPublished = page.published
 
   const handleSave = async () => {
     setSaving(true)
@@ -103,6 +106,10 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
       }).catch(() => {})
 
       setSuccess(true)
+      // Show celebration when publishing for the first time
+      if (!wasPublished && published && !isStatic) {
+        setShowCelebration(true)
+      }
       setTimeout(() => setSuccess(false), 3000)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Fehler beim Speichern")
@@ -308,6 +315,15 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
           )}
         </div>
       </div>
+
+      {/* Publish Celebration */}
+      {showCelebration && (
+        <PublishCelebration
+          title={title}
+          url={page.route}
+          onClose={() => setShowCelebration(false)}
+        />
+      )}
     </div>
   )
 }

@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { usePageWizard, generateSlug, buildFullUrl } from "./page-wizard-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { TagSelector } from "./tag-selector"
-import { ImageIcon, Loader2, X, ArrowRight, FolderOpen, Check } from "lucide-react"
+import { ArrowRight, FolderOpen, Check, Loader2 } from "lucide-react"
 import { ImagePicker } from "./image-picker"
 import { createClient } from "@/lib/supabase/client"
 
@@ -28,11 +28,9 @@ interface CategoryDef {
 
 export function PageWizardStep1() {
   const { state, dispatch } = usePageWizard()
-  const [heroUploading, setHeroUploading] = useState(false)
   const [categories, setCategories] = useState<CategoryDef[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
   const [errors, setErrors] = useState<{ title?: string; routePath?: string }>({})
-  const heroInputRef = useRef<HTMLInputElement>(null)
 
   // Fetch categories from site_structure setting
   useEffect(() => {
@@ -78,23 +76,6 @@ export function PageWizardStep1() {
   const handleRouteSelect = (path: string) => {
     dispatch({ type: "SET_ROUTE_PATH", payload: path })
     if (path) setErrors((prev) => ({ ...prev, routePath: undefined }))
-  }
-
-  const handleHeroUpload = async (file: File) => {
-    setHeroUploading(true)
-    try {
-      const fd = new FormData()
-      fd.append("file", file)
-      const res = await fetch("/api/upload", { method: "POST", body: fd })
-      const data = await res.json()
-      if (res.ok) {
-        dispatch({ type: "SET_HERO_IMAGE", payload: data.url })
-      }
-    } catch {
-      // upload error
-    } finally {
-      setHeroUploading(false)
-    }
   }
 
   const validate = (): boolean => {
