@@ -163,7 +163,8 @@ export function HomepageEditor({ sections }: HomepageEditorProps) {
     })
   }
 
-  const dirtyCount = Object.values(sectionStates).filter((s) => s.dirty).length
+  const stateValues = Object.values(sectionStates) as SectionState[]
+  const dirtyCount = stateValues.filter((s) => s.dirty).length
 
   if (loading) {
     return (

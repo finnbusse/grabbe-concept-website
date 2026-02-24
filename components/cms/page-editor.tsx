@@ -308,16 +308,33 @@ export function PageEditor({ page }: PageEditorProps) {
         </div>
 
         <div className="space-y-6">
-          {/* Hero image panel */}
-          <div className="rounded-2xl border bg-card p-6 space-y-3">
-            <h3 className="font-display text-sm font-semibold">Hero-Bild</h3>
-            <p className="text-xs text-muted-foreground">Wird rechts oben im Seitenkopf angezeigt.</p>
-            <ImagePicker
-              value={heroImageUrl || null}
-              onChange={(url) => setHeroImageUrl(url || "")}
-              aspectRatio="16/9"
-            />
-          </div>
+          {/* For existing pages: link to settings instead of duplicating metadata */}
+          {page && (
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+              <h3 className="font-display text-sm font-semibold mb-2">Seiteneinstellungen</h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                Hero-Bild, SEO, Tags und Veröffentlichungs-Status findest du in den Einstellungen.
+              </p>
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/cms/seiten/${page.id}/einstellungen`}>
+                  Einstellungen öffnen
+                </Link>
+              </Button>
+            </div>
+          )}
+
+          {/* Hero image — only for new pages */}
+          {!page && (
+            <div className="rounded-2xl border bg-card p-6 space-y-3">
+              <h3 className="font-display text-sm font-semibold">Hero-Bild</h3>
+              <p className="text-xs text-muted-foreground">Wird rechts oben im Seitenkopf angezeigt.</p>
+              <ImagePicker
+                value={heroImageUrl || null}
+                onChange={(url) => setHeroImageUrl(url || "")}
+                aspectRatio="16/9"
+              />
+            </div>
+          )}
 
           <div className="rounded-2xl border bg-card p-6 space-y-4">
             <h3 className="font-display text-sm font-semibold">Einstellungen</h3>
@@ -377,36 +394,39 @@ export function PageEditor({ page }: PageEditorProps) {
             </div>
           )}
 
-          <div className="rounded-2xl border bg-card p-6 space-y-4">
-            <h3 className="font-display text-sm font-semibold">SEO (optional)</h3>
-            <p className="text-[10px] text-muted-foreground">Falls leer, wird der Seitentitel automatisch für Suchmaschinen verwendet.</p>
-            <div className="grid gap-2">
-              <Label htmlFor="metaDesc">Meta-Beschreibung</Label>
-              <textarea
-                id="metaDesc"
-                value={metaDescription}
-                onChange={(e) => setMetaDescription(e.target.value)}
-                placeholder="Eigene Beschreibung für Suchmaschinen (empfohlen: max. 160 Zeichen)..."
-                maxLength={320}
-                rows={3}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-              />
-              {metaDescription && (
-                <span className={`text-[10px] ${metaDescription.length > 160 ? "text-amber-600" : "text-muted-foreground"}`}>
-                  {metaDescription.length}/160 Zeichen
-                </span>
-              )}
+          {/* SEO — only for new pages (existing pages manage SEO in settings) */}
+          {!page && (
+            <div className="rounded-2xl border bg-card p-6 space-y-4">
+              <h3 className="font-display text-sm font-semibold">SEO (optional)</h3>
+              <p className="text-[10px] text-muted-foreground">Falls leer, wird der Seitentitel automatisch für Suchmaschinen verwendet.</p>
+              <div className="grid gap-2">
+                <Label htmlFor="metaDesc">Meta-Beschreibung</Label>
+                <textarea
+                  id="metaDesc"
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value)}
+                  placeholder="Eigene Beschreibung für Suchmaschinen (empfohlen: max. 160 Zeichen)..."
+                  maxLength={320}
+                  rows={3}
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+                />
+                {metaDescription && (
+                  <span className={`text-[10px] ${metaDescription.length > 160 ? "text-amber-600" : "text-muted-foreground"}`}>
+                    {metaDescription.length}/160 Zeichen
+                  </span>
+                )}
+              </div>
+              <div className="grid gap-2">
+                <Label>Social-Media Bild</Label>
+                <ImagePicker
+                  value={seoOgImage || null}
+                  onChange={(url) => setSeoOgImage(url || "")}
+                  hint="Eigenes Vorschaubild für Social Media. Falls leer, wird das Standard-OG-Bild verwendet."
+                  aspectRatio="16/9"
+                />
+              </div>
             </div>
-            <div className="grid gap-2">
-              <Label>Social-Media Bild</Label>
-              <ImagePicker
-                value={seoOgImage || null}
-                onChange={(url) => setSeoOgImage(url || "")}
-                hint="Eigenes Vorschaubild für Social Media. Falls leer, wird das Standard-OG-Bild verwendet."
-                aspectRatio="16/9"
-              />
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
