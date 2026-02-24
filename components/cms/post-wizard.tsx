@@ -27,7 +27,7 @@ interface PostWizardProps {
   editPostId?: string
 }
 
-export function PostWizard({ editMode }: PostWizardProps) {
+export function PostWizard({ editMode, editPostId: _editPostId }: PostWizardProps) {
   const { state } = usePostWizard()
 
   return (
