@@ -147,6 +147,24 @@ export function PageWizardStep1() {
         </div>
       </div>
 
+      {/* Hero Subtitle */}
+      <div className="rounded-2xl border bg-card p-6 space-y-3">
+        <Label htmlFor="wizard-subtitle" className="text-base font-semibold">Hero-Untertitel (optional)</Label>
+        <p className="text-xs text-muted-foreground">Wird als beschreibender Text unter dem Seitentitel angezeigt.</p>
+        <Input
+          id="wizard-subtitle"
+          value={state.heroSubtitle}
+          onChange={(e) => dispatch({ type: "SET_HERO_SUBTITLE", payload: e.target.value })}
+          placeholder="z.B. Alles rund um unsere Arbeitsgemeinschaften"
+          maxLength={200}
+        />
+        {state.heroSubtitle && (
+          <span className={`text-[10px] ${state.heroSubtitle.length > 180 ? "text-amber-600" : "text-muted-foreground"}`}>
+            {state.heroSubtitle.length}/200
+          </span>
+        )}
+      </div>
+
       {/* Hero Image */}
       <div className="rounded-2xl border bg-card p-6 space-y-3">
         <Label className="text-base font-semibold">Hero-Bild (optional)</Label>

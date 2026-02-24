@@ -12,6 +12,7 @@ export interface PageWizardState {
   title: string
   slug: string
   heroImageUrl: string | null
+  heroSubtitle: string
   tagIds: string[]
   routePath: string
 
@@ -36,6 +37,7 @@ export type WizardAction =
   | { type: "SET_TITLE"; payload: string }
   | { type: "SET_SLUG"; payload: string }
   | { type: "SET_HERO_IMAGE"; payload: string | null }
+  | { type: "SET_HERO_SUBTITLE"; payload: string }
   | { type: "SET_TAG_IDS"; payload: string[] }
   | { type: "SET_ROUTE_PATH"; payload: string }
   | { type: "SET_CONTENT_MODE"; payload: "blocks" | "markdown" }
@@ -58,6 +60,7 @@ const initialState: PageWizardState = {
   title: "",
   slug: "",
   heroImageUrl: null,
+  heroSubtitle: "",
   tagIds: [],
   routePath: "",
   contentMode: "blocks",
@@ -84,6 +87,8 @@ function wizardReducer(state: PageWizardState, action: WizardAction): PageWizard
       return { ...state, slug: action.payload }
     case "SET_HERO_IMAGE":
       return { ...state, heroImageUrl: action.payload }
+    case "SET_HERO_SUBTITLE":
+      return { ...state, heroSubtitle: action.payload }
     case "SET_TAG_IDS":
       return { ...state, tagIds: action.payload }
     case "SET_ROUTE_PATH":

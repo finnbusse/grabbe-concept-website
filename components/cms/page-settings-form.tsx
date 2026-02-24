@@ -24,6 +24,7 @@ interface PageSettingsData {
   slug: string
   route: string
   heroImageUrl: string
+  heroSubtitle: string
   metaDescription: string
   seoTitle: string
   seoOgImage: string
@@ -46,6 +47,7 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
   const router = useRouter()
   const [title, setTitle] = useState(page.title)
   const [heroImageUrl, setHeroImageUrl] = useState(page.heroImageUrl)
+  const [heroSubtitle, setHeroSubtitle] = useState(page.heroSubtitle)
   const [metaDescription, setMetaDescription] = useState(page.metaDescription)
   const [seoTitle, setSeoTitle] = useState(page.seoTitle)
   const [seoOgImage, setSeoOgImage] = useState(page.seoOgImage)
@@ -103,6 +105,7 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
         const payload: Record<string, unknown> = {
           title,
           hero_image_url: heroImageUrl || null,
+          hero_subtitle: heroSubtitle || null,
           meta_description: metaDescription || null,
           seo_og_image: seoOgImage || null,
           published,
@@ -110,9 +113,9 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
         }
         const { error: err } = await supabase.from("pages").update(payload as never).eq("id", page.id)
         if (err) {
-          // Retry without hero_image_url if column doesn't exist
-          if ((err as { message?: string }).message?.includes("hero_image_url")) {
-            const { hero_image_url: _dropped, ...payloadWithout } = payload
+          // Retry without hero_image_url/hero_subtitle if columns don't exist
+          if ((err as { message?: string }).message?.includes("hero_image_url") || (err as { message?: string }).message?.includes("hero_subtitle")) {
+            const { hero_image_url: _a, hero_subtitle: _b, ...payloadWithout } = payload
             const { error: err2 } = await supabase.from("pages").update(payloadWithout as never).eq("id", page.id)
             if (err2) throw err2
           } else {
@@ -225,6 +228,28 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
                 <p className="text-[11px] text-muted-foreground">Pfad kann in der Seitenstruktur geändert werden</p>
               )}
             </div>
+
+            {/* Hero Subtitle */}
+            {!isStatic && (
+              <div className="grid gap-2">
+                <Label htmlFor="heroSubtitle">Hero-Untertitel (optional)</Label>
+                <Input
+                  id="heroSubtitle"
+                  value={heroSubtitle}
+                  onChange={(e) => setHeroSubtitle(e.target.value)}
+                  placeholder="Beschreibender Text unter dem Seitentitel"
+                  maxLength={200}
+                />
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] text-muted-foreground">Wird als beschreibender Text unter dem Seitentitel angezeigt</p>
+                  {heroSubtitle && (
+                    <span className={`text-[10px] ${heroSubtitle.length > 180 ? "text-amber-600" : "text-muted-foreground"}`}>
+                      {heroSubtitle.length}/200
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Hero Image */}

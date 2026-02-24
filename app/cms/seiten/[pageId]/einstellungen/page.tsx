@@ -39,6 +39,7 @@ export default async function PageSettingsPage({ params }: { params: Promise<{ p
           slug: "",
           route: def.route,
           heroImageUrl,
+          heroSubtitle: "",
           metaDescription: "",
           seoTitle: "",
           seoOgImage: "",
@@ -64,6 +65,7 @@ export default async function PageSettingsPage({ params }: { params: Promise<{ p
     slug: string
     route_path: string | null
     hero_image_url: string | null
+    hero_subtitle: string | null
     meta_description: string | null
     seo_og_image: string | null
     published: boolean
@@ -79,6 +81,7 @@ export default async function PageSettingsPage({ params }: { params: Promise<{ p
         slug: p.slug,
         route: p.route_path ? `${p.route_path}/${p.slug}` : `/seiten/${p.slug}`,
         heroImageUrl: p.hero_image_url || "",
+        heroSubtitle: p.hero_subtitle || "",
         metaDescription: p.meta_description || "",
         seoTitle: "",
         seoOgImage: p.seo_og_image || "",

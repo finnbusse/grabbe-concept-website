@@ -73,6 +73,7 @@ export function PageEditorStep3() {
         published: publish,
         route_path: state.routePath || null,
         hero_image_url: state.heroImageUrl || null,
+        hero_subtitle: state.heroSubtitle || null,
         meta_description: state.metaDescription || null,
         seo_og_image: state.ogImageUrl || state.heroImageUrl || null,
         user_id: user.id,
@@ -82,9 +83,9 @@ export function PageEditorStep3() {
       const { error: saveError } = await supabase.from("pages").insert(payload as never)
 
       if (saveError) {
-        // Resilient: if hero_image_url column doesn't exist yet, retry without it
-        if ((saveError as { message?: string }).message?.includes("hero_image_url")) {
-          const { hero_image_url: _dropped, ...payloadWithout } = payload
+        // Resilient: if hero_image_url or hero_subtitle column doesn't exist yet, retry without them
+        if ((saveError as { message?: string }).message?.includes("hero_image_url") || (saveError as { message?: string }).message?.includes("hero_subtitle")) {
+          const { hero_image_url: _a, hero_subtitle: _b, ...payloadWithout } = payload
           const { error: err2 } = await supabase.from("pages").insert(payloadWithout as never)
           if (err2) throw err2
         } else {
