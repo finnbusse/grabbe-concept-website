@@ -3,9 +3,11 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
-  ImageIcon, Upload, Link as LinkIcon, X, Check, Loader2, Search,
+  ImageIcon, Upload, Link as LinkIcon, X, Check, Loader2, Search, AlertTriangle,
 } from "lucide-react"
+import { TagSelector } from "./tag-selector"
 
 // ---------------------------------------------------------------------------
 // Types
@@ -20,10 +22,19 @@ interface ImagePickerProps {
 }
 
 interface BlobItem {
+  id?: string
   url: string
   pathname: string
   size: number
   uploadedAt: string
+}
+
+interface DuplicateInfo {
+  id: string
+  url: string
+  title: string
+  filename: string
+  size: number
 }
 
 // ---------------------------------------------------------------------------
@@ -103,6 +114,126 @@ export function ImagePicker({
 }
 
 // ---------------------------------------------------------------------------
+// Post-upload metadata panel
+// ---------------------------------------------------------------------------
+
+interface MetadataFormState {
+  documentId: string
+  url: string
+  filename: string
+  size: number
+  title: string
+  altText: string
+  tagIds: string[]
+}
+
+function PostUploadMetadata({
+  data,
+  onSaveAndUse,
+  onSkip,
+}: {
+  data: MetadataFormState
+  onSaveAndUse: (url: string) => void
+  onSkip: (url: string) => void
+}) {
+  const [title, setTitle] = useState(data.title)
+  const [altText, setAltText] = useState(data.altText)
+  const [tagIds, setTagIds] = useState<string[]>(data.tagIds)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSave = async () => {
+    setSaving(true)
+    setError(null)
+    try {
+      if (data.documentId) {
+        const res = await fetch(`/api/upload/${data.documentId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, alt_text: altText, tagIds }),
+        })
+        if (!res.ok) throw new Error("Speichern fehlgeschlagen")
+      }
+      onSaveAndUse(data.url)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Fehler")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes > 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    return `${(bytes / 1024).toFixed(0)} KB`
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start gap-4 rounded-xl border bg-emerald-50 dark:bg-emerald-950/30 p-4">
+        <div className="overflow-hidden rounded-lg border w-24 h-24 shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={data.url} alt={data.filename} className="h-full w-full object-cover" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+            <Check className="h-4 w-4" /> Bild hochgeladen
+          </p>
+          <p className="text-xs text-muted-foreground mt-1 truncate">Dateiname: {data.filename}</p>
+          <p className="text-xs text-muted-foreground">Größe: {formatFileSize(data.size)}</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <div className="grid gap-1.5">
+          <Label htmlFor="upload-title" className="text-sm">Titel *</Label>
+          <Input
+            id="upload-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="z.B. Schulfest 2024"
+            autoFocus
+          />
+        </div>
+
+        <div className="grid gap-1.5">
+          <Label htmlFor="upload-alt" className="text-sm">Alt-Text (für Barrierefreiheit)</Label>
+          <Input
+            id="upload-alt"
+            value={altText}
+            onChange={(e) => setAltText(e.target.value)}
+            placeholder="z.B. Schüler beim Schulfest auf dem Hof"
+          />
+          <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+            ℹ️ Alt-Texte helfen blinden Nutzern, Bilder zu verstehen
+          </p>
+        </div>
+
+        <div className="grid gap-1.5">
+          <Label className="text-sm">Tags</Label>
+          <TagSelector selectedTagIds={tagIds} onChange={setTagIds} />
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          {error}
+        </div>
+      )}
+
+      <div className="flex items-center justify-end gap-2 pt-2">
+        <Button variant="ghost" size="sm" onClick={() => onSkip(data.url)}>
+          Überspringen
+        </Button>
+        <Button size="sm" onClick={handleSave} disabled={saving}>
+          {saving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Check className="mr-1.5 h-3.5 w-3.5" />}
+          Speichern &amp; verwenden
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Modal
 // ---------------------------------------------------------------------------
 
@@ -126,6 +257,9 @@ function ImagePickerModal({
   const [selected, setSelected] = useState<string | null>(currentValue)
   const [urlInput, setUrlInput] = useState("")
   const [uploading, setUploading] = useState(false)
+  const [metadataForm, setMetadataForm] = useState<MetadataFormState | null>(null)
+  const [duplicate, setDuplicate] = useState<DuplicateInfo | null>(null)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadBlobs = useCallback(async (cursorParam?: string) => {
@@ -134,6 +268,7 @@ function ImagePickerModal({
       const params = new URLSearchParams()
       if (cursorParam) params.set("cursor", cursorParam)
       params.set("limit", "50")
+      params.set("type", "image")
       const res = await fetch(`/api/upload?${params.toString()}`)
       const data = await res.json()
       if (cursorParam) {
@@ -158,21 +293,51 @@ function ImagePickerModal({
     ? blobs.filter((b) => b.pathname.toLowerCase().includes(search.toLowerCase()))
     : blobs
 
+  const checkDuplicate = async (file: File): Promise<DuplicateInfo | null> => {
+    try {
+      const params = new URLSearchParams({ filename: file.name, size: String(file.size) })
+      const res = await fetch(`/api/upload?${params.toString()}`)
+      const data = await res.json()
+      if (data.duplicates && data.duplicates.length > 0) {
+        return data.duplicates[0]
+      }
+    } catch { /* ignore */ }
+    return null
+  }
+
   const handleUpload = async (file: File) => {
+    const dupe = await checkDuplicate(file)
+    if (dupe) {
+      setDuplicate(dupe)
+      setPendingFile(file)
+      return
+    }
+    await performUpload(file)
+  }
+
+  const performUpload = async (file: File) => {
     setUploading(true)
+    setDuplicate(null)
+    setPendingFile(null)
     try {
       const fd = new FormData()
       fd.append("file", file)
       const res = await fetch("/api/upload", { method: "POST", body: fd })
       const data = await res.json()
       if (res.ok && data.url) {
-        // Add to list and select
+        setMetadataForm({
+          documentId: data.documentId || "",
+          url: data.url,
+          filename: data.filename || file.name,
+          size: data.size || file.size,
+          title: file.name.replace(/\.[^.]+$/, ""),
+          altText: "",
+          tagIds: [],
+        })
         setBlobs((prev) => [
-          { url: data.url, pathname: data.filename, size: data.size, uploadedAt: new Date().toISOString() },
+          { id: data.documentId, url: data.url, pathname: data.filename, size: data.size, uploadedAt: new Date().toISOString() },
           ...prev,
         ])
-        setSelected(data.url)
-        setTab("mediathek")
       }
     } catch {
       // Silent fail
@@ -187,6 +352,12 @@ function ImagePickerModal({
     if (file && file.type.startsWith("image/")) {
       handleUpload(file)
     }
+  }
+
+  const handleMetadataDone = (url: string) => {
+    setMetadataForm(null)
+    setSelected(url)
+    setTab("mediathek")
   }
 
   return (
@@ -311,40 +482,79 @@ function ImagePickerModal({
           )}
 
           {tab === "hochladen" && (
-            <div
-              className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 p-12 text-center transition-colors hover:border-primary/50 hover:bg-primary/5"
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0]
-                  if (f) handleUpload(f)
-                }}
-              />
-              {uploading ? (
-                <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
-              ) : (
-                <Upload className="h-10 w-10 text-muted-foreground mb-3" />
+            <>
+              {/* Duplicate warning */}
+              {duplicate && (
+                <div className="rounded-xl border border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30 p-4 mb-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                        Eine Datei mit diesem Namen existiert bereits in der Mediathek.
+                      </p>
+                      <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                        {duplicate.filename} ({duplicate.title})
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => onSelect(duplicate.url)}>
+                      Vorhandene Datei verwenden
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => { if (pendingFile) performUpload(pendingFile) }}>
+                      Trotzdem hochladen
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => { setDuplicate(null); setPendingFile(null) }}>
+                      Abbrechen
+                    </Button>
+                  </div>
+                </div>
               )}
-              <p className="text-sm font-medium text-muted-foreground">
-                {uploading ? "Wird hochgeladen..." : "Bild hier ablegen oder klicken"}
-              </p>
-              {!uploading && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mt-4"
-                  onClick={() => fileInputRef.current?.click()}
+
+              {/* Post-upload metadata form */}
+              {metadataForm ? (
+                <PostUploadMetadata
+                  data={metadataForm}
+                  onSaveAndUse={handleMetadataDone}
+                  onSkip={handleMetadataDone}
+                />
+              ) : !duplicate && (
+                <div
+                  className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-muted-foreground/25 p-12 text-center transition-colors hover:border-primary/50 hover:bg-primary/5"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleDrop}
                 >
-                  Datei auswählen
-                </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0]
+                      if (f) handleUpload(f)
+                    }}
+                  />
+                  {uploading ? (
+                    <Loader2 className="h-10 w-10 animate-spin text-primary mb-3" />
+                  ) : (
+                    <Upload className="h-10 w-10 text-muted-foreground mb-3" />
+                  )}
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {uploading ? "Wird hochgeladen..." : "Bild hier ablegen oder klicken"}
+                  </p>
+                  {!uploading && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-4"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Datei auswählen
+                    </Button>
+                  )}
+                </div>
               )}
-            </div>
+            </>
           )}
 
           {tab === "url" && (

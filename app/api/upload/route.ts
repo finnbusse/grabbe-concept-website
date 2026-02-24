@@ -12,9 +12,32 @@ export async function GET(request: NextRequest) {
     const cursor = searchParams.get("cursor") || undefined
     const limitParam = searchParams.get("limit")
     const limit = limitParam ? Math.min(parseInt(limitParam, 10) || 50, 100) : 50
+    const filenameFilter = searchParams.get("filename")
+    const sizeFilter = searchParams.get("size")
 
     // Try documents table first (unified media library)
     const supabase = await createClient()
+
+    // Deduplication check: if filename and size provided, return matching documents
+    if (filenameFilter && sizeFilter) {
+      const { data: dupes } = await supabase
+        .from("documents")
+        .select("id, title, file_url, file_name, file_size, file_type, created_at")
+        .eq("file_name", filenameFilter)
+        .eq("file_size", parseInt(sizeFilter, 10))
+        .limit(1)
+      const typedDupes = (dupes || []) as Array<{
+        id: string; title: string; file_url: string; file_name: string
+        file_size: number; file_type: string | null; created_at: string
+      }>
+      return NextResponse.json({
+        duplicates: typedDupes.map((d) => ({
+          id: d.id, url: d.file_url, title: d.title,
+          filename: d.file_name, size: d.file_size,
+        })),
+      })
+    }
+
     let query = supabase
       .from("documents")
       .select("id, title, file_url, file_name, file_size, file_type, created_at")
@@ -39,6 +62,7 @@ export async function GET(request: NextRequest) {
       }>
       return NextResponse.json({
         blobs: typedDocs.map((d) => ({
+          id: d.id,
           url: d.file_url,
           pathname: d.file_name || d.title,
           size: d.file_size,
@@ -127,7 +151,7 @@ export async function POST(request: NextRequest) {
     const docTitle = formData.get("title") as string
     const docCategory = formData.get("category") as string
 
-    await supabase.from("documents").insert({
+    const { data: insertedDoc } = await supabase.from("documents").insert({
       title: docTitle || file.name,
       file_url: blob.url,
       file_name: file.name,
@@ -135,14 +159,17 @@ export async function POST(request: NextRequest) {
       file_type: file.type,
       category: docCategory || "allgemein",
       user_id: user.id,
-    } as never)
+    } as never).select("id").single()
     revalidateTag("documents", "max")
+
+    const docId = (insertedDoc as unknown as { id: string } | null)?.id
 
     return NextResponse.json({
       url: blob.url,
       filename: file.name,
       size: file.size,
       type: file.type,
+      documentId: docId || null,
     })
   } catch (error: unknown) {
     console.error("Upload error:", error)
