@@ -1,6 +1,28 @@
 import { createStaticClient } from "@/lib/supabase/static"
 import { createClient } from "@/lib/supabase/server"
 import { unstable_cache } from "next/cache"
+import { parseDesignSettings } from "@/lib/design-settings"
+import type { DesignSettings } from "@/lib/design-settings"
+
+// Re-export for convenience
+export { DESIGN_DEFAULTS } from "@/lib/design-settings"
+export type { DesignSettings } from "@/lib/design-settings"
+
+/** Fetch design settings (cached with ISR) */
+export const getDesignSettings = unstable_cache(
+  async (): Promise<DesignSettings> => {
+    const supabase = createStaticClient()
+    const { data } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "design_settings")
+      .single()
+    const row = data as { value: string } | null
+    return parseDesignSettings(row?.value)
+  },
+  ["design-settings"],
+  { revalidate: 3600, tags: ["settings", "design_settings"] }
+)
 
 export type SiteSetting = {
   id: string

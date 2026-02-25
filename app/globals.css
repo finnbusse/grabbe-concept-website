@@ -37,6 +37,17 @@
     --sidebar-accent-foreground: 215 25% 12%;
     --sidebar-border: 210 25% 90%;
     --sidebar-ring: 215 70% 45%;
+
+    /* Customisable font indirection (overridden via inline style on <html>) */
+    --font-heading: var(--font-instrument-serif);
+    --font-body: var(--font-geist-sans);
+    --font-accent: var(--font-josefin-sans);
+
+    /* Subject accent colours (hex, overridden via inline style on <html>) */
+    --color-subject-nawi: #16a34a;
+    --color-subject-musik: #ea580c;
+    --color-subject-kunst: #7c3aed;
+    --color-subject-sport: #0891b2;
   }
   .dark {
     --background: 215 30% 7%;

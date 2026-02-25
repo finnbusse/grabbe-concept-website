@@ -5,12 +5,35 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ImagePicker } from "@/components/cms/image-picker"
 import {
   Settings, Save, Loader2, Upload, Globe, Building2, Mail, Phone,
   MapPin, Share2, Search as SearchIcon, Image as ImageIcon, FileText,
-  Shield, Hash, Quote,
+  Shield, Hash, Quote, Paintbrush,
 } from "lucide-react"
+import type { DesignSettings } from "@/lib/design-settings"
+import { DESIGN_DEFAULTS } from "@/lib/design-settings"
+
+// ---------------------------------------------------------------------------
+// Curated Google Fonts list (~50 popular choices)
+// ---------------------------------------------------------------------------
+const GOOGLE_FONTS: string[] = [
+  "Inter", "Roboto", "Open Sans", "Lato", "Montserrat", "Poppins",
+  "Raleway", "Nunito", "Source Sans 3", "PT Sans",
+  "Merriweather", "Playfair Display", "Lora", "Libre Baskerville",
+  "Crimson Text", "EB Garamond", "Cormorant Garamond", "Bitter",
+  "Spectral", "Noto Serif",
+  "Oswald", "Bebas Neue", "Archivo Black", "Anton", "Barlow Condensed",
+  "Josefin Sans", "Work Sans", "DM Sans", "Cabin", "Karla",
+  "Rubik", "Quicksand", "Comfortaa", "Outfit", "Manrope",
+  "Space Grotesk", "Plus Jakarta Sans", "Sora", "Figtree", "Lexend",
+  "IBM Plex Sans", "IBM Plex Serif", "Fira Sans", "Mukta", "Noto Sans",
+  "PT Serif", "Instrument Serif", "Geist",
+  "Futura LT",
+]
+
+const FONT_OPTIONS = ["default", ...GOOGLE_FONTS]
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -155,11 +178,110 @@ function ImagePickerField({
 }
 
 // ===========================================================================
+// Font picker with live preview
+// ===========================================================================
+function FontPicker({
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  label: string
+  hint: string
+  value: string
+  onChange: (v: string) => void
+}) {
+  const displayValue = value === "default" ? "Standard" : value
+  const previewStyle: React.CSSProperties =
+    value !== "default" ? { fontFamily: `'${value}', sans-serif` } : {}
+
+  return (
+    <Field label={label} hint={hint}>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        {FONT_OPTIONS.map((f) => (
+          <option key={f} value={f}>
+            {f === "default" ? "Standard (unverändert)" : f}
+          </option>
+        ))}
+      </select>
+      {value !== "default" && (
+        <>
+          {/* Load the font for preview */}
+          {value !== "Futura LT" && value !== "Geist" && (
+            // eslint-disable-next-line @next/next/no-page-custom-font
+            <link
+              rel="stylesheet"
+              href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(value)}:wght@400;700&display=swap`}
+            />
+          )}
+          <div
+            className="mt-2 rounded-lg border border-border bg-muted/30 px-4 py-3"
+            style={previewStyle}
+          >
+            <p className="text-lg font-bold">{displayValue}</p>
+            <p className="text-sm text-muted-foreground">
+              Das Grabbe-Gymnasium Detmold – ABCDEFG abcdefg 0123456789
+            </p>
+          </div>
+        </>
+      )}
+    </Field>
+  )
+}
+
+// ===========================================================================
+// Color picker field
+// ===========================================================================
+function ColorField({
+  label,
+  hint,
+  value,
+  defaultValue,
+  onChange,
+}: {
+  label: string
+  hint?: string
+  value: string
+  defaultValue: string
+  onChange: (v: string) => void
+}) {
+  return (
+    <Field label={label} hint={hint}>
+      <div className="flex items-center gap-3">
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-10 w-14 cursor-pointer rounded-lg border border-input bg-background p-1"
+        />
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={defaultValue}
+          className="w-32 font-mono text-xs"
+        />
+        {value !== defaultValue && (
+          <Button variant="ghost" size="sm" onClick={() => onChange(defaultValue)}>
+            Zurücksetzen
+          </Button>
+        )}
+      </div>
+    </Field>
+  )
+}
+
+// ===========================================================================
 // Page
 // ===========================================================================
 export default function SettingsPage() {
   const [values, setValues] = useState<Values>({})
   const [initial, setInitial] = useState<Values>({})
+  const [design, setDesign] = useState<DesignSettings>(DESIGN_DEFAULTS)
+  const [initialDesign, setInitialDesign] = useState<DesignSettings>(DESIGN_DEFAULTS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState("")
@@ -168,8 +290,12 @@ export default function SettingsPage() {
   const loadedRef = useRef(false)
   const msgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Derive dirty state
-  const isDirty = Object.keys(values).some((k) => values[k] !== initial[k])
+  // Derive dirty state (general settings + design settings)
+  const designJson = JSON.stringify(design)
+  const initialDesignJson = JSON.stringify(initialDesign)
+  const isGeneralDirty = Object.keys(values).some((k) => values[k] !== initial[k])
+  const isDesignDirty = designJson !== initialDesignJson
+  const isDirty = isGeneralDirty || isDesignDirty
 
   // Warn before leaving with unsaved changes
   useEffect(() => {
@@ -195,6 +321,20 @@ export default function SettingsPage() {
       ;(data as { key: string; value: string }[] | null)?.forEach((s) => { map[s.key] = s.value ?? "" })
       setValues(map)
       setInitial(map)
+
+      // Parse design_settings if present
+      if (map.design_settings) {
+        try {
+          const parsed = JSON.parse(map.design_settings) as Partial<DesignSettings>
+          const ds: DesignSettings = {
+            fonts: { ...DESIGN_DEFAULTS.fonts, ...parsed.fonts },
+            colors: { ...DESIGN_DEFAULTS.colors, ...parsed.colors },
+          }
+          setDesign(ds)
+          setInitialDesign(ds)
+        } catch { /* keep defaults */ }
+      }
+
       setLoading(false)
     })()
   }, [])
@@ -203,13 +343,30 @@ export default function SettingsPage() {
     setValues((prev) => ({ ...prev, [key]: value }))
   }, [])
 
+  const setFont = useCallback((role: keyof DesignSettings["fonts"], value: string) => {
+    setDesign((prev) => ({ ...prev, fonts: { ...prev.fonts, [role]: value } }))
+  }, [])
+
+  const setColor = useCallback((key: keyof DesignSettings["colors"], value: string) => {
+    setDesign((prev) => ({ ...prev, colors: { ...prev.colors, [key]: value } }))
+  }, [])
+
   const handleSave = async () => {
     setSaving(true)
     setMsg("")
     setMsgType("")
     try {
-      const keys = Object.keys(values).filter((k) => values[k] !== initial[k])
-      const payload = keys.map((key) => ({ key, value: values[key] ?? "" }))
+      // Collect changed general settings
+      const keys = Object.keys(values).filter((k) => k !== "design_settings" && values[k] !== initial[k])
+      const payload: { key: string; value: string }[] = keys.map((key) => ({ key, value: values[key] ?? "" }))
+
+      // Add design_settings if changed
+      if (isDesignDirty) {
+        payload.push({ key: "design_settings", value: JSON.stringify(design) })
+      }
+
+      if (payload.length === 0) return
+
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -219,7 +376,12 @@ export default function SettingsPage() {
         const err = await res.json().catch(() => null)
         throw new Error(err?.error || "Speichern fehlgeschlagen")
       }
-      setInitial({ ...values })
+      setInitial((prev) => {
+        const next = { ...prev }
+        payload.forEach((p) => { next[p.key] = p.value })
+        return next
+      })
+      setInitialDesign(design)
       setMsg("Gespeichert! Änderungen sind sofort live.")
       setMsgType("success")
     } catch (error) {
@@ -296,6 +458,19 @@ export default function SettingsPage() {
           </Button>
         </div>
       </div>
+
+      {/* Tabs */}
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="general">Allgemein</TabsTrigger>
+          <TabsTrigger value="design">
+            <Paintbrush className="mr-1.5 h-3.5 w-3.5" />
+            Design
+          </TabsTrigger>
+        </TabsList>
+
+        {/* ==================== GENERAL TAB ==================== */}
+        <TabsContent value="general" className="space-y-6">
 
       {/* ====================== GENERAL ====================== */}
       <Section
@@ -460,6 +635,112 @@ export default function SettingsPage() {
           </ul>
         </div>
       </Section>
+
+        </TabsContent>
+
+        {/* ==================== DESIGN TAB ==================== */}
+        <TabsContent value="design" className="space-y-6">
+
+          {/* -- Fonts -- */}
+          <Section
+            icon={Paintbrush}
+            title="Schriftarten"
+            description="Wähle für jede Rolle eine Schriftart aus. Standard: Instrument Serif (Überschriften), Geist Sans (Fließtext), Josefin Sans (Akzent)."
+          >
+            <FontPicker
+              label="Überschriften-Schrift"
+              hint="Wird für alle h1–h6 und Display-Texte verwendet. Standard: Instrument Serif."
+              value={design.fonts.heading}
+              onChange={(v) => setFont("heading", v)}
+            />
+            <FontPicker
+              label="Fließtext-Schrift"
+              hint="Standard-Body-Schrift für Absätze, Listen, UI. Standard: Geist Sans."
+              value={design.fonts.body}
+              onChange={(v) => setFont("body", v)}
+            />
+            <FontPicker
+              label="Akzent-Schrift"
+              hint="Für Labels, Tags und besondere Hervorhebungen. Standard: Josefin Sans."
+              value={design.fonts.accent}
+              onChange={(v) => setFont("accent", v)}
+            />
+          </Section>
+
+          {/* -- Colors -- */}
+          <Section
+            icon={Paintbrush}
+            title="Farbpalette"
+            description="Primärfarbe und Akzentfarben der vier Profilprojekte."
+          >
+            <ColorField
+              label="Primärfarbe"
+              hint="Hauptfarbe für Buttons, Links und Akzente. Standard: Blau (#2563eb)."
+              value={design.colors.primary}
+              defaultValue={DESIGN_DEFAULTS.colors.primary}
+              onChange={(v) => setColor("primary", v)}
+            />
+
+            <div className="mt-2 rounded-xl border border-border bg-muted/30 px-4 py-4">
+              <p className="mb-4 text-sm font-medium text-card-foreground">Profilprojekt-Farben</p>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <ColorField
+                  label="NaWi-Projekt"
+                  value={design.colors.subjectNaturwissenschaften}
+                  defaultValue={DESIGN_DEFAULTS.colors.subjectNaturwissenschaften}
+                  onChange={(v) => setColor("subjectNaturwissenschaften", v)}
+                />
+                <ColorField
+                  label="Musikprojekt"
+                  value={design.colors.subjectMusik}
+                  defaultValue={DESIGN_DEFAULTS.colors.subjectMusik}
+                  onChange={(v) => setColor("subjectMusik", v)}
+                />
+                <ColorField
+                  label="Kunstprojekt"
+                  value={design.colors.subjectKunst}
+                  defaultValue={DESIGN_DEFAULTS.colors.subjectKunst}
+                  onChange={(v) => setColor("subjectKunst", v)}
+                />
+                <ColorField
+                  label="Sportprojekt"
+                  value={design.colors.subjectSport}
+                  defaultValue={DESIGN_DEFAULTS.colors.subjectSport}
+                  onChange={(v) => setColor("subjectSport", v)}
+                />
+              </div>
+            </div>
+
+            {/* Live swatch preview */}
+            <div className="mt-2">
+              <p className="mb-2 text-sm font-medium text-card-foreground">Vorschau</p>
+              <div className="flex gap-3">
+                <div className="flex flex-col items-center gap-1">
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.primary }} />
+                  <span className="text-[10px] text-muted-foreground">Primär</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.subjectNaturwissenschaften }} />
+                  <span className="text-[10px] text-muted-foreground">NaWi</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.subjectMusik }} />
+                  <span className="text-[10px] text-muted-foreground">Musik</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.subjectKunst }} />
+                  <span className="text-[10px] text-muted-foreground">Kunst</span>
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.subjectSport }} />
+                  <span className="text-[10px] text-muted-foreground">Sport</span>
+                </div>
+              </div>
+            </div>
+          </Section>
+
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
