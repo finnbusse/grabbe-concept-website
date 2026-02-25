@@ -6,14 +6,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import {
+  Select, SelectContent, SelectGroup, SelectItem, SelectLabel,
+  SelectSeparator, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ImagePicker } from "@/components/cms/image-picker"
 import {
-  Settings, Save, Loader2, Upload, Globe, Building2, Mail, Phone,
-  MapPin, Share2, Search as SearchIcon, Image as ImageIcon, FileText,
-  Shield, Hash, Quote, Paintbrush,
+  Settings, Save, Loader2, Upload, Globe, Building2, Mail,
+  Share2, Search as SearchIcon, Image as ImageIcon, FileText,
+  Shield, Hash, Quote, Paintbrush, Check, RotateCcw,
 } from "lucide-react"
 import type { DesignSettings } from "@/lib/design-settings"
-import { DESIGN_DEFAULTS } from "@/lib/design-settings"
+import {
+  DESIGN_DEFAULTS, TAILWIND_COLORS, TAILWIND_COLOR_FAMILIES,
+  TAILWIND_COLOR_SHADES, tailwindToHex,
+} from "@/lib/design-settings"
 
 // ---------------------------------------------------------------------------
 // Curated Google Fonts list (~50 popular choices)
@@ -25,15 +33,20 @@ const GOOGLE_FONTS: string[] = [
   "Crimson Text", "EB Garamond", "Cormorant Garamond", "Bitter",
   "Spectral", "Noto Serif",
   "Oswald", "Bebas Neue", "Archivo Black", "Anton", "Barlow Condensed",
-  "Josefin Sans", "Work Sans", "DM Sans", "Cabin", "Karla",
+  "Work Sans", "DM Sans", "Cabin", "Karla",
   "Rubik", "Quicksand", "Comfortaa", "Outfit", "Manrope",
   "Space Grotesk", "Plus Jakarta Sans", "Sora", "Figtree", "Lexend",
   "IBM Plex Sans", "IBM Plex Serif", "Fira Sans", "Mukta", "Noto Sans",
-  "PT Serif", "Instrument Serif", "Geist",
-  "Futura LT",
+  "PT Serif",
 ]
 
-const FONT_OPTIONS = ["default", ...GOOGLE_FONTS]
+/** Standard fonts that ship with the site — always at the top */
+const STANDARD_FONTS = [
+  { value: "default", label: "Standard (unverändert)" },
+  { value: "Instrument Serif", label: "Instrument Serif (Standard Überschrift)" },
+  { value: "Geist", label: "Geist Sans (Standard Fließtext)" },
+  { value: "Josefin Sans", label: "Josefin Sans (Standard Akzent)" },
+]
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -178,7 +191,7 @@ function ImagePickerField({
 }
 
 // ===========================================================================
-// Font picker with live preview
+// Font picker with shadcn Select + live preview
 // ===========================================================================
 function FontPicker({
   label,
@@ -191,27 +204,40 @@ function FontPicker({
   value: string
   onChange: (v: string) => void
 }) {
-  const displayValue = value === "default" ? "Standard" : value
+  const isCustom = value !== "default" && !STANDARD_FONTS.some((f) => f.value === value)
   const previewStyle: React.CSSProperties =
     value !== "default" ? { fontFamily: `'${value}', sans-serif` } : {}
 
   return (
     <Field label={label} hint={hint}>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-      >
-        {FONT_OPTIONS.map((f) => (
-          <option key={f} value={f}>
-            {f === "default" ? "Standard (unverändert)" : f}
-          </option>
-        ))}
-      </select>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Schriftart wählen…" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectLabel>Standard</SelectLabel>
+            {STANDARD_FONTS.map((f) => (
+              <SelectItem key={f.value} value={f.value}>
+                {f.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+          <SelectSeparator />
+          <SelectGroup>
+            <SelectLabel>Google Fonts</SelectLabel>
+            {GOOGLE_FONTS.map((f) => (
+              <SelectItem key={f} value={f}>
+                {f}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
       {value !== "default" && (
         <>
-          {/* Load the font for preview */}
-          {value !== "Futura LT" && value !== "Geist" && (
+          {/* Load the font for preview — skip for bundled fonts */}
+          {isCustom && (
             // eslint-disable-next-line @next/next/no-page-custom-font
             <link
               rel="stylesheet"
@@ -222,7 +248,7 @@ function FontPicker({
             className="mt-2 rounded-lg border border-border bg-muted/30 px-4 py-3"
             style={previewStyle}
           >
-            <p className="text-lg font-bold">{displayValue}</p>
+            <p className="text-lg font-bold">{value}</p>
             <p className="text-sm text-muted-foreground">
               Das Grabbe-Gymnasium Detmold – ABCDEFG abcdefg 0123456789
             </p>
@@ -234,9 +260,9 @@ function FontPicker({
 }
 
 // ===========================================================================
-// Color picker field
+// Tailwind color picker with shadcn Popover
 // ===========================================================================
-function ColorField({
+function TailwindColorPicker({
   label,
   hint,
   value,
@@ -249,23 +275,57 @@ function ColorField({
   defaultValue: string
   onChange: (v: string) => void
 }) {
+  const hex = tailwindToHex(value)
+  const isDefault = value === defaultValue
+
   return (
     <Field label={label} hint={hint}>
       <div className="flex items-center gap-3">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-10 w-14 cursor-pointer rounded-lg border border-input bg-background p-1"
-        />
-        <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={defaultValue}
-          className="w-32 font-mono text-xs"
-        />
-        {value !== defaultValue && (
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background hover:bg-accent/50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            >
+              <div
+                className="h-5 w-5 rounded border border-border"
+                style={{ backgroundColor: hex }}
+              />
+              <span className="font-mono text-xs text-muted-foreground">{value}</span>
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-3" align="start">
+            <div className="grid gap-1">
+              {TAILWIND_COLOR_FAMILIES.map((family) => (
+                <div key={family} className="flex gap-0.5">
+                  {TAILWIND_COLOR_SHADES.map((shade) => {
+                    const key = `${family}-${shade}`
+                    const swatchHex = TAILWIND_COLORS[key]
+                    if (!swatchHex) return null
+                    const isSelected = value === key
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        title={key}
+                        onClick={() => onChange(key)}
+                        className="relative h-6 w-6 rounded-sm border border-transparent transition-transform hover:scale-125 hover:border-foreground/30 focus:outline-none focus:ring-1 focus:ring-ring"
+                        style={{ backgroundColor: swatchHex }}
+                      >
+                        {isSelected && (
+                          <Check className="absolute inset-0 m-auto h-3.5 w-3.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+        {!isDefault && (
           <Button variant="ghost" size="sm" onClick={() => onChange(defaultValue)}>
+            <RotateCcw className="mr-1 h-3 w-3" />
             Zurücksetzen
           </Button>
         )}
@@ -673,9 +733,9 @@ export default function SettingsPage() {
             title="Farbpalette"
             description="Primärfarbe und Akzentfarben der vier Profilprojekte."
           >
-            <ColorField
+            <TailwindColorPicker
               label="Primärfarbe"
-              hint="Hauptfarbe für Buttons, Links und Akzente. Standard: Blau (#2563eb)."
+              hint="Hauptfarbe für Buttons, Links und Akzente. Standard: blue-600."
               value={design.colors.primary}
               defaultValue={DESIGN_DEFAULTS.colors.primary}
               onChange={(v) => setColor("primary", v)}
@@ -684,25 +744,25 @@ export default function SettingsPage() {
             <div className="mt-2 rounded-xl border border-border bg-muted/30 px-4 py-4">
               <p className="mb-4 text-sm font-medium text-card-foreground">Profilprojekt-Farben</p>
               <div className="grid gap-5 sm:grid-cols-2">
-                <ColorField
+                <TailwindColorPicker
                   label="NaWi-Projekt"
                   value={design.colors.subjectNaturwissenschaften}
                   defaultValue={DESIGN_DEFAULTS.colors.subjectNaturwissenschaften}
                   onChange={(v) => setColor("subjectNaturwissenschaften", v)}
                 />
-                <ColorField
+                <TailwindColorPicker
                   label="Musikprojekt"
                   value={design.colors.subjectMusik}
                   defaultValue={DESIGN_DEFAULTS.colors.subjectMusik}
                   onChange={(v) => setColor("subjectMusik", v)}
                 />
-                <ColorField
+                <TailwindColorPicker
                   label="Kunstprojekt"
                   value={design.colors.subjectKunst}
                   defaultValue={DESIGN_DEFAULTS.colors.subjectKunst}
                   onChange={(v) => setColor("subjectKunst", v)}
                 />
-                <ColorField
+                <TailwindColorPicker
                   label="Sportprojekt"
                   value={design.colors.subjectSport}
                   defaultValue={DESIGN_DEFAULTS.colors.subjectSport}
@@ -716,23 +776,23 @@ export default function SettingsPage() {
               <p className="mb-2 text-sm font-medium text-card-foreground">Vorschau</p>
               <div className="flex gap-3">
                 <div className="flex flex-col items-center gap-1">
-                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.primary }} />
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: tailwindToHex(design.colors.primary) }} />
                   <span className="text-[10px] text-muted-foreground">Primär</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.subjectNaturwissenschaften }} />
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: tailwindToHex(design.colors.subjectNaturwissenschaften) }} />
                   <span className="text-[10px] text-muted-foreground">NaWi</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.subjectMusik }} />
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: tailwindToHex(design.colors.subjectMusik) }} />
                   <span className="text-[10px] text-muted-foreground">Musik</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.subjectKunst }} />
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: tailwindToHex(design.colors.subjectKunst) }} />
                   <span className="text-[10px] text-muted-foreground">Kunst</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: design.colors.subjectSport }} />
+                  <div className="h-12 w-12 rounded-lg border border-border" style={{ backgroundColor: tailwindToHex(design.colors.subjectSport) }} />
                   <span className="text-[10px] text-muted-foreground">Sport</span>
                 </div>
               </div>

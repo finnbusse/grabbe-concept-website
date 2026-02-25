@@ -12,6 +12,7 @@ import {
 } from "@/lib/seo"
 import { getDesignSettings, DESIGN_DEFAULTS } from "@/lib/settings"
 import type { DesignSettings } from "@/lib/settings"
+import { tailwindToHex } from "@/lib/design-settings"
 import "./globals.css"
 
 const _instrumentSerif = Instrument_Serif({
@@ -83,38 +84,42 @@ function buildDesignOverrides(ds: DesignSettings) {
   const style: Record<string, string> = {}
   const googleFonts: string[] = []
 
+  // Fonts already bundled via next/font — skip Google Fonts loading for these
+  const bundledFonts = new Set(["Instrument Serif", "Josefin Sans", "Geist"])
+
   // Fonts — only override when not 'default'
   if (ds.fonts.heading !== "default") {
     style["--font-heading"] = `'${ds.fonts.heading}'`
-    googleFonts.push(ds.fonts.heading)
+    if (!bundledFonts.has(ds.fonts.heading)) googleFonts.push(ds.fonts.heading)
   }
   if (ds.fonts.body !== "default") {
     style["--font-body"] = `'${ds.fonts.body}'`
-    googleFonts.push(ds.fonts.body)
+    if (!bundledFonts.has(ds.fonts.body)) googleFonts.push(ds.fonts.body)
   }
   if (ds.fonts.accent !== "default") {
     style["--font-accent"] = `'${ds.fonts.accent}'`
-    googleFonts.push(ds.fonts.accent)
+    if (!bundledFonts.has(ds.fonts.accent)) googleFonts.push(ds.fonts.accent)
   }
 
-  // Primary color — convert hex to HSL for the existing CSS variable system
+  // Primary color — convert Tailwind key to hex, then to HSL for the existing CSS variable system
   if (ds.colors.primary !== DESIGN_DEFAULTS.colors.primary) {
-    const hsl = hexToHSL(ds.colors.primary)
+    const hex = tailwindToHex(ds.colors.primary)
+    const hsl = hexToHSL(hex)
     if (hsl) style["--primary"] = hsl
   }
 
-  // Subject accent colours
+  // Subject accent colours (resolve Tailwind keys to hex)
   if (ds.colors.subjectNaturwissenschaften !== DESIGN_DEFAULTS.colors.subjectNaturwissenschaften) {
-    style["--color-subject-nawi"] = ds.colors.subjectNaturwissenschaften
+    style["--color-subject-nawi"] = tailwindToHex(ds.colors.subjectNaturwissenschaften)
   }
   if (ds.colors.subjectMusik !== DESIGN_DEFAULTS.colors.subjectMusik) {
-    style["--color-subject-musik"] = ds.colors.subjectMusik
+    style["--color-subject-musik"] = tailwindToHex(ds.colors.subjectMusik)
   }
   if (ds.colors.subjectKunst !== DESIGN_DEFAULTS.colors.subjectKunst) {
-    style["--color-subject-kunst"] = ds.colors.subjectKunst
+    style["--color-subject-kunst"] = tailwindToHex(ds.colors.subjectKunst)
   }
   if (ds.colors.subjectSport !== DESIGN_DEFAULTS.colors.subjectSport) {
-    style["--color-subject-sport"] = ds.colors.subjectSport
+    style["--color-subject-sport"] = tailwindToHex(ds.colors.subjectSport)
   }
 
   // Build Google Fonts URL (deduped)
