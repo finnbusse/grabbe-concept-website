@@ -6,13 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImagePicker } from "@/components/cms/image-picker"
-import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, CreditCard, ImageIcon, HelpCircle, Type, List, Quote, Minus, Video, MousePointerClick, Columns, MoveVertical, ListCollapse, Table2, CalendarDays, Download, Newspaper } from "lucide-react"
+import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, CreditCard, ImageIcon, HelpCircle, Type, List, Quote, Minus, Video, MousePointerClick, Columns, MoveVertical, ListCollapse, Table2, CalendarDays, Download, Newspaper, Globe } from "lucide-react"
 
 // ============================================================================
 // Block Types
 // ============================================================================
 
-export type BlockType = 'text' | 'cards' | 'faq' | 'gallery' | 'list' | 'hero' | 'quote' | 'divider' | 'video' | 'cta' | 'columns' | 'spacer' | 'accordion' | 'table' | 'tagged-events' | 'tagged-downloads' | 'tagged-posts'
+export type BlockType = 'text' | 'cards' | 'faq' | 'gallery' | 'list' | 'hero' | 'quote' | 'divider' | 'video' | 'cta' | 'columns' | 'spacer' | 'accordion' | 'table' | 'tagged-events' | 'tagged-downloads' | 'tagged-posts' | 'iframe'
 
 export interface ContentBlock {
   id: string
@@ -45,6 +45,7 @@ const BLOCK_OPTIONS: BlockOption[] = [
   { type: 'tagged-events', icon: CalendarDays, label: 'Termine (Tag)', description: 'Termine mit bestimmtem Tag anzeigen' },
   { type: 'tagged-downloads', icon: Download, label: 'Downloads (Tag)', description: 'Downloads mit bestimmtem Tag anzeigen' },
   { type: 'tagged-posts', icon: Newspaper, label: 'Beiträge (Tag)', description: 'Beiträge mit bestimmtem Tag anzeigen' },
+  { type: 'iframe', icon: Globe, label: 'Externe Website (iframe)', description: 'Drittseite per iframe einbetten' },
 ]
 
 // ============================================================================
@@ -104,6 +105,8 @@ function createDefaultBlock(type: BlockType): ContentBlock {
       return { id, type, data: { tagId: '', heading: 'Downloads' } }
     case 'tagged-posts':
       return { id, type, data: { tagId: '', heading: 'Beiträge', limit: 5 } }
+    case 'iframe':
+      return { id, type, data: { url: '', title: '', height: '500', scrolling: 'auto', allowFullscreen: true, showBorder: true, caption: '' } }
   }
 }
 
@@ -258,6 +261,8 @@ function BlockContent({ block, onChange }: { block: ContentBlock; onChange: (dat
     case 'tagged-downloads':
     case 'tagged-posts':
       return <TaggedContentBlockEditor type={block.type} data={block.data} onChange={onChange} />
+    case 'iframe':
+      return <IframeBlockEditor data={block.data} onChange={onChange} />
     default:
       return <p className="text-sm text-muted-foreground">Unbekannter Block-Typ</p>
   }
@@ -858,6 +863,133 @@ function TableBlockEditor({ data, onChange }: { data: Record<string, unknown>; o
   )
 }
 
+function IframeBlockEditor({ data, onChange }: { data: Record<string, unknown>; onChange: (data: Record<string, unknown>) => void }) {
+  const height = (data.height as string) || '500'
+  const isCustomHeight = !['300', '400', '500', '600', '800'].includes(height)
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <Label className="text-xs">URL der einzubettenden Seite <span className="text-destructive">*</span></Label>
+        <Input
+          value={(data.url as string) || ''}
+          onChange={(e) => onChange({ ...data, url: e.target.value })}
+          placeholder="https://example.com"
+          className="mt-1 text-xs font-mono"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">Hinweis: Manche Webseiten verbieten das Einbetten per iframe (X-Frame-Options).</p>
+      </div>
+      <div>
+        <Label className="text-xs">Titel / Beschriftung (Barrierefreiheit)</Label>
+        <Input
+          value={(data.title as string) || ''}
+          onChange={(e) => onChange({ ...data, title: e.target.value })}
+          placeholder="z.B. Stundenplan, Schulportal…"
+          className="mt-1"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label className="text-xs">Höhe</Label>
+          <Select
+            value={isCustomHeight ? 'custom' : height}
+            onValueChange={(value) => {
+              if (value !== 'custom') onChange({ ...data, height: value })
+              else onChange({ ...data, height: '700' })
+            }}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="300">300 px (klein)</SelectItem>
+              <SelectItem value="400">400 px</SelectItem>
+              <SelectItem value="500">500 px (Standard)</SelectItem>
+              <SelectItem value="600">600 px</SelectItem>
+              <SelectItem value="800">800 px (groß)</SelectItem>
+              <SelectItem value="custom">Benutzerdefiniert</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">Scrollleiste</Label>
+          <Select
+            value={(data.scrolling as string) || 'auto'}
+            onValueChange={(value) => onChange({ ...data, scrolling: value })}
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">Automatisch</SelectItem>
+              <SelectItem value="yes">Immer anzeigen</SelectItem>
+              <SelectItem value="no">Nie anzeigen</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      {isCustomHeight && (
+        <div>
+          <Label className="text-xs">Benutzerdefinierte Höhe (px)</Label>
+          <Input
+            type="number"
+            value={height}
+            onChange={(e) => onChange({ ...data, height: e.target.value })}
+            min={100}
+            max={2000}
+            className="mt-1 w-32"
+          />
+        </div>
+      )}
+      <div className="flex gap-6">
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={(data.allowFullscreen as boolean) !== false}
+            onChange={(e) => onChange({ ...data, allowFullscreen: e.target.checked })}
+            className="rounded border-input"
+          />
+          Vollbild erlauben
+        </label>
+        <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={(data.showBorder as boolean) !== false}
+            onChange={(e) => onChange({ ...data, showBorder: e.target.checked })}
+            className="rounded border-input"
+          />
+          Rahmen anzeigen
+        </label>
+      </div>
+      <div>
+        <Label className="text-xs">Bildunterschrift (optional)</Label>
+        <Input
+          value={(data.caption as string) || ''}
+          onChange={(e) => onChange({ ...data, caption: e.target.value })}
+          placeholder="Kurze Beschreibung des Inhalts…"
+          className="mt-1"
+        />
+      </div>
+      {(data.url as string) && (
+        <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Vorschau</p>
+          <div className={`overflow-hidden ${(data.showBorder as boolean) !== false ? 'rounded-xl border border-border/60' : 'rounded-xl'}`}>
+            <iframe
+              src={data.url as string}
+              title={(data.title as string) || 'Eingebettete Website'}
+              height={height}
+              scrolling={(data.scrolling as string) || 'auto'}
+              allowFullScreen={(data.allowFullscreen as boolean) !== false}
+              className="w-full"
+              style={{ border: 'none', display: 'block' }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function TaggedContentBlockEditor({ type, data, onChange }: { type: string; data: Record<string, unknown>; onChange: (data: Record<string, unknown>) => void }) {
   const [tags, setTags] = useState<Array<{ id: string; name: string; color: string }>>([])
 
@@ -1173,6 +1305,32 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
               ))}
             </tbody>
           </table>
+        </div>
+      )
+    }
+    case 'iframe': {
+      const url = block.data.url as string
+      const title = (block.data.title as string) || 'Eingebettete Website'
+      const height = (block.data.height as string) || '500'
+      const scrolling = (block.data.scrolling as string) || 'auto'
+      const allowFullscreen = (block.data.allowFullscreen as boolean) !== false
+      const showBorder = (block.data.showBorder as boolean) !== false
+      const caption = block.data.caption as string
+      if (!url) return null
+      return (
+        <div className="mb-12">
+          <div className={`overflow-hidden ${showBorder ? 'rounded-2xl border border-border/60' : 'rounded-2xl'}`}>
+            <iframe
+              src={url}
+              title={title}
+              height={height}
+              scrolling={scrolling}
+              allowFullScreen={allowFullscreen}
+              className="w-full"
+              style={{ border: 'none', display: 'block' }}
+            />
+          </div>
+          {caption && <p className="mt-3 text-center text-sm text-muted-foreground">{caption}</p>}
         </div>
       )
     }
