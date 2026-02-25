@@ -293,6 +293,32 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
         </div>
       )
     }
+    case 'iframe': {
+      const url = block.data.url as string
+      const title = (block.data.title as string) || 'Eingebettete Website'
+      const height = (block.data.height as string) || '500'
+      const scrolling = (block.data.scrolling as string) || 'auto'
+      const allowFullscreen = (block.data.allowFullscreen as boolean) !== false
+      const showBorder = (block.data.showBorder as boolean) !== false
+      const caption = block.data.caption as string
+      if (!url) return null
+      return (
+        <div className="mb-12">
+          <div className={`overflow-hidden ${showBorder ? 'rounded-2xl border border-border/60' : 'rounded-2xl'}`}>
+            <iframe
+              src={url}
+              title={title}
+              height={height}
+              scrolling={scrolling}
+              allowFullScreen={allowFullscreen}
+              className="w-full"
+              style={{ border: 'none', display: 'block' }}
+            />
+          </div>
+          {caption && <p className="mt-3 text-center text-sm text-muted-foreground">{caption}</p>}
+        </div>
+      )
+    }
     default:
       return null
   }
