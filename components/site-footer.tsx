@@ -147,7 +147,7 @@ export function SiteFooter({
         {/* Bottom bar */}
         <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-primary-foreground/10 pt-8 sm:flex-row">
           <p className="text-[11px] text-primary-foreground/30">
-            {year} {fullName}
+            © {year} Finn Busse · Alle Rechte vorbehalten
           </p>
           <Link
             href="/cms"
