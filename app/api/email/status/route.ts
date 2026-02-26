@@ -3,6 +3,8 @@ import { getUserRoleSlugs } from "@/lib/permissions"
 import { isAdmin } from "@/lib/permissions-shared"
 import { NextResponse } from "next/server"
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   // Authenticate user
   const supabase = await createClient()

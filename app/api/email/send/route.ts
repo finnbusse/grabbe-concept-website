@@ -6,6 +6,8 @@ import { testEmailTemplate } from "@/lib/email-templates/test"
 import { NextResponse, type NextRequest } from "next/server"
 import { z } from "zod"
 
+export const dynamic = 'force-dynamic'
+
 const SendEmailSchema = z.object({
   type: z.literal("test"),
   to: z.string().email("Ungültige E-Mail-Adresse"),
