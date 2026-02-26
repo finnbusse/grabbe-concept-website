@@ -4,7 +4,7 @@ import { getUserRoleSlugs } from "@/lib/permissions"
 import { isAdmin } from "@/lib/permissions-shared"
 import { sendEmail } from "@/lib/email"
 import { invitationEmailTemplate } from "@/lib/email-templates/invitation"
-import { guessFirstNameFromEmail } from "@/lib/invitation-tokens"
+import { guessFirstNameFromEmail, buildOnboardingUrl } from "@/lib/invitation-tokens"
 import { NextResponse, type NextRequest } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -62,8 +62,7 @@ export async function POST(
     : user.email || "Administrator"
 
   // Build onboarding URL
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://grabbe.site"
-  const onboardingUrl = `${baseUrl}/onboarding?token=${inv.token as string}`
+  const onboardingUrl = buildOnboardingUrl(inv.token as string)
 
   const recipientFirstName = guessFirstNameFromEmail(inv.email as string)
   const roleName = (inv.cms_roles as { name: string } | null)?.name || "Mitglied"

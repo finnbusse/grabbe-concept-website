@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useSearchParams } from "next/navigation"
-import { Eye, EyeOff, Upload, Check, User } from "lucide-react"
+import { Eye, EyeOff, Check } from "lucide-react"
 
 // ---------------------------------------------------------------------------
 // Types
@@ -36,8 +36,6 @@ export default function OnboardingPage() {
   const [lastName, setLastName] = useState("")
   const [displayName, setDisplayName] = useState("")
   const [displayNameTouched, setDisplayNameTouched] = useState(false)
-  const [avatarFile, setAvatarFile] = useState<File | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
   // Step 3 — password
@@ -110,29 +108,6 @@ export default function OnboardingPage() {
   }, [])
 
   // ---------------------------------------------------------------------------
-  // Avatar upload handling
-  // ---------------------------------------------------------------------------
-
-  function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setAvatarFile(file)
-    const reader = new FileReader()
-    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string)
-    reader.readAsDataURL(file)
-  }
-
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault()
-    const file = e.dataTransfer.files?.[0]
-    if (!file || !file.type.startsWith("image/")) return
-    setAvatarFile(file)
-    const reader = new FileReader()
-    reader.onload = (ev) => setAvatarPreview(ev.target?.result as string)
-    reader.readAsDataURL(file)
-  }
-
-  // ---------------------------------------------------------------------------
   // Password validation
   // ---------------------------------------------------------------------------
 
@@ -165,12 +140,6 @@ export default function OnboardingPage() {
     setSubmitError(null)
 
     try {
-      // Upload avatar first if present
-      if (avatarFile) {
-        // Avatar upload will be handled separately after user creation
-        // For now we skip it — the user can upload later in their profile
-      }
-
       const res = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -345,50 +314,9 @@ export default function OnboardingPage() {
                   <span className="field-helper">So wirst du im CMS angezeigt</span>
                 </div>
 
-                {/* Avatar upload */}
-                <div className="onboarding-field">
-                  <label>Profilbild</label>
-                  {avatarPreview ? (
-                    <div className="onboarding-avatar-preview">
-                      <img src={avatarPreview} alt="Vorschau" />
-                      <button
-                        type="button"
-                        onClick={() => { setAvatarFile(null); setAvatarPreview(null) }}
-                        className="onboarding-avatar-remove"
-                      >
-                        Entfernen
-                      </button>
-                    </div>
-                  ) : (
-                    <label
-                      className="onboarding-avatar-drop"
-                      onDragOver={(e) => e.preventDefault()}
-                      onDrop={handleDrop}
-                    >
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                        className="sr-only"
-                      />
-                      <div className="onboarding-avatar-placeholder">
-                        <User className="onboarding-avatar-icon" />
-                      </div>
-                      <div className="onboarding-avatar-text">
-                        <Upload size={16} />
-                        <span>Bild hochladen oder hierher ziehen</span>
-                      </div>
-                    </label>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => goToStep(2)}
-                    className="onboarding-skip"
-                    style={{ visibility: avatarPreview ? "hidden" : "visible" }}
-                  >
-                    Überspringen
-                  </button>
-                </div>
+                <p className="field-helper" style={{ marginTop: "8px" }}>
+                  Dein Profilbild kannst du nach der Anmeldung in deinem Profil hinzufügen.
+                </p>
               </div>
 
               <div className="onboarding-actions">

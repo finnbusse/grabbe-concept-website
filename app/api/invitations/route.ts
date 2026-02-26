@@ -4,7 +4,7 @@ import { getUserRoleSlugs } from "@/lib/permissions"
 import { isAdmin } from "@/lib/permissions-shared"
 import { sendEmail } from "@/lib/email"
 import { invitationEmailTemplate } from "@/lib/email-templates/invitation"
-import { generateInvitationToken, guessFirstNameFromEmail } from "@/lib/invitation-tokens"
+import { generateInvitationToken, guessFirstNameFromEmail, buildOnboardingUrl } from "@/lib/invitation-tokens"
 import { NextResponse, type NextRequest } from "next/server"
 import { z } from "zod"
 
@@ -157,8 +157,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Build onboarding URL
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://grabbe.site"
-  const onboardingUrl = `${baseUrl}/onboarding?token=${token}`
+  const onboardingUrl = buildOnboardingUrl(token)
 
   // Send invitation email
   const recipientFirstName = guessFirstNameFromEmail(email)

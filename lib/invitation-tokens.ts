@@ -1,6 +1,13 @@
 import { createHmac, randomUUID } from "crypto"
 
-const HMAC_SECRET = process.env.INVITATION_HMAC_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "fallback-secret"
+const HMAC_SECRET = process.env.INVITATION_HMAC_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+
+function getHmacSecret(): string {
+  if (!HMAC_SECRET) {
+    throw new Error("Missing INVITATION_HMAC_SECRET or SUPABASE_SERVICE_ROLE_KEY environment variable")
+  }
+  return HMAC_SECRET
+}
 
 /**
  * Generate a secure, single-use invitation token.
@@ -8,7 +15,7 @@ const HMAC_SECRET = process.env.INVITATION_HMAC_SECRET || process.env.SUPABASE_S
  */
 export function generateInvitationToken(): string {
   const id = randomUUID()
-  const signature = createHmac("sha256", HMAC_SECRET)
+  const signature = createHmac("sha256", getHmacSecret())
     .update(id)
     .digest("hex")
     .slice(0, 16)
@@ -27,7 +34,7 @@ export function validateTokenSignature(token: string): boolean {
   const id = parts.slice(0, 5).join("-")
   const providedSignature = parts[5]
 
-  const expectedSignature = createHmac("sha256", HMAC_SECRET)
+  const expectedSignature = createHmac("sha256", getHmacSecret())
     .update(id)
     .digest("hex")
     .slice(0, 16)
@@ -60,4 +67,18 @@ export function guessFirstNameFromEmail(email: string): string | null {
   }
 
   return null
+}
+
+/**
+ * Get the base URL for onboarding links.
+ */
+export function getOnboardingBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_SITE_URL || "https://grabbe.site"
+}
+
+/**
+ * Build the full onboarding URL for a given token.
+ */
+export function buildOnboardingUrl(token: string): string {
+  return `${getOnboardingBaseUrl()}/onboarding?token=${token}`
 }
