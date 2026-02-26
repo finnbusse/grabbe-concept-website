@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import {
   Gauge, Inbox, BarChart2, FileText, Newspaper, CalendarDays, FolderOpen,
-  Sitemap, Globe, Users, Settings, HelpCircle, LogOut, X, UserCircle,
+  FolderTree, Globe, Users, Settings, HelpCircle, LogOut, X, UserCircle,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -36,11 +36,11 @@ const contentLinks: SidebarLink[] = [
   { icon: FileText, label: "Seiten", href: "/cms/seiten", permCheck: (p) => checkPermission(p, "seitenEditor") || p.pages.edit },
   { icon: Newspaper, label: "News", href: "/cms/posts", permCheck: (p) => checkPermission(p, "posts") },
   { icon: CalendarDays, label: "Termine", href: "/cms/events", permCheck: (p) => checkPermission(p, "events") },
-  { icon: FolderOpen, label: "Dateien", href: "/cms/documents", permCheck: (p) => checkPermission(p, "documents") },
+  { icon: FolderOpen, label: "Dateien", href: "/cms/dateien", permCheck: (p) => checkPermission(p, "documents") },
 ]
 
 const adminLinks: SidebarLink[] = [
-  { icon: Sitemap, label: "Seitenstruktur", href: "/cms/seitenstruktur", permCheck: (p) => checkPermission(p, "seitenstruktur") },
+  { icon: FolderTree, label: "Seitenstruktur", href: "/cms/seitenstruktur", permCheck: (p) => checkPermission(p, "seitenstruktur") },
   { icon: Globe, label: "Website-Einstellungen", href: "/cms/settings/website", permCheck: (p) => checkPermission(p, "settings") },
 ]
 

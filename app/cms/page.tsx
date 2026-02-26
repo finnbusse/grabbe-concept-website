@@ -23,7 +23,7 @@ export default async function CmsDashboardPage({ searchParams }: { searchParams:
       .select("first_name")
       .eq("user_id", user.id)
       .single()
-    firstName = profile?.first_name || ""
+    firstName = (profile as { first_name?: string } | null)?.first_name || ""
   }
 
   const [postsRes, pagesRes, eventsRes, docsRes, msgsRes, anmRes] = await Promise.all([
@@ -48,9 +48,9 @@ export default async function CmsDashboardPage({ searchParams }: { searchParams:
 
   const quickActions = [
     { icon: PenLine, title: "Neuer Beitrag", subtitle: "News-Artikel erstellen", href: "/cms/posts/new" },
-    { icon: FilePlus, title: "Neue Seite", subtitle: "Website-Seite anlegen", href: "/cms/seiten/new" },
+    { icon: FilePlus, title: "Neue Seite", subtitle: "Website-Seite anlegen", href: "/cms/pages/new" },
     { icon: CalendarPlus, title: "Neuer Termin", subtitle: "Veranstaltung eintragen", href: "/cms/events/new" },
-    { icon: Upload, title: "Datei hochladen", subtitle: "Dokument hinzufügen", href: "/cms/documents" },
+    { icon: Upload, title: "Datei hochladen", subtitle: "Dokument hinzufügen", href: "/cms/dateien" },
   ]
 
   return (
