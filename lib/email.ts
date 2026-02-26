@@ -1,6 +1,7 @@
 import { Resend } from "resend"
 
-const FROM_ADDRESS = "Grabbe-Gymnasium Detmold <noreply@push.grabbe.site>"
+const FROM_EMAIL = "noreply@push.grabbe.site"
+const FROM_ADDRESS = `Grabbe-Gymnasium Detmold <${FROM_EMAIL}>`
 
 let resendClient: Resend | null = null
 
@@ -73,7 +74,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<SendEmailRes
       text: htmlToPlainText(options.html),
       replyTo: options.replyTo,
       headers: {
-        "List-Unsubscribe": "<mailto:noreply@push.grabbe.site?subject=unsubscribe>",
+        "List-Unsubscribe": `<mailto:${FROM_EMAIL}?subject=unsubscribe>`,
         ...options.headers,
       },
     })
