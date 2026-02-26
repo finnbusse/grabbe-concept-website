@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Eye, EyeOff, Check } from "lucide-react"
 
@@ -18,10 +18,30 @@ interface InvitationData {
 }
 
 // ---------------------------------------------------------------------------
-// Onboarding Page
+// Onboarding Page (wrapped in Suspense for useSearchParams)
 // ---------------------------------------------------------------------------
 
 export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="onboarding-page">
+          <OnboardingHeader />
+          <div className="onboarding-content">
+            <div className="onboarding-loading">
+              <div className="onboarding-spinner" />
+              <p>Einladung wird überprüft...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <OnboardingContent />
+    </Suspense>
+  )
+}
+
+function OnboardingContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get("token")
 
