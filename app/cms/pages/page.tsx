@@ -148,7 +148,7 @@ export default function CmsPagesPage() {
               <Link
                 key={page.id}
                 href={`/cms/pages/${page.id}`}
-                className="group rounded-xl border border-border bg-card p-4 transition-colors hover:border-primary/30"
+                className="group rounded-lg border border-border p-4 transition-colors hover:border-primary/30 hover:bg-muted/50"
               >
                 <div className="flex items-start justify-between gap-2">
                   <h2 className="font-display text-sm font-semibold text-card-foreground group-hover:text-primary">

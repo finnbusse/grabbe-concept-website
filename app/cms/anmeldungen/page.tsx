@@ -94,7 +94,7 @@ export default function AnmeldungenPage() {
           <p className="text-sm text-muted-foreground py-12 text-center">Noch keine Anmeldungen eingegangen.</p>
         ) : (
           items.map((item) => (
-            <div key={item.id} className="rounded-xl border bg-card overflow-hidden">
+            <div key={item.id} className="rounded-lg border border-border overflow-hidden">
               <button
                 onClick={() => setExpandedId(expandedId === item.id ? null : item.id)}
                 className="flex w-full items-center justify-between px-5 py-3 text-left hover:bg-muted/50 transition-colors"

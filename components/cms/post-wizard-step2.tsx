@@ -34,7 +34,7 @@ export function PostWizardStep2() {
       {/* Mode Toggle + Tab Switch */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Content Mode Toggle */}
-        <div className="flex items-center gap-2 rounded-xl border bg-card px-3 py-2">
+        <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
           <span className="text-sm text-muted-foreground mr-1">Modus:</span>
           <Button
             variant={state.contentMode === "blocks" ? "default" : "outline"}
@@ -57,7 +57,7 @@ export function PostWizardStep2() {
         </div>
 
         {/* Edit/Preview Tab */}
-        <div className="flex items-center gap-1 rounded-xl border bg-card p-1">
+        <div className="flex items-center gap-1 rounded-lg border border-border p-1">
           <button
             type="button"
             onClick={() => setActiveTab("edit")}
@@ -208,7 +208,7 @@ function MarkdownEditor({
       )}
 
       {/* Editor + Preview */}
-      <div className={`rounded-2xl border bg-card overflow-hidden ${viewMode === "split" ? "grid grid-cols-2 divide-x" : ""}`}>
+      <div className={`rounded-lg border border-border overflow-hidden ${viewMode === "split" ? "grid grid-cols-2 divide-x" : ""}`}>
         {/* Editor Pane */}
         <div>
           <div className="border-b bg-muted/30 px-4 py-2">

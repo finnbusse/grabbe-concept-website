@@ -235,7 +235,7 @@ export function PageTree({ staticPages, customPages, categories }: PageTreeProps
   const { homepage, folders, otherStatic, unassigned } = buildTree(staticPages, customPages, categories)
 
   return (
-    <div className="rounded-2xl border bg-card">
+    <div className="rounded-lg border border-border">
       {/* Homepage rows (pinned top) */}
       {homepage.length > 0 && (
         <div className="border-b border-border px-2 py-2">

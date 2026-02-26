@@ -106,7 +106,7 @@ export default function SeitenEditorPage() {
       )}
 
       {/* Eigene Seiten hint */}
-      <div className="mt-10 rounded-2xl border bg-card p-6">
+      <div className="mt-10 space-y-4 border-b border-border pb-6">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
             <BookOpen className="h-4 w-4 text-violet-600" />
@@ -129,7 +129,7 @@ function PageCard({ page }: { page: { id: string; title: string; description: st
   return (
     <Link
       href={`/cms/seiten-editor/${page.id}`}
-      className="group rounded-2xl border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-md"
+      className="group rounded-lg border border-border p-5 transition-all hover:border-primary/30 hover:bg-muted/50"
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">

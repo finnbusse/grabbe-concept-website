@@ -191,7 +191,7 @@ export function PageEditor({ page }: PageEditorProps) {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <div className="rounded-2xl border bg-card p-6 space-y-4">
+          <div className="space-y-6 border-b border-border pb-6 space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="title">Seitentitel</Label>
               <Input id="title" value={title} onChange={(e) => handleTitleChange(e.target.value)} placeholder="Seitentitel eingeben..." className="font-display text-lg" />
@@ -210,7 +210,7 @@ export function PageEditor({ page }: PageEditorProps) {
 
           {showPreview ? (
             /* Live Preview Panel */
-            <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <div className="space-y-6 border-b border-border pb-6 space-y-4">
               <div className="flex items-center justify-between border-b border-border pb-3">
                 <div className="flex items-center gap-2">
                   <Monitor className="h-4 w-4 text-primary" />
@@ -241,7 +241,7 @@ export function PageEditor({ page }: PageEditorProps) {
           ) : (
             <>
               {/* Editor Mode Toggle */}
-              <div className="flex items-center gap-2 rounded-2xl border bg-card px-4 py-3">
+              <div className="flex items-center gap-2 rounded-lg border border-border px-4 py-3">
                 <span className="text-sm text-muted-foreground mr-2">Bearbeitungsmodus:</span>
                 <Button
                   variant={editorMode === 'markdown' ? 'default' : 'outline'}
@@ -263,7 +263,7 @@ export function PageEditor({ page }: PageEditorProps) {
 
               {editorMode === 'markdown' ? (
                 <>
-                  <div className="rounded-2xl border bg-card p-6 space-y-3">
+                  <div className="space-y-6 border-b border-border pb-6 space-y-3">
                     <Label htmlFor="content">Inhalt (Markdown)</Label>
                     <p className="text-xs text-muted-foreground">**fett**, *kursiv*, ## Überschrift, [Link](url), ![Bild](url)</p>
                     <textarea
@@ -275,7 +275,7 @@ export function PageEditor({ page }: PageEditorProps) {
                     />
                   </div>
 
-                  <div className="rounded-2xl border bg-card p-6 space-y-4">
+                  <div className="space-y-6 border-b border-border pb-6 space-y-4">
                     <h3 className="font-display font-semibold">Dateien & Medien</h3>
                     <FileUploader
                       label="Bild oder Dokument hochladen"
@@ -295,7 +295,7 @@ export function PageEditor({ page }: PageEditorProps) {
                   </div>
                 </>
               ) : (
-                <div className="rounded-2xl border bg-card p-6 space-y-4">
+                <div className="space-y-6 border-b border-border pb-6 space-y-4">
                   <div>
                     <h3 className="font-display font-semibold">Seiteninhalt</h3>
                     <p className="text-xs text-muted-foreground">Fuegen Sie Bausteine hinzu und bearbeiten Sie den Inhalt der Seite.</p>
@@ -325,7 +325,7 @@ export function PageEditor({ page }: PageEditorProps) {
 
           {/* Hero image — only for new pages */}
           {!page && (
-            <div className="rounded-2xl border bg-card p-6 space-y-3">
+            <div className="space-y-6 border-b border-border pb-6 space-y-3">
               <h3 className="font-display text-sm font-semibold">Hero-Bild</h3>
               <p className="text-xs text-muted-foreground">Wird rechts oben im Seitenkopf angezeigt.</p>
               <ImagePicker
@@ -336,7 +336,7 @@ export function PageEditor({ page }: PageEditorProps) {
             </div>
           )}
 
-          <div className="rounded-2xl border bg-card p-6 space-y-4">
+          <div className="space-y-6 border-b border-border pb-6 space-y-4">
             <h3 className="font-display text-sm font-semibold">Einstellungen</h3>
             <div className="flex items-center justify-between">
               <Label htmlFor="pub">Veröffentlicht</Label>
@@ -396,7 +396,7 @@ export function PageEditor({ page }: PageEditorProps) {
 
           {/* SEO — only for new pages (existing pages manage SEO in settings) */}
           {!page && (
-            <div className="rounded-2xl border bg-card p-6 space-y-4">
+            <div className="space-y-6 border-b border-border pb-6 space-y-4">
               <h3 className="font-display text-sm font-semibold">SEO (optional)</h3>
               <p className="text-[10px] text-muted-foreground">Falls leer, wird der Seitentitel automatisch für Suchmaschinen verwendet.</p>
               <div className="grid gap-2">

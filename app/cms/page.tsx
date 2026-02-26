@@ -78,29 +78,33 @@ export default async function CmsDashboardPage({ searchParams }: { searchParams:
   ]
 
   return (
-    <div>
+    <div className="space-y-8">
       {error === "no_access" && (
-        <div className="mb-6 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
           Sie haben keine Berechtigung, auf diesen Bereich zuzugreifen.
         </div>
       )}
-      <h1 className="font-display text-3xl font-bold text-foreground">Dashboard</h1>
-      <p className="mt-2 text-muted-foreground">Willkommen im Content-Management-System des Grabbe-Gymnasiums.</p>
+      <div>
+        <h1 className="font-display text-3xl font-bold text-foreground">Dashboard</h1>
+        <p className="mt-2 text-muted-foreground">Willkommen im Content-Management-System des Grabbe-Gymnasiums.</p>
+      </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => (
-          <Link key={stat.label} href={stat.href} className="group rounded-2xl border bg-card p-6 transition-all hover:border-primary/30 hover:shadow-md">
-            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.color}`}>
+          <Link key={stat.label} href={stat.href} className="group flex items-center gap-4 rounded-lg border border-border p-4 transition-all hover:border-primary/30 hover:bg-muted/50">
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${stat.color}`}>
               <stat.icon className="h-5 w-5" />
             </div>
-            <p className="mt-4 font-display text-3xl font-bold">{stat.count}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+            <div>
+              <p className="font-display text-2xl font-bold">{stat.count}</p>
+              <p className="text-sm text-muted-foreground">{stat.label}</p>
+            </div>
           </Link>
         ))}
       </div>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div className="space-y-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <FileEdit className="h-5 w-5" />
@@ -110,18 +114,18 @@ export default async function CmsDashboardPage({ searchParams }: { searchParams:
               <p className="text-sm text-muted-foreground">Texte und Inhalte aller Seiten bearbeiten</p>
             </div>
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Bearbeiten Sie die Texte der Startseite und aller Unterseiten. Design und Layout bleiben dabei erhalten.
           </p>
-          <Link href="/cms/seiten-editor" className="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+          <Link href="/cms/seiten-editor" className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
             Seiten bearbeiten
           </Link>
         </div>
 
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="font-display text-lg font-semibold">Schnellstart</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Erstellen Sie neue Inhalte für die Website.</p>
-          <div className="mt-4 flex flex-wrap gap-3">
+        <div className="space-y-4">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border pb-2">Schnellstart</h2>
+          <p className="text-sm text-muted-foreground">Erstellen Sie neue Inhalte für die Website.</p>
+          <div className="flex flex-wrap gap-3">
             <Link href="/cms/posts/new" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
               Neuer Beitrag
             </Link>
@@ -137,10 +141,10 @@ export default async function CmsDashboardPage({ searchParams }: { searchParams:
           </div>
         </div>
 
-        <div className="rounded-2xl border bg-card p-6">
-          <h2 className="font-display text-lg font-semibold">Verwaltung</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Website-Administration</p>
-          <div className="mt-4 flex flex-col gap-2">
+        <div className="space-y-4">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border pb-2">Verwaltung</h2>
+          <p className="text-sm text-muted-foreground">Website-Administration</p>
+          <div className="flex flex-col gap-2">
             <Link href="/cms/settings" className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
               <span className="font-bold text-primary">{">"}</span> Einstellungen (Schulname, Logo, SEO, Variablen)
             </Link>
@@ -157,8 +161,8 @@ export default async function CmsDashboardPage({ searchParams }: { searchParams:
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border bg-card p-6">
-        <div className="flex items-center gap-3">
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 border-b border-border pb-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600">
             <Clock className="h-5 w-5" />
           </div>
@@ -168,9 +172,9 @@ export default async function CmsDashboardPage({ searchParams }: { searchParams:
           </div>
         </div>
         {recentActivity.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">Noch keine Inhalte vorhanden.</p>
+          <p className="text-sm text-muted-foreground">Noch keine Inhalte vorhanden.</p>
         ) : (
-          <ul className="mt-4 divide-y">
+          <ul className="divide-y">
             {recentActivity.map((item) => (
               <li key={`${item.type}-${item.id}`}>
                 <Link href={item.href} className="flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-muted">
@@ -189,9 +193,9 @@ export default async function CmsDashboardPage({ searchParams }: { searchParams:
         )}
       </div>
 
-      <div className="mt-6 rounded-2xl border bg-card p-6">
-        <h2 className="font-display text-lg font-semibold">Tipps</h2>
-        <ul className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+      <div className="space-y-4">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border pb-2">Tipps</h2>
+        <ul className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
           <li className="flex gap-2"><span className="font-bold text-primary">1.</span> Beiträge verwenden Markdown: **fett**, *kursiv*, [Link](url)</li>
           <li className="flex gap-2"><span className="font-bold text-primary">2.</span> Bilder/PDFs unter &quot;Dokumente&quot; hochladen, URL kopieren und einbinden</li>
           <li className="flex gap-2"><span className="font-bold text-primary">3.</span> &quot;Auf Startseite&quot; bei Beiträgen für prominente Anzeige aktivieren</li>

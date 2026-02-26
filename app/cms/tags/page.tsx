@@ -112,8 +112,8 @@ export default function TagsPage() {
       )}
 
       {/* Create new tag */}
-      <div className="mt-6 rounded-2xl border bg-card p-6 space-y-4">
-        <h3 className="font-display font-semibold">Neuen Tag erstellen</h3>
+      <div className="mt-6 space-y-4">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border pb-2">Neuen Tag erstellen</h3>
         <div className="flex flex-wrap items-end gap-4">
           <div className="space-y-2 flex-1 min-w-[200px]">
             <Label htmlFor="tagName">Name</Label>
@@ -175,7 +175,7 @@ export default function TagsPage() {
               const colors = getTagColorClasses(tag.color)
               const isEditing = editId === tag.id
               return (
-                <div key={tag.id} className="flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/30">
+                <div key={tag.id} className="flex items-center gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/30">
                   {isEditing ? (
                     <>
                       <Input

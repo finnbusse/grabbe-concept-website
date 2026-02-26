@@ -48,7 +48,7 @@ export function MessagesInbox({ initialMessages }: { initialMessages: Message[] 
           <p className="text-sm text-muted-foreground py-12 text-center">Keine Nachrichten vorhanden.</p>
         ) : (
           messages.map((msg) => (
-            <div key={msg.id} className={`rounded-xl border bg-card transition-colors ${!msg.read ? "border-primary/30 bg-primary/5" : ""}`}>
+            <div key={msg.id} className={`rounded-lg border border-border transition-colors ${!msg.read ? "border-primary/30 bg-primary/5" : ""}`}>
               <button
                 className="flex w-full items-center gap-4 p-4 text-left"
                 onClick={() => { setOpenId(openId === msg.id ? null : msg.id); if (!msg.read) markRead(msg.id) }}

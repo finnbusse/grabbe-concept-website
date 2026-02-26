@@ -59,7 +59,7 @@ export default async function CmsEventsPage() {
           events.map((event) => (
             <div
               key={event.id}
-              className="flex items-center justify-between rounded-xl border border-border bg-card p-4"
+              className="flex items-center justify-between rounded-lg border border-border p-4"
             >
               <div className="flex items-start gap-4">
                 <div className="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">

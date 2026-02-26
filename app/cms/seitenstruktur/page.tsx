@@ -364,7 +364,7 @@ export default function SeitenstrukturPage() {
 
       <div className="mt-8 space-y-6">
         {/* Top-level system pages */}
-        <div className="rounded-2xl border bg-card p-5">
+        <div className="space-y-4 border-b border-border pb-5">
           <div className="flex items-center gap-2 mb-4">
             <Globe className="h-4 w-4 text-primary" />
             <h2 className="font-display text-lg font-semibold">Hauptebene</h2>
@@ -565,7 +565,7 @@ function CategoryNode({
   )
 
   return (
-    <div className={`rounded-2xl border bg-card ${level > 0 ? "ml-6 border-border/60" : ""}`}>
+    <div className={`rounded-lg border border-border ${level > 0 ? "ml-6 border-border/60" : ""}`}>
       {/* Category Header */}
       <div className="flex items-center gap-2 px-5 py-3">
         <button onClick={() => toggleCategory(category.id)} className="shrink-0">

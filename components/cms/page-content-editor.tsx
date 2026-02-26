@@ -193,7 +193,7 @@ function SectionEditor({
   onReset: (key: string) => void
 }) {
   return (
-    <div className="rounded-2xl border bg-card p-6">
+    <div className="space-y-6">
       <div className="mb-4">
         <h3 className="font-display text-lg font-semibold">{section.title}</h3>
         {section.description && (

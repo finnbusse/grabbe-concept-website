@@ -395,7 +395,7 @@ export default function UsersPage() {
         )}
       </div>
 
-      <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-3">
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Users className="h-4 w-4" />
           <span className="font-medium">{users.length} Benutzer</span>
@@ -472,7 +472,7 @@ export default function UsersPage() {
 
       <div className="grid gap-3">
         {filteredUsers.map((u) => (
-          <div key={u.id} className="rounded-xl border border-border bg-card p-4">
+          <div key={u.id} className="rounded-lg border border-border p-4">
             {editingId === u.id ? (
               /* Edit mode */
               <div className="space-y-4">

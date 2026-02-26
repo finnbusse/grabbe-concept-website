@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { ArrowLeft, Save, Loader2, Trash2, ChevronDown, Lock } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { ArrowLeft, Save, Loader2, Trash2, Lock } from "lucide-react"
 import { TagSelector } from "@/components/cms/tag-selector"
 import { ImagePicker } from "@/components/cms/image-picker"
 import { SeoPreview } from "@/components/cms/seo-preview"
@@ -45,6 +46,8 @@ interface PageSettingsFormProps {
 
 export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const defaultTab = searchParams.get("tab") || "allgemein"
   const [title, setTitle] = useState(page.title)
   const [heroImageUrl, setHeroImageUrl] = useState(page.heroImageUrl)
   const [heroSubtitle, setHeroSubtitle] = useState(page.heroSubtitle)
@@ -56,7 +59,6 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [showDanger, setShowDanger] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [showCelebration, setShowCelebration] = useState(false)
   const wasPublished = page.published
@@ -82,6 +84,12 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
     }
     loadSeoSettings()
   }, [])
+
+  const handleTabChange = (value: string) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set("tab", value)
+    window.history.replaceState({}, "", url.toString())
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -165,7 +173,7 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
   const previewDesc = metaDescription || "Beschreibung der Seite"
 
   return (
-    <div>
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
@@ -190,20 +198,25 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>
       )}
       {success && (
-        <div className="mt-4 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div className="rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           Einstellungen gespeichert!
         </div>
       )}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        {/* Left column */}
-        <div className="space-y-8">
-          {/* Title */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Seitentitel</h3>
+      <Tabs defaultValue={defaultTab} onValueChange={handleTabChange} className="space-y-8">
+        <TabsList>
+          <TabsTrigger value="allgemein">Allgemein</TabsTrigger>
+          <TabsTrigger value="inhalt">Inhalt</TabsTrigger>
+          <TabsTrigger value="seo">SEO</TabsTrigger>
+          {!isStatic && <TabsTrigger value="gefahr" className="text-destructive data-[state=active]:text-destructive">Gefährliche Zone</TabsTrigger>}
+        </TabsList>
+
+        {/* ==================== ALLGEMEIN TAB ==================== */}
+        <TabsContent value="allgemein" className="space-y-8">
+          <div className="max-w-2xl space-y-6">
             <div className="grid gap-2">
               <Label htmlFor="title">Seitentitel</Label>
               <Input
@@ -215,7 +228,7 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
                 disabled={isStatic}
               />
               {isStatic && (
-                <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <p className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Lock className="h-3 w-3" /> Titel geschützter Seiten kann nicht geändert werden
                 </p>
               )}
@@ -227,10 +240,56 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
                 <span className="text-sm font-mono text-muted-foreground">{page.route}</span>
               </div>
               {!isStatic && (
-                <p className="text-[11px] text-muted-foreground">Pfad kann in der Seitenstruktur geändert werden</p>
+                <p className="text-xs text-muted-foreground">Pfad kann in der Seitenstruktur geändert werden</p>
               )}
             </div>
 
+            {/* Status */}
+            {!isStatic && (
+              <>
+                <div className="border-b border-border" />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="pub">Veröffentlicht</Label>
+                    <p className="text-xs text-muted-foreground">Seite ist für Besucher sichtbar</p>
+                  </div>
+                  <Switch id="pub" checked={published} onCheckedChange={setPublished} />
+                </div>
+              </>
+            )}
+
+            {/* Tags */}
+            <div className="border-b border-border" />
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Tags</h3>
+              <TagSelector selectedTagIds={tagIds} onChange={setTagIds} />
+            </div>
+
+            {/* Timestamps */}
+            {(page.createdAt || page.updatedAt) && (
+              <>
+                <div className="border-b border-border" />
+                <div className="space-y-2">
+                  <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Zeitstempel</h3>
+                  {page.createdAt && (
+                    <p className="text-xs text-muted-foreground">
+                      Erstellt am: {new Date(page.createdAt).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
+                  {page.updatedAt && (
+                    <p className="text-xs text-muted-foreground">
+                      Zuletzt bearbeitet: {new Date(page.updatedAt).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ==================== INHALT TAB ==================== */}
+        <TabsContent value="inhalt" className="space-y-8">
+          <div className="max-w-2xl space-y-6">
             {/* Hero Subtitle */}
             {!isStatic && (
               <div className="grid gap-2">
@@ -243,60 +302,32 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
                   maxLength={200}
                 />
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] text-muted-foreground">Wird als beschreibender Text unter dem Seitentitel angezeigt</p>
+                  <p className="text-xs text-muted-foreground">Wird als beschreibender Text unter dem Seitentitel angezeigt</p>
                   {heroSubtitle && (
-                    <span className={`text-[10px] ${heroSubtitle.length > 180 ? "text-amber-600" : "text-muted-foreground"}`}>
+                    <span className={`text-xs ${heroSubtitle.length > 180 ? "text-amber-600" : "text-muted-foreground"}`}>
                       {heroSubtitle.length}/200
                     </span>
                   )}
                 </div>
               </div>
             )}
+
+            {/* Hero Image */}
+            <div className="border-b border-border" />
+            <div className="space-y-4">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hero-Bild</h3>
+              <ImagePicker
+                value={heroImageUrl || null}
+                onChange={(url) => setHeroImageUrl(url || "")}
+                aspectRatio="16/9"
+              />
+            </div>
           </div>
+        </TabsContent>
 
-          <div className="border-b border-border" />
-
-          {/* Hero Image */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Hero-Bild</h3>
-            <ImagePicker
-              value={heroImageUrl || null}
-              onChange={(url) => setHeroImageUrl(url || "")}
-              aspectRatio="16/9"
-            />
-          </div>
-
-          <div className="border-b border-border" />
-
-          {/* Tags */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Tags</h3>
-            <TagSelector selectedTagIds={tagIds} onChange={setTagIds} />
-          </div>
-        </div>
-
-        {/* Right column */}
-        <div className="space-y-8">
-          {/* Status */}
-          {!isStatic && (
-            <>
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Status</h3>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="pub">Veröffentlicht</Label>
-                    <p className="text-[11px] text-muted-foreground">Seite ist für Besucher sichtbar</p>
-                  </div>
-                  <Switch id="pub" checked={published} onCheckedChange={setPublished} />
-                </div>
-              </div>
-              <div className="border-b border-border" />
-            </>
-          )}
-
-          {/* SEO */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">SEO</h3>
+        {/* ==================== SEO TAB ==================== */}
+        <TabsContent value="seo" className="space-y-8">
+          <div className="max-w-2xl space-y-6">
             <div className="grid gap-2">
               <Label htmlFor="seoTitle">SEO-Titel (optional)</Label>
               <Input
@@ -305,10 +336,11 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
                 onChange={(e) => setSeoTitle(e.target.value)}
                 placeholder={`${title || "Seitentitel"}${seoSeparator}${seoSuffix}`}
               />
-              <p className="text-[10px] text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Wird automatisch ergänzt um &quot;{seoSeparator}{seoSuffix}&quot;
               </p>
             </div>
+
             <div className="grid gap-2">
               <Label htmlFor="metaDesc">Meta-Beschreibung</Label>
               <textarea
@@ -320,20 +352,25 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
                 rows={3}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
               />
-              <span className={`text-[10px] ${metaDescription.length > 160 ? "text-amber-600" : "text-muted-foreground"}`}>
+              <span className={`text-xs ${metaDescription.length > 160 ? "text-amber-600" : "text-muted-foreground"}`}>
                 {metaDescription.length}/160 Zeichen
               </span>
             </div>
 
             {/* Google preview */}
-            <SeoPreview
-              title={previewTitle}
-              description={previewDesc}
-              url={page.route}
-              titleSeparator={seoSeparator}
-              titleSuffix={seoSuffix}
-            />
+            <div className="border-b border-border" />
+            <div className="space-y-4">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Google-Vorschau</h3>
+              <SeoPreview
+                title={previewTitle}
+                description={previewDesc}
+                url={page.route}
+                titleSeparator={seoSeparator}
+                titleSuffix={seoSuffix}
+              />
+            </div>
 
+            <div className="border-b border-border" />
             <div className="grid gap-2">
               <Label>Social-Media Bild</Label>
               <ImagePicker
@@ -343,56 +380,26 @@ export function PageSettingsForm({ page, isStatic }: PageSettingsFormProps) {
               />
             </div>
           </div>
+        </TabsContent>
 
-          {/* Timestamps */}
-          {(page.createdAt || page.updatedAt) && (
-            <>
-              <div className="border-b border-border" />
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Zeitstempel</h3>
-                {page.createdAt && (
-                  <p className="text-xs text-muted-foreground">
-                    Erstellt am: {new Date(page.createdAt).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                )}
-                {page.updatedAt && (
-                  <p className="text-xs text-muted-foreground">
-                    Zuletzt bearbeitet: {new Date(page.updatedAt).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Danger zone */}
-          {!isStatic && (
-            <>
-              <div className="border-b border-border" />
-              <div className="rounded-2xl border border-destructive/30 bg-card">
-                <button
-                  type="button"
-                  onClick={() => setShowDanger(!showDanger)}
-                  className="flex w-full items-center justify-between px-6 py-4 text-sm font-semibold text-destructive"
-                >
-                  Gefährliche Zone
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showDanger ? "rotate-180" : ""}`} />
-                </button>
-                {showDanger && (
-                  <div className="border-t border-destructive/20 px-6 py-4">
-                    <p className="mb-3 text-xs text-muted-foreground">
-                      Das Löschen einer Seite kann nicht rückgängig gemacht werden. Alle Inhalte gehen verloren.
-                    </p>
-                    <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
-                      {deleting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Trash2 className="mr-1.5 h-3.5 w-3.5" />}
-                      Seite löschen
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+        {/* ==================== GEFÄHRLICHE ZONE TAB ==================== */}
+        {!isStatic && (
+          <TabsContent value="gefahr" className="space-y-8">
+            <div className="max-w-2xl space-y-6">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-destructive border-b border-destructive/30 pb-2">
+                Seite löschen
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Das Löschen einer Seite kann nicht rückgängig gemacht werden. Alle Inhalte gehen verloren.
+              </p>
+              <Button variant="destructive" size="sm" onClick={handleDelete} disabled={deleting}>
+                {deleting ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Trash2 className="mr-1.5 h-3.5 w-3.5" />}
+                Seite löschen
+              </Button>
+            </div>
+          </TabsContent>
+        )}
+      </Tabs>
 
       {/* Publish Celebration */}
       {showCelebration && (

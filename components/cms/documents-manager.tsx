@@ -140,7 +140,7 @@ export function DocumentsManager({ initialDocuments }: { initialDocuments: Doc[]
       <h1 className="font-display text-2xl font-bold">Dokumente & Medien</h1>
       <p className="mt-1 text-sm text-muted-foreground">Laden Sie Dateien hoch und kopieren Sie die URL, um sie auf Seiten und Beiträgen einzubinden.</p>
 
-      <div className="mt-6 rounded-2xl border bg-card p-6 space-y-4">
+      <div className="mt-6 space-y-4">
         <h3 className="font-display font-semibold">Neues Dokument hochladen</h3>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
@@ -185,7 +185,7 @@ export function DocumentsManager({ initialDocuments }: { initialDocuments: Doc[]
         ) : (
           <div className="space-y-2">
             {docs.map((doc) => (
-              <div key={doc.id} className="flex items-center gap-4 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/30">
+              <div key={doc.id} className="flex items-center gap-4 rounded-lg border border-border p-4 transition-colors hover:bg-muted/30">
                 {doc.file_type?.startsWith("image/") ? (
                   <ImageIcon className="h-5 w-5 text-primary shrink-0" />
                 ) : (

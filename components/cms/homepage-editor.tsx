@@ -226,7 +226,7 @@ export function HomepageEditor({ sections }: HomepageEditorProps) {
           const displayTitle = section.title.replace(/^Startseite:\s*/i, "")
 
           return (
-            <div key={section.id} className="rounded-2xl border bg-card overflow-hidden">
+            <div key={section.id} className="rounded-lg border border-border overflow-hidden">
               {/* Section header */}
               <button
                 type="button"

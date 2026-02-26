@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { AlertCircle, CheckCircle, Loader2, RefreshCw, XCircle } from "lucide-react"
 
 interface DiagnosticResult {
@@ -57,7 +56,7 @@ export default function DiagnosticPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold">Datenbank-Diagnose</h1>
@@ -76,7 +75,7 @@ export default function DiagnosticPage() {
       </div>
 
       {error && (
-        <Card className="border-destructive/50 bg-destructive/10 p-4">
+        <div className="border-b border-destructive/30 bg-destructive/10 px-4 py-3">
           <div className="flex items-start gap-3">
             <XCircle className="h-5 w-5 text-destructive mt-0.5" />
             <div className="flex-1">
@@ -84,14 +83,14 @@ export default function DiagnosticPage() {
               <p className="mt-1 text-sm text-destructive/90">{error}</p>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {result && (
         <>
           {/* Summary */}
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-4">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
               {result.summary?.status === 'ALL_CHECKS_PASSED' ? (
                 <CheckCircle className="h-6 w-6 text-green-600" />
               ) : (
@@ -110,14 +109,14 @@ export default function DiagnosticPage() {
             </div>
 
             {result.recommended_action && (
-              <div className="mt-4 rounded-lg bg-yellow-50 border border-yellow-200 p-4">
+              <div className="rounded-lg bg-yellow-50 border border-yellow-200 p-4">
                 <h3 className="font-semibold text-yellow-900 mb-2">Empfohlene Aktion:</h3>
                 <p className="text-sm text-yellow-800">{result.recommended_action}</p>
                 <div className="mt-3 text-sm text-yellow-800">
                   <strong>So beheben Sie das Problem:</strong>
                   <ol className="ml-4 mt-2 list-decimal space-y-1">
                     <li>Öffnen Sie Ihr Supabase Dashboard</li>
-                    <li>Gehen Sie zu "SQL Editor"</li>
+                    <li>Gehen Sie zu &quot;SQL Editor&quot;</li>
                     <li>Öffnen Sie die Datei <code className="bg-yellow-100 px-1 rounded">scripts/complete_schema.sql</code> aus diesem Projekt</li>
                     <li>Kopieren Sie den Inhalt und führen Sie ihn im SQL Editor aus</li>
                     <li>Führen Sie diese Diagnose erneut aus</li>
@@ -125,12 +124,12 @@ export default function DiagnosticPage() {
                 </div>
               </div>
             )}
-          </Card>
+          </div>
 
           {/* Errors */}
           {result.errors.length > 0 && (
-            <Card className="p-6 border-destructive/50">
-              <h2 className="font-display text-lg font-bold mb-4 text-destructive">
+            <div className="space-y-4">
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-destructive border-b border-destructive/30 pb-2">
                 Gefundene Fehler ({result.errors.length})
               </h2>
               <div className="space-y-2">
@@ -141,12 +140,14 @@ export default function DiagnosticPage() {
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Detailed Checks */}
-          <Card className="p-6">
-            <h2 className="font-display text-lg font-bold mb-4">Detaillierte Prüfungen</h2>
+          <div className="space-y-4">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground border-b border-border pb-2">
+              Detaillierte Prüfungen
+            </h2>
             <div className="space-y-3">
               {Object.entries(result.checks).map(([key, value]: [string, any]) => (
                 <div key={key} className="flex items-start gap-3 rounded-lg border p-3">
@@ -195,7 +196,7 @@ export default function DiagnosticPage() {
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
 
           {/* Timestamp */}
           <div className="text-center text-xs text-muted-foreground">

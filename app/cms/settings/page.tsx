@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
+import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -345,6 +346,8 @@ function TailwindColorPicker({
 export default function SettingsPage() {
   const { roleSlugs } = usePermissions()
   const showEmailTab = isAdmin(roleSlugs)
+  const searchParams = useSearchParams()
+  const defaultTab = searchParams.get("tab") || "website"
 
   const [values, setValues] = useState<Values>({})
   const [initial, setInitial] = useState<Values>({})
@@ -568,23 +571,22 @@ export default function SettingsPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="general" className="space-y-6">
+      <Tabs defaultValue={defaultTab} onValueChange={(v) => {
+        const url = new URL(window.location.href)
+        url.searchParams.set("tab", v)
+        window.history.replaceState({}, "", url.toString())
+      }} className="space-y-8">
         <TabsList>
-          <TabsTrigger value="general">Allgemein</TabsTrigger>
-          <TabsTrigger value="design">
-            <Paintbrush className="mr-1.5 h-3.5 w-3.5" />
-            Design
-          </TabsTrigger>
+          <TabsTrigger value="website">Website</TabsTrigger>
+          <TabsTrigger value="design">Design</TabsTrigger>
+          <TabsTrigger value="seo">SEO</TabsTrigger>
           {showEmailTab && (
-            <TabsTrigger value="email">
-              <Mail className="mr-1.5 h-3.5 w-3.5" />
-              E-Mail
-            </TabsTrigger>
+            <TabsTrigger value="email">E-Mail</TabsTrigger>
           )}
         </TabsList>
 
-        {/* ==================== GENERAL TAB ==================== */}
-        <TabsContent value="general" className="space-y-6">
+        {/* ==================== WEBSITE TAB ==================== */}
+        <TabsContent value="website" className="space-y-8">
 
       {/* ====================== GENERAL ====================== */}
       <Section
@@ -675,6 +677,11 @@ export default function SettingsPage() {
         </Field>
       </Section>
 
+        </TabsContent>
+
+        {/* ==================== SEO TAB ==================== */}
+        <TabsContent value="seo" className="space-y-8">
+
       {/* ====================== SEO ====================== */}
       <Section
         icon={SearchIcon}
@@ -753,7 +760,7 @@ export default function SettingsPage() {
         </TabsContent>
 
         {/* ==================== DESIGN TAB ==================== */}
-        <TabsContent value="design" className="space-y-6">
+        <TabsContent value="design" className="space-y-8">
 
           {/* -- Fonts -- */}
           <Section
@@ -857,7 +864,7 @@ export default function SettingsPage() {
 
         {/* ==================== EMAIL TAB ==================== */}
         {showEmailTab && (
-          <TabsContent value="email" className="space-y-6">
+          <TabsContent value="email" className="space-y-8">
             <Section
               icon={Mail}
               title="Konfigurationsstatus"

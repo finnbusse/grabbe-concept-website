@@ -150,7 +150,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
   return (
     <div className="space-y-4">
       {blocks.map((block, index) => (
-        <div key={block.id} className="rounded-2xl border bg-card">
+        <div key={block.id} className="rounded-lg border border-border">
           {/* Block Header */}
           <div className="flex items-center gap-2 border-b px-4 py-2">
             <GripVertical className="h-4 w-4 text-muted-foreground/40" />
@@ -200,7 +200,7 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
         </Button>
 
         {showAddMenu && (
-          <div className="absolute top-full left-0 right-0 mt-2 rounded-xl border bg-card p-2 shadow-lg z-10">
+          <div className="absolute top-full left-0 right-0 mt-2 rounded-lg border border-border p-2 bg-background shadow-lg z-10">
             {BLOCK_OPTIONS.map((option) => (
               <button
                 key={option.type}
