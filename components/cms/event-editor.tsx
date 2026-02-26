@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft, Save } from "lucide-react"
-import { TagSelector, TagBadge } from "./tag-selector"
-import type { TagData } from "./tag-selector"
+import { TagSelector } from "./tag-selector"
+import { DateRangePicker } from "./date-range-picker"
 import Link from "next/link"
 
 interface EventEditorProps {
@@ -21,6 +21,7 @@ interface EventEditorProps {
     event_time: string | null
     location: string | null
     published: boolean
+    is_all_day?: boolean | null
   }
 }
 
@@ -30,7 +31,12 @@ export function EventEditor({ event }: EventEditorProps) {
   const [description, setDescription] = useState(event?.description ?? "")
   const [eventDate, setEventDate] = useState(event?.event_date ?? "")
   const [eventEndDate, setEventEndDate] = useState(event?.event_end_date ?? "")
-  const [eventTime, setEventTime] = useState(event?.event_time ?? "")
+  const [eventTime, setEventTime] = useState(() => {
+    // Normalize legacy free-text values like "18:00 Uhr" → "18:00"
+    const t = event?.event_time ?? ""
+    return t.replace(/ ?uhr$/i, "").trim()
+  })
+  const [isAllDay, setIsAllDay] = useState(event?.is_all_day ?? false)
   const [location, setLocation] = useState(event?.location ?? "")
   const [category, setCategory] = useState((event as Record<string, unknown>)?.category as string ?? "termin")
   const [published, setPublished] = useState(event?.published ?? true)
@@ -65,7 +71,7 @@ export function EventEditor({ event }: EventEditorProps) {
         title,
         description: description || null,
         event_date: eventDate,
-        event_time: eventTime || null,
+        event_time: isAllDay ? null : (eventTime || null),
         location: location || null,
         category,
         published,
@@ -73,8 +79,12 @@ export function EventEditor({ event }: EventEditorProps) {
         updated_at: new Date().toISOString(),
       }
 
-      // Try with event_end_date first, fall back without it if column doesn't exist
-      const payloadWithEndDate = { ...basePayload, event_end_date: eventEndDate || null }
+      // Try with event_end_date and is_all_day first, fall back without them if columns don't exist
+      const payloadWithEndDate = {
+        ...basePayload,
+        event_end_date: isAllDay ? (eventEndDate || null) : null,
+        is_all_day: isAllDay,
+      }
 
       const saveWithPayload = async (payload: Record<string, unknown>) => {
         if (event) {
@@ -88,8 +98,8 @@ export function EventEditor({ event }: EventEditorProps) {
 
       let saveError = await saveWithPayload(payloadWithEndDate)
 
-      // If the error mentions event_end_date column, retry without it
-      if (saveError && saveError.message?.includes("event_end_date")) {
+      // If the error mentions unknown columns, retry without them
+      if (saveError && (saveError.message?.includes("event_end_date") || saveError.message?.includes("is_all_day"))) {
         saveError = await saveWithPayload(basePayload)
       }
 
@@ -169,32 +179,16 @@ export function EventEditor({ event }: EventEditorProps) {
               />
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="grid gap-2">
-                <Label htmlFor="event_date">Startdatum</Label>
-                <Input
-                  id="event_date"
-                  type="date"
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="event_end_date">Enddatum (optional)</Label>
-                <Input
-                  id="event_end_date"
-                  type="date"
-                  value={eventEndDate}
-                  onChange={(e) => setEventEndDate(e.target.value)}
-                  min={eventDate || undefined}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="event_time">Uhrzeit (optional)</Label>
-                <Input
-                  id="event_time"
-                  value={eventTime}
-                  onChange={(e) => setEventTime(e.target.value)}
-                  placeholder="z.B. 18:00 Uhr"
+              <div className="col-span-full lg:col-span-3">
+                <DateRangePicker
+                  date={eventDate}
+                  endDate={eventEndDate}
+                  time={eventTime}
+                  isAllDay={isAllDay}
+                  onDateChange={setEventDate}
+                  onEndDateChange={setEventEndDate}
+                  onTimeChange={setEventTime}
+                  onIsAllDayChange={setIsAllDay}
                 />
               </div>
               <div className="grid gap-2">
