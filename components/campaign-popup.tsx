@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import type { Campaign, CampaignButton } from "@/lib/types/database.types"
+import { trackEvent } from "@/lib/analytics"
 
 interface CampaignPopupProps {
   campaigns: Campaign[]
@@ -60,6 +61,7 @@ export function CampaignPopup({ campaigns }: CampaignPopupProps) {
 
     if (campaign) {
       setActiveCampaign(campaign)
+      trackEvent("campaign_shown", { campaign_id: campaign.id, title: campaign.title })
     }
   }, [campaigns])
 
@@ -67,6 +69,7 @@ export function CampaignPopup({ campaigns }: CampaignPopupProps) {
     if (activeCampaign?.show_once) {
       localStorage.setItem(`campaign_dismissed_${activeCampaign.id}`, "1")
     }
+    trackEvent("campaign_dismissed", { campaign_id: activeCampaign!.id, title: activeCampaign!.title })
     setActiveCampaign(null)
   }
 
@@ -125,7 +128,10 @@ export function CampaignPopup({ campaigns }: CampaignPopupProps) {
                     ...(isPrimary ? { backgroundColor: accentColor } : {}),
                     ...(isOutline ? { borderColor: accentColor, color: accentColor } : {}),
                   }}
-                  onClick={handleClose}
+                  onClick={() => {
+                    trackEvent("campaign_button_click", { campaign_id: activeCampaign.id, label: btn.label, url: btn.url })
+                    handleClose()
+                  }}
                 >
                   {btn.label}
                 </a>
