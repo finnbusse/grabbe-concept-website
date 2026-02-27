@@ -7,7 +7,6 @@ import { createClient } from "@/lib/supabase/client"
 import {
   Gauge, Inbox, BarChart2, FileText, Newspaper, CalendarDays, FolderOpen,
   FolderTree, Globe, Users, Settings, HelpCircle, LogOut, X, UserCircle,
-  Megaphone,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -37,7 +36,6 @@ const contentLinks: SidebarLink[] = [
   { icon: FileText, label: "Seiten", href: "/cms/seiten", permCheck: (p) => checkPermission(p, "seitenEditor") || p.pages.edit },
   { icon: Newspaper, label: "News", href: "/cms/posts", permCheck: (p) => checkPermission(p, "posts") },
   { icon: CalendarDays, label: "Termine", href: "/cms/events", permCheck: (p) => checkPermission(p, "events") },
-  { icon: Megaphone, label: "Kampagnen", href: "/cms/campaigns" },
   { icon: FolderOpen, label: "Dateien", href: "/cms/dateien", permCheck: (p) => checkPermission(p, "documents") },
 ]
 

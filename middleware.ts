@@ -85,6 +85,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl, 301)
   }
 
+  // Redirect /cms/campaigns → /cms/posts?tab=kampagnen
+  if (pathname === '/cms/campaigns') {
+    const redirectUrl = request.nextUrl.clone()
+    redirectUrl.pathname = '/cms/posts'
+    redirectUrl.searchParams.set('tab', 'kampagnen')
+    return NextResponse.redirect(redirectUrl, 301)
+  }
+
   // Redirect /cms/navigation → /cms/seitenstruktur
   if (pathname === '/cms/navigation') {
     const redirectUrl = request.nextUrl.clone()
