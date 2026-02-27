@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Token erforderlich" }, { status: 400 })
   }
 
-  // Validate token signature
   if (!validateTokenSignature(token)) {
     return NextResponse.json({ error: "Ungültiger Token" }, { status: 400 })
   }
@@ -30,17 +29,14 @@ export async function GET(request: NextRequest) {
 
   const inv = invitation as Record<string, unknown>
 
-  // Check if already accepted
   if (inv.accepted_at) {
     return NextResponse.json({ error: "Diese Einladung wurde bereits angenommen" }, { status: 410 })
   }
 
-  // Check if expired
   if (new Date(inv.expires_at as string) < new Date()) {
     return NextResponse.json({ error: "Diese Einladung ist abgelaufen" }, { status: 410 })
   }
 
-  // Fetch inviter name
   let inviterName: string | null = null
   const { data: invitationFull } = await adminClient
     .from("invitations")
@@ -82,20 +78,22 @@ export async function POST(request: NextRequest) {
     token: string
     firstName: string
     lastName: string
-    displayName: string
+    displayName?: string
     password: string
   }
 
-  if (!token || !firstName || !lastName || !password) {
+  const normalizedFirstName = firstName?.trim()
+  const normalizedLastName = lastName?.trim()
+  const normalizedDisplayName = (displayName ?? "").trim() || `${normalizedFirstName} ${normalizedLastName}`.trim()
+
+  if (!token || !normalizedFirstName || !normalizedLastName || !password) {
     return NextResponse.json({ error: "Alle Pflichtfelder müssen ausgefüllt sein" }, { status: 400 })
   }
 
-  // Validate token signature
   if (!validateTokenSignature(token)) {
     return NextResponse.json({ error: "Ungültiger Token" }, { status: 400 })
   }
 
-  // Validate password requirements
   if (password.length < 8) {
     return NextResponse.json({ error: "Passwort muss mindestens 8 Zeichen lang sein" }, { status: 400 })
   }
@@ -111,7 +109,6 @@ export async function POST(request: NextRequest) {
 
   const adminClient = createAdminClient()
 
-  // Re-validate invitation
   const { data: invitation, error: fetchError } = await adminClient
     .from("invitations")
     .select("id, email, role_id, accepted_at, expires_at")
@@ -132,11 +129,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Diese Einladung ist abgelaufen" }, { status: 410 })
   }
 
-  // Create auth user via Supabase Admin
   const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
     email: inv.email,
     password,
     email_confirm: true,
+    user_metadata: {
+      first_name: normalizedFirstName,
+      last_name: normalizedLastName,
+      display_name: normalizedDisplayName,
+      full_name: normalizedDisplayName,
+    },
   })
 
   if (authError) {
@@ -149,28 +151,38 @@ export async function POST(request: NextRequest) {
 
   const userId = authData.user.id
 
-  // Create user profile
-  await adminClient.from("user_profiles").insert({
+  const { error: profileError } = await adminClient.from("user_profiles").insert({
     user_id: userId,
-    first_name: firstName,
-    last_name: lastName,
-    display_name: displayName || `${firstName} ${lastName}`,
+    first_name: normalizedFirstName,
+    last_name: normalizedLastName,
     title: "",
   })
 
-  // Assign role
+  if (profileError) {
+    await adminClient.auth.admin.deleteUser(userId)
+    return NextResponse.json({ error: "Profil konnte nicht gespeichert werden" }, { status: 500 })
+  }
+
   if (inv.role_id) {
-    await adminClient.from("user_roles").insert({
+    const { error: roleError } = await adminClient.from("user_roles").insert({
       user_id: userId,
       role_id: inv.role_id,
     })
+
+    if (roleError) {
+      await adminClient.auth.admin.deleteUser(userId)
+      return NextResponse.json({ error: "Rolle konnte nicht zugewiesen werden" }, { status: 500 })
+    }
   }
 
-  // Mark invitation as accepted
-  await adminClient
+  const { error: invitationUpdateError } = await adminClient
     .from("invitations")
     .update({ accepted_at: new Date().toISOString() })
     .eq("id", inv.id)
+
+  if (invitationUpdateError) {
+    return NextResponse.json({ error: "Einladung konnte nicht finalisiert werden" }, { status: 500 })
+  }
 
   return NextResponse.json({ success: true, userId })
 }
