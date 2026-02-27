@@ -4,7 +4,7 @@ export default function StatistikPage() {
   return (
     <div>
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Statistik</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground">Statistik</h1>
         <p className="text-sm text-muted-foreground mt-1">Website-Statistiken und Analysen</p>
       </div>
 

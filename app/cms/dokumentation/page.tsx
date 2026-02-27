@@ -5,7 +5,7 @@ export default function DokumentationPage() {
   return (
     <div>
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Dokumentation</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground">Dokumentation</h1>
         <p className="text-sm text-muted-foreground mt-1">Hilfe und Anleitungen für das CMS</p>
       </div>
 

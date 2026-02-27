@@ -42,7 +42,7 @@ export default async function CmsEventsPage() {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold text-foreground">Termine</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">Termine</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Verwalten Sie schulische Veranstaltungen und Termine.
           </p>

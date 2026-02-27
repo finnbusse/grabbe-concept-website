@@ -112,7 +112,7 @@ export default function SystemSettingsPage() {
     <div className="space-y-6 pb-12">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-foreground">CMS-Einstellungen</h1>
+        <h1 className="font-display text-2xl font-bold text-foreground">CMS-Einstellungen</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Einstellungen, die das CMS-System betreffen.
         </p>
