@@ -1,16 +1,18 @@
 import Link from "next/link"
 import { EDITABLE_PAGES } from "@/lib/page-content"
-import { FileEdit, ArrowRight, Home, BookOpen, GraduationCap, School, FileText } from "lucide-react"
+import { FileEdit, ArrowRight, Home, BookOpen, GraduationCap, School, FileText, LayoutGrid } from "lucide-react"
 
 export default function SeitenEditorPage() {
   // Group pages by route category
   const homepagePages = EDITABLE_PAGES.filter((p) => p.route === "/")
-  const unsereSchulePages = EDITABLE_PAGES.filter((p) => p.route.startsWith("/unsere-schule"))
-  const schullebenPages = EDITABLE_PAGES.filter((p) => p.route.startsWith("/schulleben"))
+  const landingPages = EDITABLE_PAGES.filter((p) => p.id.startsWith("landing-"))
+  const unsereSchulePages = EDITABLE_PAGES.filter((p) => p.route.startsWith("/unsere-schule") && !p.id.startsWith("landing-"))
+  const schullebenPages = EDITABLE_PAGES.filter((p) => p.route.startsWith("/schulleben") && !p.id.startsWith("landing-"))
   const otherPages = EDITABLE_PAGES.filter((p) =>
     p.route !== "/" &&
     !p.route.startsWith("/unsere-schule") &&
-    !p.route.startsWith("/schulleben")
+    !p.route.startsWith("/schulleben") &&
+    !p.id.startsWith("landing-")
   )
 
   return (
@@ -53,6 +55,23 @@ export default function SeitenEditorPage() {
           ))}
         </div>
       </div>
+
+      {/* Landing Pages (Kategorieübersichten) */}
+      {landingPages.length > 0 && (
+        <div className="mt-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+              <LayoutGrid className="h-4 w-4 text-violet-600" />
+            </div>
+            <h2 className="font-display text-xl font-semibold">Landing Pages (Kategorieübersichten)</h2>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {landingPages.map((page) => (
+              <PageCard key={page.id} page={page} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Unsere Schule */}
       {unsereSchulePages.length > 0 && (
