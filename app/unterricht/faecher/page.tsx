@@ -28,7 +28,7 @@ const SUBJECTS: { name: string; emoji: string; slug: string }[] = [
   { name: "Kunst", emoji: "🎨", slug: "kunst" },
   { name: "Mathematik", emoji: "📐", slug: "mathematik" },
   { name: "Musik", emoji: "🎵", slug: "musik" },
-  { name: "Latein", emoji: "🏛️", slug: "latein" },
+  { name: "Latein", emoji: "🏺", slug: "latein" },
   { name: "Pädagogik", emoji: "🧠", slug: "paedagogik" },
   { name: "Philosophie", emoji: "💭", slug: "philosophie" },
   { name: "Physik", emoji: "⚛️", slug: "physik" },
