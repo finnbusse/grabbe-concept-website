@@ -65,7 +65,7 @@ export async function GET() {
         slug: 'test-diagnostic-' + Date.now(),
         content: 'This is a diagnostic test post',
         user_id: user.id,
-        published: false,
+        status: 'draft',
       }
 
       const { data: insertData, error: insertError } = await supabase
@@ -109,7 +109,7 @@ export async function GET() {
         slug: 'test-diagnostic-' + Date.now(),
         content: 'This is a diagnostic test page',
         user_id: user.id,
-        published: false,
+        status: 'draft',
       }
 
       const { data: insertData, error: insertError } = await supabase
@@ -151,9 +151,9 @@ export async function GET() {
       const testEvent = {
         title: 'Test Event (will be deleted)',
         description: 'This is a diagnostic test event',
-        event_date: new Date().toISOString().split('T')[0],
+        starts_at: new Date().toISOString(),
         user_id: user.id,
-        published: false,
+        status: 'draft',
       }
 
       const { data: insertData, error: insertError } = await supabase

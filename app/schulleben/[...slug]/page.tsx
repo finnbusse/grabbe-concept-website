@@ -20,7 +20,7 @@ export async function generateStaticParams() {
   const { data } = await supabase
     .from("pages")
     .select("slug, route_path")
-    .eq("published", true)
+    .eq("status", "published")
     .like("route_path", "/schulleben%")
     .returns<Array<{ slug: string; route_path: string | null }>>()
   return (data ?? []).map((page) => {

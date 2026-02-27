@@ -70,7 +70,7 @@ export function PageEditorStep3() {
         content: finalContent,
         section: "allgemein",
         sort_order: 0,
-        published: publish,
+        status: publish ? 'published' as const : 'draft' as const,
         route_path: state.routePath || null,
         hero_image_url: state.heroImageUrl || null,
         hero_subtitle: state.heroSubtitle || null,

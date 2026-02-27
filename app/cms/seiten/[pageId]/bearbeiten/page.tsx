@@ -34,7 +34,7 @@ export default async function PageEditPage({ params }: { params: Promise<{ pageI
     content: string
     section: string | null
     sort_order: number
-    published: boolean
+    status: string
     route_path?: string | null
     hero_image_url?: string | null
     meta_description?: string | null

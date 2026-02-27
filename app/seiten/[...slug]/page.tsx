@@ -20,7 +20,7 @@ export async function generateStaticParams() {
   const { data } = await supabase
     .from("pages")
     .select("slug, route_path")
-    .eq("published", true)
+    .eq("status", "published")
     .returns<Array<{ slug: string; route_path: string | null }>>()
 
   // Exclude pages served by known filesystem routes (unsere-schule, schulleben)
@@ -49,7 +49,7 @@ async function resolvePage(segments: string[]) {
       .from("pages")
       .select("*")
       .eq("slug", segments[0])
-      .eq("published", true)
+      .eq("status", "published")
       .single()
     return data
   }
@@ -65,7 +65,7 @@ async function resolvePage(segments: string[]) {
       .select("*")
       .eq("slug", pageSlug)
       .eq("route_path", routePath)
-      .eq("published", true)
+      .eq("status", "published")
       .single()
 
     if (data) return data
@@ -75,7 +75,7 @@ async function resolvePage(segments: string[]) {
       .from("pages")
       .select("*")
       .eq("slug", pageSlug)
-      .eq("published", true)
+      .eq("status", "published")
       .single()
     return fallback
   }

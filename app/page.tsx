@@ -29,15 +29,15 @@ export default async function HomePage() {
     supabase
       .from("posts")
       .select("id, title, slug, excerpt, category, image_url, author_name, event_date, created_at, user_id")
-      .eq("published", true)
+      .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(4),
     supabase
       .from("events")
-      .select("id, title, event_date, event_end_date, event_time, location, category")
-      .eq("published", true)
-      .or(`event_date.gte.${new Date().toISOString().split("T")[0]},event_end_date.gte.${new Date().toISOString().split("T")[0]}`)
-      .order("event_date", { ascending: true })
+      .select("id, title, starts_at, ends_at, is_all_day, timezone, location, category")
+      .eq("status", "published")
+      .or(`starts_at.gte.${new Date().toISOString()},ends_at.gte.${new Date().toISOString()}`)
+      .order("starts_at", { ascending: true })
       .limit(6),
     getMultiplePageContents(pageIds, PAGE_DEFAULTS),
     supabase

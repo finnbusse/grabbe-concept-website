@@ -10,14 +10,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { data: posts } = await supabase
     .from("posts")
     .select("slug, updated_at, created_at")
-    .eq("published", true)
+    .eq("status", "published")
     .order("created_at", { ascending: false })
 
   // Fetch all published custom pages
   const { data: pages } = await supabase
     .from("pages")
     .select("slug, route_path, updated_at")
-    .eq("published", true)
+    .eq("status", "published")
 
   const entries: MetadataRoute.Sitemap = []
 

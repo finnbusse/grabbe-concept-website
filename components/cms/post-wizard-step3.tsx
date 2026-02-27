@@ -127,7 +127,7 @@ export function PostWizardStep3() {
         content: finalContent,
         excerpt: state.excerpt || null,
         category: state.category || null,
-        published: publish,
+        status: publish ? 'published' : 'draft',
         featured: false,
         image_url: state.coverImageUrl || null,
         author_name: authorName || user.email?.split("@")[0] || "Redaktion",
