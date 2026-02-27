@@ -3,6 +3,7 @@ import { formatEventTime } from "@/lib/db-helpers"
 import Link from "next/link"
 import { Plus, CalendarDays, MapPin, Tag as TagIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { DeleteEventButton } from "@/components/cms/delete-event-button"
 
 const TAG_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -81,9 +82,9 @@ export default async function CmsEventsPage() {
                     {(eventTagsMap.get(event.id) || []).map((tag) => {
                       const c = TAG_COLORS[tag.color] || TAG_COLORS.blue
                       return (
-                        <span key={tag.id} className={`inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0 text-[10px] font-medium ${c.bg} ${c.text} ${c.border}`}>
-                          <TagIcon className="h-2 w-2" />{tag.name}
-                        </span>
+                        <Badge key={tag.id} className={`${c.bg} ${c.text} ${c.border} text-[10px] font-medium hover:opacity-90`}>
+                          <TagIcon className="mr-0.5 h-2 w-2" />{tag.name}
+                        </Badge>
                       )
                     })}
                   </div>

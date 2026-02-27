@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -828,7 +829,7 @@ function PageItem({
       <FileText className="h-3.5 w-3.5 text-muted-foreground" />
       <span className="text-sm text-foreground flex-1">{page.title}</span>
       {page.status !== 'published' && (
-        <span className="text-[10px] rounded-full border px-2 py-0.5 text-muted-foreground">Entwurf</span>
+        <Badge className="border-transparent bg-muted text-muted-foreground hover:bg-muted text-[10px]">Entwurf</Badge>
       )}
       <span className="text-xs text-muted-foreground font-mono">{currentPath}</span>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

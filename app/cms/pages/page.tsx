@@ -167,32 +167,32 @@ export default function CmsPagesPage() {
 
                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
                   {page.status === 'published' ? (
-                    <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-600">
-                      <Eye className="h-3 w-3" />
+                    <Badge className="border-transparent bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10">
+                      <Eye className="mr-1 h-3 w-3" />
                       Aktiv
-                    </span>
+                    </Badge>
                   ) : (
-                    <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                      <EyeOff className="h-3 w-3" />
+                    <Badge className="border-transparent bg-muted text-muted-foreground hover:bg-muted">
+                      <EyeOff className="mr-1 h-3 w-3" />
                       Entwurf
-                    </span>
+                    </Badge>
                   )}
                   <Badge variant="secondary" className="text-xs font-normal">
                     {SECTION_LABELS[page.section] ?? page.section}
                   </Badge>
-                  <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                  <Badge className="border-transparent bg-muted text-muted-foreground hover:bg-muted">
                     {blocks ? (
                       <>
-                        <Blocks className="h-3 w-3" />
+                        <Blocks className="mr-1 h-3 w-3" />
                         Blöcke
                       </>
                     ) : (
                       <>
-                        <FileText className="h-3 w-3" />
+                        <FileText className="mr-1 h-3 w-3" />
                         Markdown
                       </>
                     )}
-                  </span>
+                  </Badge>
                 </div>
 
                 {page.updated_at && (

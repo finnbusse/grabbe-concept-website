@@ -17,12 +17,12 @@ export default async function CmsCampaignsPage() {
   const now = new Date()
 
   function getStatus(campaign: { is_active: boolean; starts_at: string | null; ends_at: string | null }) {
-    if (!campaign.is_active) return { label: "Inaktiv", variant: "secondary" as const }
+    if (!campaign.is_active) return { label: "Inaktiv", className: "border-transparent bg-muted text-muted-foreground hover:bg-muted" }
     const start = campaign.starts_at ? new Date(campaign.starts_at) : null
     const end = campaign.ends_at ? new Date(campaign.ends_at) : null
-    if (start && start > now) return { label: "Geplant", variant: "outline" as const }
-    if (end && end < now) return { label: "Abgelaufen", variant: "secondary" as const }
-    return { label: "Aktiv", variant: "default" as const }
+    if (start && start > now) return { label: "Geplant", className: "border-transparent bg-amber-100 text-amber-700 hover:bg-amber-100" }
+    if (end && end < now) return { label: "Abgelaufen", className: "border-transparent bg-muted text-muted-foreground hover:bg-muted" }
+    return { label: "Aktiv", className: "border-transparent bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10" }
   }
 
   return (
@@ -63,7 +63,7 @@ export default async function CmsCampaignsPage() {
                       >
                         {campaign.title}
                       </Link>
-                      <Badge variant={status.variant}>{status.label}</Badge>
+                      <Badge className={status.className}>{status.label}</Badge>
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">
                       {campaign.headline}
