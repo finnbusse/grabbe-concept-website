@@ -22,7 +22,11 @@ const STEPS = [
 // Main Wizard Component
 // ============================================================================
 
-export function PageWizard() {
+interface PageWizardProps {
+  editMode?: boolean
+}
+
+export function PageWizard({ editMode }: PageWizardProps) {
   const { state } = usePageWizard()
 
   return (
@@ -34,7 +38,9 @@ export function PageWizard() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="font-display text-2xl font-bold">Neue Seite erstellen</h1>
+        <h1 className="font-display text-2xl font-bold">
+          {editMode ? "Seite bearbeiten" : "Neue Seite erstellen"}
+        </h1>
       </div>
 
       {/* Progress Indicator */}
