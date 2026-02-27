@@ -18,7 +18,7 @@ export async function resolveCustomPage(slug: string, routePath?: string) {
       .select("*")
       .eq("slug", slug)
       .eq("route_path", routePath)
-      .eq("published", true)
+      .eq("status", "published")
       .single()
 
     if (data) return data
@@ -29,7 +29,7 @@ export async function resolveCustomPage(slug: string, routePath?: string) {
     .from("pages")
     .select("*")
     .eq("slug", slug)
-    .eq("published", true)
+    .eq("status", "published")
     .single()
 
   return fallback

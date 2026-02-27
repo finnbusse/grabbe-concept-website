@@ -25,15 +25,15 @@ export async function GET(request: NextRequest) {
     }
 
     const eventIds = eventTags.map((et) => et.event_id)
-    const today = new Date().toISOString().split("T")[0]
+    const now = new Date().toISOString()
 
     const { data: events } = await supabase
       .from("events")
       .select("*")
       .in("id", eventIds)
-      .eq("published", true)
-      .gte("event_date", today)
-      .order("event_date", { ascending: true })
+      .eq("status", "published")
+      .gte("starts_at", now)
+      .order("starts_at", { ascending: true })
       .limit(limit)
 
     return NextResponse.json(events || [])
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       .from("documents")
       .select("*")
       .in("id", docIds)
-      .eq("published", true)
+      .eq("status", "published")
       .order("created_at", { ascending: false })
 
     return NextResponse.json(documents || [])
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       .from("posts")
       .select("*")
       .in("id", postIds)
-      .eq("published", true)
+      .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(limit)
 

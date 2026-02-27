@@ -29,13 +29,13 @@ export async function TaggedSection({ type, tagId, heading, limit = 10 }: Tagged
         </div>
       ) : null
     }
-    const today = new Date().toISOString().split("T")[0]
+    const now = new Date().toISOString()
     const { data: events } = await supabase
-      .from("events").select("id, title, description, event_date, event_time, location")
+      .from("events").select("id, title, description, starts_at, is_all_day, location")
       .in("id", eventTags.map((et) => et.event_id))
-      .eq("published", true)
-      .gte("event_date", today)
-      .order("event_date", { ascending: true })
+      .eq("status", "published")
+      .gte("starts_at", now)
+      .order("starts_at", { ascending: true })
       .limit(limit)
 
     if (!events || events.length === 0) {
@@ -54,7 +54,7 @@ export async function TaggedSection({ type, tagId, heading, limit = 10 }: Tagged
         {heading && <h3 className="font-display text-sm font-semibold mb-3">{heading}</h3>}
         <div className="space-y-2.5">
           {events.map((ev) => {
-            const d = new Date(ev.event_date)
+            const d = new Date(ev.starts_at)
             return (
               <div key={ev.id} className="flex gap-3 rounded-xl border bg-background p-3">
                 <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -65,7 +65,7 @@ export async function TaggedSection({ type, tagId, heading, limit = 10 }: Tagged
                   <h4 className="font-display text-xs font-semibold">{ev.title}</h4>
                   {ev.description && <p className="mt-0.5 text-[10px] text-muted-foreground line-clamp-1">{ev.description}</p>}
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[10px] text-muted-foreground">
-                    {ev.event_time && <span className="flex items-center gap-0.5"><Clock className="h-2.5 w-2.5" />{ev.event_time}</span>}
+                    {!ev.is_all_day && <span className="flex items-center gap-0.5"><Clock className="h-2.5 w-2.5" />{`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`}</span>}
                     {ev.location && <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" />{ev.location}</span>}
                   </div>
                 </div>
@@ -90,7 +90,7 @@ export async function TaggedSection({ type, tagId, heading, limit = 10 }: Tagged
     const { data: documents } = await supabase
       .from("documents").select("id, title, file_url, file_name")
       .in("id", docTags.map((dt) => dt.document_id))
-      .eq("published", true)
+      .eq("status", "published")
       .order("created_at", { ascending: false })
 
     if (!documents || documents.length === 0) {
@@ -140,7 +140,7 @@ export async function TaggedSection({ type, tagId, heading, limit = 10 }: Tagged
     const { data: posts } = await supabase
       .from("posts").select("id, title, slug, excerpt")
       .in("id", postTags.map((pt) => pt.post_id))
-      .eq("published", true)
+      .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(limit)
 

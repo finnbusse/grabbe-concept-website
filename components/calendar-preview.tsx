@@ -7,9 +7,10 @@ import { AnimateOnScroll } from "./animate-on-scroll"
 interface Event {
   id: string
   title: string
-  event_date: string
-  event_end_date?: string | null
-  event_time: string | null
+  starts_at: string
+  ends_at?: string | null
+  is_all_day?: boolean
+  timezone?: string
   location: string | null
   category?: string | null
 }
@@ -50,7 +51,7 @@ export function CalendarPreview({ events, content }: { events: Event[]; content?
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {events.slice(0, 6).map((event, i) => {
-                const date = new Date(event.event_date)
+                const date = new Date(event.starts_at)
                 const isFerien = event.category === "ferien"
                 return (
                   <AnimateOnScroll key={event.id} animation="fade-in-up" delay={i * 0.08}>
@@ -70,11 +71,13 @@ export function CalendarPreview({ events, content }: { events: Event[]; content?
                       <div className="min-w-0 flex-1">
                         <h3 className="font-display text-lg text-primary-foreground line-clamp-2">{event.title}</h3>
                         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-primary-foreground/50">
-                          {event.event_end_date && event.event_end_date !== event.event_date && (
-                            <span>bis {new Date(event.event_end_date).getDate()}. {monthNames[new Date(event.event_end_date).getMonth()]}</span>
-                          )}
-                          {event.event_time && (
-                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{event.event_time}</span>
+                          {event.ends_at && (() => {
+                            const endD = new Date(event.ends_at)
+                            const sameDay = date.toDateString() === endD.toDateString()
+                            return !sameDay ? <span>bis {endD.getDate()}. {monthNames[endD.getMonth()]}</span> : null
+                          })()}
+                          {!event.is_all_day && (
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{`${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`}</span>
                           )}
                           {event.location && (
                             <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>

@@ -18,7 +18,7 @@ interface Doc {
   file_size: number
   file_type: string | null
   category: string
-  published: boolean
+  status: string
   created_at: string
 }
 
@@ -91,7 +91,7 @@ export function DocumentsManager({ initialDocuments }: { initialDocuments: Doc[]
       file_size: uploadedSize,
       file_type: uploadedType,
       category,
-      published: true,
+      status: 'published',
       user_id: user.id,
     }).select().single()
 

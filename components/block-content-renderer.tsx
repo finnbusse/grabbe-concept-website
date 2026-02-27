@@ -65,13 +65,13 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
         </div>
       )
     }
-    const today = new Date().toISOString().split("T")[0]
+    const now = new Date().toISOString()
     const { data: events } = await supabase
-      .from("events").select("id, title, description, event_date, event_time, location")
+      .from("events").select("id, title, description, starts_at, is_all_day, location")
       .in("id", eventTags.map((et) => et.event_id))
-      .eq("published", true)
-      .gte("event_date", today)
-      .order("event_date", { ascending: true })
+      .eq("status", "published")
+      .gte("starts_at", now)
+      .order("starts_at", { ascending: true })
       .limit(limit)
 
     if (!events || events.length === 0) {
@@ -90,7 +90,7 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
         {heading && <h2 className="font-display text-xl text-foreground mb-4">{heading}</h2>}
         <div className="space-y-3">
           {events.map((ev) => {
-            const d = new Date(ev.event_date)
+            const d = new Date(ev.starts_at)
             return (
               <div key={ev.id} className="group flex gap-4 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]">
                 <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -101,7 +101,7 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
                   <h3 className="font-display text-sm font-semibold text-foreground">{ev.title}</h3>
                   {ev.description && <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{ev.description}</p>}
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                    {ev.event_time && <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{ev.event_time}</span>}
+                    {!ev.is_all_day && <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`}</span>}
                     {ev.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{ev.location}</span>}
                   </div>
                 </div>
@@ -126,7 +126,7 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
     const { data: documents } = await supabase
       .from("documents").select("id, title, file_url, file_name")
       .in("id", docTags.map((dt) => dt.document_id))
-      .eq("published", true)
+      .eq("status", "published")
       .order("created_at", { ascending: false })
 
     if (!documents || documents.length === 0) {
@@ -178,7 +178,7 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
     const { data: posts } = await supabase
       .from("posts").select("id, title, slug, excerpt, event_date, created_at")
       .in("id", postTags.map((pt) => pt.post_id))
-      .eq("published", true)
+      .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(limit)
 
