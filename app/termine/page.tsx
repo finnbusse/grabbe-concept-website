@@ -2,6 +2,7 @@ import { SiteLayout } from "@/components/site-layout"
 import { PageHero } from "@/components/page-hero"
 import { createClient } from "@/lib/supabase/server"
 import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
+import { formatEventTime } from "@/lib/db-helpers"
 import { CalendarDays, MapPin, Clock, Tag } from "lucide-react"
 import { generatePageMetadata } from "@/lib/seo"
 import type { EventListItem } from "@/lib/types/database.types"
@@ -136,11 +137,14 @@ export default async function TerminePage() {
                                   <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground line-clamp-2">{ev.description}</p>
                                 )}
                                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                                  {!ev.is_all_day && (
-                                    <span className="flex items-center gap-1.5">
-                                      <Clock className="h-3 w-3" />{`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`} Uhr
-                                    </span>
-                                  )}
+                                  {!ev.is_all_day && (() => {
+                                    const time = formatEventTime(ev.starts_at)
+                                    return time ? (
+                                      <span className="flex items-center gap-1.5">
+                                        <Clock className="h-3 w-3" />{time} Uhr
+                                      </span>
+                                    ) : null
+                                  })()}
                                   {ev.location && (
                                     <span className="flex items-center gap-1.5">
                                       <MapPin className="h-3 w-3" />{ev.location}

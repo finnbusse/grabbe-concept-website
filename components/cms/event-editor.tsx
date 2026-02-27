@@ -73,17 +73,24 @@ export function EventEditor({ event }: EventEditorProps) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Nicht angemeldet")
 
+      const tz = event?.timezone ?? 'Europe/Berlin'
+
+      // Build timezone-aware ISO timestamps
+      const startsAtDate = eventTime && !isAllDay
+        ? new Date(`${eventDate}T${eventTime}:00`)
+        : new Date(`${eventDate}T00:00:00`)
+
+      const endsAtDate = isAllDay && eventEndDate
+        ? new Date(`${eventEndDate}T23:59:59`)
+        : null
+
       const basePayload: Record<string, unknown> = {
         title,
         description: description || null,
-        starts_at: eventTime && !isAllDay
-          ? `${eventDate}T${eventTime}:00`
-          : `${eventDate}T00:00:00`,
-        ends_at: isAllDay && eventEndDate
-          ? `${eventEndDate}T23:59:59`
-          : null,
+        starts_at: startsAtDate.toISOString(),
+        ends_at: endsAtDate ? endsAtDate.toISOString() : null,
         is_all_day: isAllDay,
-        timezone: event?.timezone ?? 'Europe/Berlin',
+        timezone: tz,
         location: location || null,
         category,
         status: published ? 'published' : 'draft',

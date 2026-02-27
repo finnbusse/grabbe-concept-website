@@ -5,6 +5,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server"
+import { formatEventTime } from "@/lib/db-helpers"
 import { CalendarDays, Clock, MapPin, Download, FileText, ChevronRight } from "lucide-react"
 
 interface TaggedSectionProps {
@@ -65,7 +66,7 @@ export async function TaggedSection({ type, tagId, heading, limit = 10 }: Tagged
                   <h4 className="font-display text-xs font-semibold">{ev.title}</h4>
                   {ev.description && <p className="mt-0.5 text-[10px] text-muted-foreground line-clamp-1">{ev.description}</p>}
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[10px] text-muted-foreground">
-                    {!ev.is_all_day && <span className="flex items-center gap-0.5"><Clock className="h-2.5 w-2.5" />{`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`}</span>}
+                    {(() => { const time = formatEventTime(ev.starts_at, ev.is_all_day); return time ? <span className="flex items-center gap-0.5"><Clock className="h-2.5 w-2.5" />{time}</span> : null })()}
                     {ev.location && <span className="flex items-center gap-0.5"><MapPin className="h-2.5 w-2.5" />{ev.location}</span>}
                   </div>
                 </div>

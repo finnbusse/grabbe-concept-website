@@ -538,3 +538,14 @@ export function formatDateTime(dateString: string): string {
     minute: '2-digit',
   })
 }
+
+/**
+ * Extract HH:MM time string from a timestamptz value.
+ * Returns null for all-day events or invalid dates.
+ */
+export function formatEventTime(startsAt: string, isAllDay?: boolean): string | null {
+  if (isAllDay) return null
+  const d = new Date(startsAt)
+  if (isNaN(d.getTime())) return null
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, MapPin, Clock } from "lucide-react"
 import { AnimateOnScroll } from "./animate-on-scroll"
+import { formatEventTime } from "@/lib/db-helpers"
 
 interface Event {
   id: string
@@ -76,9 +77,10 @@ export function CalendarPreview({ events, content }: { events: Event[]; content?
                             const sameDay = date.toDateString() === endD.toDateString()
                             return !sameDay ? <span>bis {endD.getDate()}. {monthNames[endD.getMonth()]}</span> : null
                           })()}
-                          {!event.is_all_day && (
-                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{`${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`}</span>
-                          )}
+                          {!event.is_all_day && (() => {
+                            const time = formatEventTime(event.starts_at)
+                            return time ? <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{time}</span> : null
+                          })()}
                           {event.location && (
                             <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{event.location}</span>
                           )}

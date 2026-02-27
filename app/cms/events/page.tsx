@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { formatEventTime } from "@/lib/db-helpers"
 import Link from "next/link"
 import { Plus, CalendarDays, MapPin, Tag as TagIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -97,8 +98,8 @@ export default async function CmsEventsPage() {
                         year: "numeric",
                       })}
                       {!event.is_all_day && (() => {
-                        const d = new Date(event.starts_at)
-                        return `, ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+                        const time = formatEventTime(event.starts_at)
+                        return time ? `, ${time}` : ''
                       })()}
                     </span>
                     {event.location && (

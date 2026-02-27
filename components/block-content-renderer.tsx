@@ -5,6 +5,7 @@
 
 import { ChevronDown, CalendarDays, MapPin, Clock, Download, FileText } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
+import { formatEventTime } from "@/lib/db-helpers"
 
 interface ContentBlock {
   id: string
@@ -101,7 +102,7 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
                   <h3 className="font-display text-sm font-semibold text-foreground">{ev.title}</h3>
                   {ev.description && <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{ev.description}</p>}
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                    {!ev.is_all_day && <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`}</span>}
+                    {(() => { const time = formatEventTime(ev.starts_at, ev.is_all_day); return time ? <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{time}</span> : null })()}
                     {ev.location && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{ev.location}</span>}
                   </div>
                 </div>
