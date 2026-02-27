@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useReducer, useCallback, useEffect, useRef, type ReactNode } from "react"
+import { createContext, useContext, useReducer, useEffect, useRef, type ReactNode } from "react"
 import type { ContentBlock } from "./block-editor"
 
 // ============================================================================
@@ -31,6 +31,10 @@ export interface PageWizardState {
   isSaving: boolean
   savedPageId: string | null
   lastAutoSaved: string | null
+  pageId: string | null
+  isPublished: boolean
+  section: string
+  sortOrder: number
 }
 
 export type WizardAction =
@@ -50,6 +54,10 @@ export type WizardAction =
   | { type: "SET_SAVING"; payload: boolean }
   | { type: "SET_SAVED_PAGE_ID"; payload: string | null }
   | { type: "SET_LAST_AUTO_SAVED"; payload: string | null }
+  | { type: "SET_PAGE_ID"; payload: string | null }
+  | { type: "SET_IS_PUBLISHED"; payload: boolean }
+  | { type: "SET_SECTION"; payload: string }
+  | { type: "SET_SORT_ORDER"; payload: number }
   | { type: "RESTORE_STATE"; payload: Partial<PageWizardState> }
 
 // ============================================================================
@@ -73,6 +81,10 @@ const initialState: PageWizardState = {
   isSaving: false,
   savedPageId: null,
   lastAutoSaved: null,
+  pageId: null,
+  isPublished: false,
+  section: "allgemein",
+  sortOrder: 0,
 }
 
 // ============================================================================
@@ -113,6 +125,14 @@ function wizardReducer(state: PageWizardState, action: WizardAction): PageWizard
       return { ...state, savedPageId: action.payload }
     case "SET_LAST_AUTO_SAVED":
       return { ...state, lastAutoSaved: action.payload }
+    case "SET_PAGE_ID":
+      return { ...state, pageId: action.payload }
+    case "SET_IS_PUBLISHED":
+      return { ...state, isPublished: action.payload }
+    case "SET_SECTION":
+      return { ...state, section: action.payload }
+    case "SET_SORT_ORDER":
+      return { ...state, sortOrder: action.payload }
     case "RESTORE_STATE":
       return { ...state, ...action.payload }
     default:
@@ -133,14 +153,25 @@ const PageWizardContext = createContext<PageWizardContextValue | null>(null)
 
 const STORAGE_KEY = "page-wizard-draft"
 
-export function PageWizardProvider({ children }: { children: ReactNode }) {
+interface PageWizardProviderProps {
+  children: ReactNode
+  initialState?: Partial<PageWizardState>
+}
+
+export function PageWizardProvider({ children, initialState: initialOverrides }: PageWizardProviderProps) {
   const [state, dispatch] = useReducer(wizardReducer, initialState)
   const initialized = useRef(false)
 
-  // Restore from localStorage on mount
+  // Restore from props (edit mode) or localStorage on mount
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
+
+    if (initialOverrides) {
+      dispatch({ type: "RESTORE_STATE", payload: { ...initialOverrides, isSaving: false } })
+      return
+    }
+
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
@@ -150,10 +181,11 @@ export function PageWizardProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore parse errors
     }
-  }, [])
+  }, [initialOverrides])
 
-  // Auto-save to localStorage every 30 seconds
+  // Auto-save to localStorage every 30s (only for new pages)
   useEffect(() => {
+    if (initialOverrides) return // skip auto-save in edit mode
     const interval = setInterval(() => {
       if (state.title || state.markdownContent || state.blocks.length > 0) {
         try {
@@ -166,7 +198,7 @@ export function PageWizardProvider({ children }: { children: ReactNode }) {
       }
     }, 30000)
     return () => clearInterval(interval)
-  }, [state])
+  }, [state, initialOverrides])
 
   return (
     <PageWizardContext.Provider value={{ state, dispatch }}>

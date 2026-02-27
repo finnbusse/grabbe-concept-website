@@ -68,8 +68,8 @@ export function PageEditorStep3() {
         title: state.title,
         slug: state.slug,
         content: finalContent,
-        section: "allgemein",
-        sort_order: 0,
+        section: state.section || "allgemein",
+        sort_order: state.sortOrder || 0,
         status: publish ? 'published' as const : 'draft' as const,
         route_path: state.routePath || null,
         hero_image_url: state.heroImageUrl || null,
@@ -80,18 +80,29 @@ export function PageEditorStep3() {
         updated_at: new Date().toISOString(),
       }
 
-      const { error: saveError } = await supabase.from("pages").insert(payload as never)
+      let saveError: unknown = null
 
-      if (saveError) {
-        // Resilient: if hero_image_url or hero_subtitle column doesn't exist yet, retry without them
-        if ((saveError as { message?: string }).message?.includes("hero_image_url") || (saveError as { message?: string }).message?.includes("hero_subtitle")) {
+      if (state.pageId) {
+        // Update existing page
+        const { error: err } = await supabase.from("pages").update(payload as never).eq("id", state.pageId)
+        saveError = err
+        if (err && ((err as { message?: string }).message?.includes("hero_image_url") || (err as { message?: string }).message?.includes("hero_subtitle"))) {
+          const { hero_image_url: _a, hero_subtitle: _b, ...payloadWithout } = payload
+          const { error: err2 } = await supabase.from("pages").update(payloadWithout as never).eq("id", state.pageId)
+          saveError = err2
+        }
+      } else {
+        // Insert new page
+        const { error: err } = await supabase.from("pages").insert(payload as never)
+        saveError = err
+        if (err && ((err as { message?: string }).message?.includes("hero_image_url") || (err as { message?: string }).message?.includes("hero_subtitle"))) {
           const { hero_image_url: _a, hero_subtitle: _b, ...payloadWithout } = payload
           const { error: err2 } = await supabase.from("pages").insert(payloadWithout as never)
-          if (err2) throw err2
-        } else {
-          throw saveError
+          saveError = err2
         }
       }
+
+      if (saveError) throw saveError
 
       // Revalidate
       try {
@@ -110,12 +121,12 @@ export function PageEditorStep3() {
         setPublishState("success")
         // Wait for celebration animation, then redirect
         setTimeout(() => {
-          toast.success("Seite erfolgreich veröffentlicht!")
+          toast.success(state.pageId ? "Seite erfolgreich aktualisiert!" : "Seite erfolgreich veröffentlicht!")
           router.push("/cms/pages")
           router.refresh()
         }, 1500)
       } else {
-        toast.success("Entwurf gespeichert!")
+        toast.success(state.pageId ? "Änderungen gespeichert!" : "Entwurf gespeichert!")
         router.push("/cms/pages")
         router.refresh()
       }
@@ -301,13 +312,13 @@ export function PageEditorStep3() {
             className="gap-2"
           >
             <Save className="h-4 w-4" />
-            Als Entwurf speichern
+            {state.pageId ? "Als Entwurf speichern" : "Als Entwurf speichern"}
           </Button>
 
           {publishState === "success" ? (
             <Button size="lg" className="gap-2 bg-emerald-600 hover:bg-emerald-600 pointer-events-none publish-success-btn">
               <Check className="h-5 w-5" />
-              Veröffentlicht!
+              {state.pageId ? "Gespeichert!" : "Veröffentlicht!"}
             </Button>
           ) : (
             <Button
@@ -321,7 +332,9 @@ export function PageEditorStep3() {
               ) : (
                 <Rocket className="h-4 w-4" />
               )}
-              {publishState === "saving" ? "Wird veröffentlicht…" : "Jetzt veröffentlichen"}
+              {publishState === "saving"
+                ? (state.pageId ? "Wird gespeichert…" : "Wird veröffentlicht…")
+                : (state.pageId ? "Speichern & Veröffentlichen" : "Jetzt veröffentlichen")}
             </Button>
           )}
         </div>
