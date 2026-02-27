@@ -56,6 +56,13 @@
     --color-subject-musik: #ea580c;
     --color-subject-kunst: #7c3aed;
     --color-subject-sport: #0891b2;
+
+    /* Navbar glass colours (light default, can be overridden in dark media query) */
+    --nav-glass-bg: 255 255 255;
+    --nav-glass-border: 255 255 255;
+    --nav-glass-item-active: 255 255 255;
+    --nav-glass-item-hover: 255 255 255;
+    --nav-dropdown-bg: 255 255 255;
   }
   .dark {
     --background: 215 30% 7%;
@@ -93,6 +100,50 @@
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 215 30% 7%;
+    --foreground: 210 30% 95%;
+    --card: 215 30% 10%;
+    --card-foreground: 210 30% 95%;
+    --popover: 215 30% 10%;
+    --popover-foreground: 210 30% 95%;
+    --primary: 210 80% 55%;
+    --primary-foreground: 215 30% 7%;
+    --secondary: 215 25% 15%;
+    --secondary-foreground: 210 30% 95%;
+    --muted: 215 25% 15%;
+    --muted-foreground: 210 15% 65%;
+    --accent: 210 80% 55%;
+    --accent-foreground: 215 30% 7%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 215 20% 18%;
+    --input: 215 20% 18%;
+    --ring: 210 80% 55%;
+    --chart-1: 210 80% 55%;
+    --chart-2: 195 75% 50%;
+    --chart-3: 160 40% 50%;
+    --chart-4: 230 55% 60%;
+    --chart-5: 190 60% 45%;
+    --sidebar-background: 215 30% 10%;
+    --sidebar-foreground: 210 30% 95%;
+    --sidebar-primary: 210 80% 55%;
+    --sidebar-primary-foreground: 215 30% 7%;
+    --sidebar-accent: 215 25% 15%;
+    --sidebar-accent-foreground: 210 30% 95%;
+    --sidebar-border: 215 20% 18%;
+    --sidebar-ring: 210 80% 55%;
+
+    /* Higher contrast glass surfaces for dark hero/header readability */
+    --nav-glass-bg: 10 19 35;
+    --nav-glass-border: 148 163 184;
+    --nav-glass-item-active: 148 163 184;
+    --nav-glass-item-hover: 148 163 184;
+    --nav-dropdown-bg: 15 23 42;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -121,9 +172,22 @@ html {
 
 .hero-image-dark { display: none; }
 
+
+.nav-glass-interactive:hover {
+  background-color: rgba(var(--nav-glass-item-hover), 0.24);
+}
+
+.nav-glass-interactive:focus-visible {
+  background-color: rgba(var(--nav-glass-item-hover), 0.3);
+}
+
 @media (prefers-color-scheme: dark) {
   .hero-image-light { display: none; }
   .hero-image-dark  { display: block; }
+
+  .school-logo-dark {
+    filter: brightness(0) invert(1) drop-shadow(0 8px 24px rgba(0, 0, 0, 0.4));
+  }
 }
 
 /* ============================================

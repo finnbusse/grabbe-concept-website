@@ -122,9 +122,9 @@ export function SiteHeader({
       <div className="absolute top-[4.5rem] lg:top-4 left-5 md:left-8 lg:left-12 z-40">
         <Link href="/">
           <img
-            src="/images/grabbe-logo.svg"
+            src={logoUrl || "/images/grabbe-logo.svg"}
             alt={schoolName}
-            className="h-16 w-auto md:h-20 lg:h-24 drop-shadow-lg"
+            className="school-logo-dark h-16 w-auto md:h-20 lg:h-24 drop-shadow-lg transition-all duration-300"
           />
         </Link>
       </div>
@@ -135,15 +135,24 @@ export function SiteHeader({
         }`}
       >
         {/* Centered glass navbar */}
-        <div className="mx-auto mt-3 flex max-w-3xl items-center justify-between rounded-full px-3 py-1.5 bg-white/15 backdrop-blur-md border border-white/25 shadow-lg lg:mt-4 lg:px-1 lg:py-1">
+        <div className="mx-auto mt-3 flex max-w-3xl items-center justify-between rounded-full px-3 py-1.5 backdrop-blur-md shadow-lg lg:mt-4 lg:px-1 lg:py-1"
+          style={{
+            backgroundColor: "rgba(var(--nav-glass-bg), 0.2)",
+            border: "1px solid rgba(var(--nav-glass-border), 0.26)",
+          }}
+        >
         {/* Start button */}
         <Link
           href="/"
-          className={`shrink-0 rounded-full px-5 py-2 text-[13px] font-medium transition-colors duration-200 ${
+          className={`shrink-0 rounded-full px-5 py-2 text-[13px] font-medium transition-colors duration-200 nav-glass-interactive ${
             pathname === "/"
-              ? "text-foreground bg-white/30"
-              : "text-foreground/80 hover:text-foreground hover:bg-white/25"
+              ? "text-foreground"
+              : "text-foreground/85 hover:text-foreground"
           }`}
+          style={pathname === "/"
+            ? { backgroundColor: "rgba(var(--nav-glass-item-active), 0.32)" }
+            : undefined
+          }
         >
           Start
         </Link>
@@ -162,11 +171,15 @@ export function SiteHeader({
               >
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-1 rounded-full px-4 py-2 text-[13px] font-medium transition-colors duration-200 ${
+                  className={`flex items-center gap-1 rounded-full px-4 py-2 text-[13px] font-medium transition-colors duration-200 nav-glass-interactive ${
                     isActive(item.href)
-                      ? "text-foreground bg-white/30"
-                      : "text-foreground/80 hover:text-foreground hover:bg-white/25"
+                      ? "text-foreground"
+                      : "text-foreground/85 hover:text-foreground"
                   }`}
+                  style={isActive(item.href)
+                    ? { backgroundColor: "rgba(var(--nav-glass-item-active), 0.32)" }
+                    : undefined
+                  }
                   onTouchEnd={(e) => {
                     // preventDefault() cancels all subsequent synthetic mouse events
                     // (mouseenter, mouseleave, mousedown, click) so hover state is not disturbed.
@@ -191,16 +204,26 @@ export function SiteHeader({
                     onMouseEnter={() => handleDropdownEnter(item.id)}
                     onMouseLeave={handleDropdownLeave}
                   >
-                    <div className="min-w-[220px] bg-white/85 backdrop-blur-xl border border-white/25 rounded-2xl p-1.5 shadow-xl animate-blur-in">
+                    <div
+                      className="min-w-[220px] backdrop-blur-xl rounded-2xl p-1.5 shadow-xl animate-blur-in"
+                      style={{
+                        backgroundColor: "rgba(var(--nav-dropdown-bg), 0.9)",
+                        border: "1px solid rgba(var(--nav-glass-border), 0.24)",
+                      }}
+                    >
                       {item.children.map((child) => (
                         <Link
                           key={child.id}
                           href={child.href}
-                          className={`block rounded-xl px-4 py-2.5 text-[13px] transition-colors duration-200 ${
+                          className={`block rounded-xl px-4 py-2.5 text-[13px] transition-colors duration-200 nav-glass-interactive ${
                             pathname === child.href
-                              ? "font-medium text-foreground bg-white/20"
-                              : "text-foreground/80 hover:text-foreground hover:bg-white/20"
+                              ? "font-medium text-foreground"
+                              : "text-foreground/85 hover:text-foreground"
                           }`}
+                          style={pathname === child.href
+                            ? { backgroundColor: "rgba(var(--nav-glass-item-active), 0.28)" }
+                            : undefined
+                          }
                         >
                           {child.label}
                         </Link>
@@ -213,11 +236,15 @@ export function SiteHeader({
               <Link
                 key={item.id}
                 href={item.href}
-                className={`rounded-full px-4 py-2 text-[13px] font-medium transition-colors duration-200 ${
+                className={`rounded-full px-4 py-2 text-[13px] font-medium transition-colors duration-200 nav-glass-interactive ${
                   isActive(item.href)
-                    ? "text-foreground bg-white/30"
-                    : "text-foreground/80 hover:text-foreground hover:bg-white/25"
+                    ? "text-foreground"
+                    : "text-foreground/85 hover:text-foreground"
                 }`}
+                style={isActive(item.href)
+                  ? { backgroundColor: "rgba(var(--nav-glass-item-active), 0.32)" }
+                  : undefined
+                }
               >
                 {item.label}
               </Link>
@@ -227,7 +254,8 @@ export function SiteHeader({
 
         {/* Mobile toggle */}
         <button
-          className="flex h-9 w-9 items-center justify-center rounded-full text-foreground/80 hover:bg-white/20 hover:text-foreground transition-all duration-200 lg:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-foreground/85 hover:text-foreground transition-all duration-200 nav-glass-interactive lg:hidden"
+          style={{ backgroundColor: mobileOpen ? "rgba(var(--nav-glass-item-hover), 0.2)" : undefined }}
           onClick={() => {
             const next = !mobileOpen
             setMobileOpen(next)
@@ -241,17 +269,27 @@ export function SiteHeader({
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div className="mx-4 mt-2 rounded-3xl bg-white/15 backdrop-blur-xl border border-white/25 p-3 shadow-xl lg:hidden animate-blur-in">
+        <div
+          className="mx-4 mt-2 rounded-3xl backdrop-blur-xl p-3 shadow-xl lg:hidden animate-blur-in"
+          style={{
+            backgroundColor: "rgba(var(--nav-glass-bg), 0.24)",
+            border: "1px solid rgba(var(--nav-glass-border), 0.26)",
+          }}
+        >
           <nav className="flex flex-col gap-1">
             {navItems.map((item) => (
               <div key={item.id}>
                 <Link
                   href={item.href}
-                  className={`block rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                  className={`block rounded-full px-3 py-2.5 text-sm font-medium transition-all duration-200 nav-glass-interactive ${
                     pathname === item.href
-                      ? "bg-white/20 text-foreground"
-                      : "text-foreground/80 hover:bg-white/20 hover:text-foreground"
+                      ? "text-foreground"
+                      : "text-foreground/85 hover:text-foreground"
                   }`}
+                  style={pathname === item.href
+                    ? { backgroundColor: "rgba(var(--nav-glass-item-active), 0.3)" }
+                    : undefined
+                  }
                   onClick={() => {
                     setMobileOpen(false)
                     trackEvent("nav_link_click", { label: item.label, href: item.href })
@@ -263,10 +301,10 @@ export function SiteHeader({
                   <Link
                     key={child.id}
                     href={child.href}
-                    className={`block rounded-full py-2 pl-7 pr-3 text-sm transition-all duration-200 ${
+                    className={`block rounded-full py-2 pl-7 pr-3 text-sm transition-all duration-200 nav-glass-interactive ${
                       pathname === child.href
                         ? "font-medium text-foreground"
-                        : "text-foreground/80 hover:text-foreground"
+                        : "text-foreground/85 hover:text-foreground"
                     }`}
                     onClick={() => {
                       setMobileOpen(false)
