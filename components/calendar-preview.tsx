@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, MapPin, Clock } from "lucide-react"
 import { AnimateOnScroll } from "./animate-on-scroll"
-import { formatEventTime } from "@/lib/db-helpers"
+import { formatEventTime } from "@/lib/format-helpers"
 
 interface Event {
   id: string
