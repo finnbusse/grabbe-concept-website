@@ -11,6 +11,7 @@ import { PartnersSection } from "@/components/partners-section"
 import { CampaignPopup } from "@/components/campaign-popup"
 import { createClient } from "@/lib/supabase/server"
 import { PAGE_DEFAULTS, getMultiplePageContents } from "@/lib/page-content"
+import type { Campaign } from "@/lib/types/database.types"
 
 export const revalidate = 300
 
@@ -86,7 +87,7 @@ export default async function HomePage() {
         <ContactSection />
         <PartnersSection content={pageContents['homepage-partners']} />
       </main>
-      <CampaignPopup campaigns={(campaignsRes.data || []) as never} />
+      <CampaignPopup campaigns={(campaignsRes.data || []) as unknown as Campaign[]} />
     </SiteLayout>
   )
 }

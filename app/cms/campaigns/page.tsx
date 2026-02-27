@@ -4,6 +4,7 @@ import { Plus, Megaphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { DeleteCampaignButton } from "@/components/cms/delete-campaign-button"
+import type { Campaign } from "@/lib/types/database.types"
 
 export default async function CmsCampaignsPage() {
   const supabase = await createClient()
@@ -12,6 +13,7 @@ export default async function CmsCampaignsPage() {
     .select("*")
     .order("created_at", { ascending: false })
 
+  const campaignList = (campaigns || []) as unknown as Campaign[]
   const now = new Date()
 
   function getStatus(campaign: { is_active: boolean; starts_at: string | null; ends_at: string | null }) {
@@ -41,8 +43,8 @@ export default async function CmsCampaignsPage() {
       </div>
 
       <div className="mt-8 space-y-3">
-        {campaigns && campaigns.length > 0 ? (
-          campaigns.map((campaign) => {
+        {campaignList.length > 0 ? (
+          campaignList.map((campaign) => {
             const status = getStatus(campaign)
             return (
               <div
