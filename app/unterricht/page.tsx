@@ -1,7 +1,7 @@
 import { SiteLayout } from "@/components/site-layout"
 import { PageHero } from "@/components/page-hero"
 import Link from "next/link"
-import { BookOpen, Clock, Network, ArrowRight } from "lucide-react"
+import { BookOpen, GraduationCap, Star, BookMarked, ArrowRight } from "lucide-react"
 import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
 import { generatePageMetadata } from "@/lib/seo"
 import type { Metadata } from "next"
@@ -10,35 +10,41 @@ export const revalidate = 3600
 
 export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata({
-    title: "Schulleben",
-    description: "Das Schulleben am Grabbe-Gymnasium Detmold – Fächer, AGs, Nachmittagsbetreuung und Netzwerk.",
-    path: "/schulleben",
+    title: "Unterricht",
+    description: "Das Unterrichtsangebot am Grabbe-Gymnasium Detmold – von der Erprobungsstufe bis zum Abitur.",
+    path: "/unterricht",
   })
 }
 
 const NAV_LINKS: { href: string; icon: typeof BookOpen; title: string; description: string }[] = [
   {
-    href: "/schulleben/faecher-ags",
+    href: "/unterricht/faecher",
+    icon: BookMarked,
+    title: "Fächer",
+    description: "Alle 20 Fächer am Grabbe-Gymnasium im Überblick.",
+  },
+  {
+    href: "/unsere-schule/erprobungsstufe",
+    icon: GraduationCap,
+    title: "Erprobungsstufe",
+    description: "Der Unterricht in den Klassen 5 und 6 mit besonderem Profil.",
+  },
+  {
+    href: "/unsere-schule/profilprojekte",
+    icon: Star,
+    title: "Profilprojekte",
+    description: "Kunst, Musik, Sport und NaWi – unsere besonderen Profilprojekte.",
+  },
+  {
+    href: "/unsere-schule/oberstufe",
     icon: BookOpen,
-    title: "Fächer & Arbeitsgemeinschaften",
-    description: "Unser breites Fächerangebot und die vielfältigen Arbeitsgemeinschaften am Nachmittag.",
-  },
-  {
-    href: "/schulleben/nachmittag",
-    icon: Clock,
-    title: "Nachmittags am Grabbe",
-    description: "Verlässliche Nachmittagsbetreuung, Hausaufgabenhilfe und Mensa-Angebote.",
-  },
-  {
-    href: "/schulleben/netzwerk",
-    icon: Network,
-    title: "Netzwerk & Partner",
-    description: "Unsere Kooperationspartner aus Kultur, Wirtschaft, Bildung und Gesellschaft.",
+    title: "Oberstufe",
+    description: "Informationen zur gymnasialen Oberstufe und zum Abitur.",
   },
 ]
 
-export default async function SchullebenPage() {
-  const content = await getPageContent('landing-schulleben', PAGE_DEFAULTS['landing-schulleben'])
+export default async function UnterrichtPage() {
+  const content = await getPageContent('landing-unterricht', PAGE_DEFAULTS['landing-unterricht'])
 
   return (
     <SiteLayout>

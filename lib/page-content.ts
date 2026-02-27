@@ -478,6 +478,36 @@ export const PAGE_DEFAULTS = {
   'downloads': {
     hero_image_url: '',
   },
+
+  // Landing pages (category overviews)
+  'landing-unterricht': {
+    page_label: 'Bildung',
+    page_title: 'Unterricht',
+    page_subtitle: 'Unser Unterrichtsangebot am Grabbe-Gymnasium – von der Erprobungsstufe bis zum Abitur.',
+    hero_image_url: '',
+    intro_text: 'Das Grabbe-Gymnasium bietet ein breites und modernes Unterrichtsangebot. Von der Erprobungsstufe über die Mittelstufe bis zum Abitur begleiten wir unsere Schüler:innen mit engagierten Lehrkräften, individueller Förderung und einem besonderen Profil in Kunst, Musik, Sport und Naturwissenschaften.',
+  },
+  'landing-unterricht-faecher': {
+    page_label: 'Unterricht',
+    page_title: 'Fächer',
+    page_subtitle: 'Alle Fächer am Grabbe-Gymnasium im Überblick – von Sprachen über MINT bis Gesellschaftswissenschaften.',
+    hero_image_url: '',
+    intro_text: 'Am Grabbe-Gymnasium unterrichten wir ein breites Spektrum an Fächern. Unsere engagierten Fachlehrkräfte begleiten die Schüler:innen von der Erprobungsstufe bis zum Abitur und fördern individuelle Stärken und Interessen.',
+  },
+  'landing-schulleben': {
+    page_label: 'Gemeinschaft',
+    page_title: 'Schulleben',
+    page_subtitle: 'Das Grabbe-Gymnasium ist mehr als Unterricht – entdecke unser vielfältiges Schulleben.',
+    hero_image_url: '',
+    intro_text: 'Am Grabbe-Gymnasium wird Gemeinschaft grossgeschrieben. Neben dem Unterricht bieten wir zahlreiche Arbeitsgemeinschaften, eine verlässliche Nachmittagsbetreuung und ein starkes Netzwerk mit Partnern aus Kultur, Wirtschaft und Bildung. Hier findest du alle Bereiche unseres Schullebens.',
+  },
+  'landing-unsere-schule': {
+    page_label: 'Willkommen',
+    page_title: 'Unsere Schule',
+    page_subtitle: 'Das Grabbe-Gymnasium Detmold – ein Ort des Lernens, der Begegnung und der persönlichen Entfaltung.',
+    hero_image_url: '',
+    intro_text: 'Das Grabbe-Gymnasium liegt im Herzen von Detmold und bietet Schüler:innen von der fünften Klasse bis zum Abitur ein vielfältiges Bildungsangebot. Mit unseren Profilprojekten, einer engagierten Schulgemeinschaft und moderner Ausstattung gestalten wir Schule als Lebensort.',
+  },
 } as const
 
 // ============================================================================
@@ -1299,5 +1329,110 @@ export const EDITABLE_PAGES: PageDefinition[] = [
     route: '/downloads',
     sections: [HERO_IMAGE_SECTION],
     defaults: PAGE_DEFAULTS['downloads'],
+  },
+  // Landing pages (category overviews)
+  {
+    id: 'landing-unterricht',
+    title: 'Unterricht',
+    description: 'Die Kategorieübersicht für den Bereich Unterricht.',
+    route: '/unterricht',
+    sections: [
+      {
+        id: 'header',
+        title: 'Seitenkopf',
+        fields: [
+          { key: 'page_label', label: 'Label', type: 'text' },
+          { key: 'page_title', label: 'Seitentitel', type: 'text' },
+          { key: 'page_subtitle', label: 'Untertitel', type: 'textarea' },
+        ],
+      },
+      {
+        id: 'intro',
+        title: 'Einleitung',
+        fields: [
+          { key: 'intro_text', label: 'Einleitungstext', type: 'textarea' },
+        ],
+      },
+      HERO_IMAGE_SECTION,
+    ],
+    defaults: PAGE_DEFAULTS['landing-unterricht'],
+  },
+  {
+    id: 'landing-unterricht-faecher',
+    title: 'Fächer',
+    description: 'Die Fächerübersicht unter Unterricht > Fächer.',
+    route: '/unterricht/faecher',
+    sections: [
+      {
+        id: 'header',
+        title: 'Seitenkopf',
+        fields: [
+          { key: 'page_label', label: 'Label', type: 'text' },
+          { key: 'page_title', label: 'Seitentitel', type: 'text' },
+          { key: 'page_subtitle', label: 'Untertitel', type: 'textarea' },
+        ],
+      },
+      {
+        id: 'intro',
+        title: 'Einleitung',
+        fields: [
+          { key: 'intro_text', label: 'Einleitungstext', type: 'textarea' },
+        ],
+      },
+      HERO_IMAGE_SECTION,
+    ],
+    defaults: PAGE_DEFAULTS['landing-unterricht-faecher'],
+  },
+  {
+    id: 'landing-schulleben',
+    title: 'Schulleben (Übersicht)',
+    description: 'Die Kategorieübersicht für den Bereich Schulleben.',
+    route: '/schulleben',
+    sections: [
+      {
+        id: 'header',
+        title: 'Seitenkopf',
+        fields: [
+          { key: 'page_label', label: 'Label', type: 'text' },
+          { key: 'page_title', label: 'Seitentitel', type: 'text' },
+          { key: 'page_subtitle', label: 'Untertitel', type: 'textarea' },
+        ],
+      },
+      {
+        id: 'intro',
+        title: 'Einleitung',
+        fields: [
+          { key: 'intro_text', label: 'Einleitungstext', type: 'textarea' },
+        ],
+      },
+      HERO_IMAGE_SECTION,
+    ],
+    defaults: PAGE_DEFAULTS['landing-schulleben'],
+  },
+  {
+    id: 'landing-unsere-schule',
+    title: 'Unsere Schule (Übersicht)',
+    description: 'Die Kategorieübersicht für den Bereich Unsere Schule.',
+    route: '/unsere-schule',
+    sections: [
+      {
+        id: 'header',
+        title: 'Seitenkopf',
+        fields: [
+          { key: 'page_label', label: 'Label', type: 'text' },
+          { key: 'page_title', label: 'Seitentitel', type: 'text' },
+          { key: 'page_subtitle', label: 'Untertitel', type: 'textarea' },
+        ],
+      },
+      {
+        id: 'intro',
+        title: 'Einleitung',
+        fields: [
+          { key: 'intro_text', label: 'Einleitungstext', type: 'textarea' },
+        ],
+      },
+      HERO_IMAGE_SECTION,
+    ],
+    defaults: PAGE_DEFAULTS['landing-unsere-schule'],
   },
 ]

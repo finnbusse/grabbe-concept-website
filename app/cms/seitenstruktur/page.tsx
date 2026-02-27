@@ -81,13 +81,17 @@ const SYSTEM_ROUTES: { path: string; label: string; category?: string; subcatego
   { path: "/termine", label: "Termine" },
   { path: "/downloads", label: "Downloads" },
   { path: "/kontakt", label: "Kontakt" },
+  { path: "/unsere-schule", label: "Unsere Schule (Übersicht)", category: "unsere-schule" },
   { path: "/unsere-schule/erprobungsstufe", label: "Erprobungsstufe", category: "unsere-schule" },
   { path: "/unsere-schule/profilprojekte", label: "Profilprojekte", category: "unsere-schule" },
   { path: "/unsere-schule/oberstufe", label: "Oberstufe", category: "unsere-schule" },
   { path: "/unsere-schule/anmeldung", label: "Anmeldung", category: "unsere-schule" },
+  { path: "/schulleben", label: "Schulleben (Übersicht)", category: "schulleben" },
   { path: "/schulleben/faecher-ags", label: "Fächer & AGs", category: "schulleben" },
   { path: "/schulleben/nachmittag", label: "Nachmittags am Grabbe", category: "schulleben" },
   { path: "/schulleben/netzwerk", label: "Netzwerk & Partner", category: "schulleben" },
+  { path: "/unterricht", label: "Unterricht", category: "unterricht" },
+  { path: "/unterricht/faecher", label: "Fächer", category: "unterricht", subcategory: "faecher" },
   { path: "/impressum", label: "Impressum" },
   { path: "/datenschutz", label: "Datenschutz" },
 ]
@@ -107,6 +111,21 @@ const DEFAULT_CATEGORIES: CategoryDef[] = [
     sort_order: 1,
     children: [],
   },
+  {
+    id: "unterricht",
+    slug: "unterricht",
+    label: "Unterricht",
+    sort_order: 2,
+    children: [
+      {
+        id: "unterricht/faecher",
+        slug: "faecher",
+        label: "Fächer",
+        sort_order: 0,
+        children: [],
+      },
+    ],
+  },
 ]
 
 // ============================================================================
@@ -119,7 +138,7 @@ function StrukturTab() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(["unsere-schule", "schulleben"]))
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(["unsere-schule", "schulleben", "unterricht"]))
   const [editingCategory, setEditingCategory] = useState<string | null>(null)
   const [newCategoryParent, setNewCategoryParent] = useState<string | null>(null)
   const [newCategorySlug, setNewCategorySlug] = useState("")
@@ -571,7 +590,7 @@ function CategoryNode({
   const [editLabel, setEditLabel] = useState(category.label)
   const isEditing = editingCategory === category.id
 
-  const isSystemCategory = category.id === "unsere-schule" || category.id === "schulleben"
+  const isSystemCategory = category.id === "unsere-schule" || category.id === "schulleben" || category.id === "unterricht" || category.id === "unterricht/faecher"
   const hasContent = systemPages.length > 0 || customPages.length > 0 || category.children.length > 0
 
   // Detect index page for this category
@@ -658,8 +677,12 @@ function CategoryNode({
       {/* Expanded content */}
       {isExpanded && (
         <div className="border-t px-5 py-3 space-y-2">
-          {/* System pages in this category */}
-          {systemPages.map((route) => (
+          {/* System pages in this category (exclude those belonging to subcategories) */}
+          {systemPages
+            .filter(route => !category.children.some(child =>
+              route.path === `/${child.id}` || route.path.startsWith(`/${child.id}/`)
+            ))
+            .map((route) => (
             <div key={route.path} className="flex items-center gap-3 rounded-lg px-3 py-2 bg-muted/50">
               <Lock className="h-3.5 w-3.5 text-muted-foreground/60" />
               <span className="text-sm text-foreground">{route.label}</span>
@@ -695,7 +718,7 @@ function CategoryNode({
               setEditingCategory={setEditingCategory}
               updateCategoryLabel={updateCategoryLabel}
               deleteCategory={deleteCategory}
-              systemPages={[]}
+              systemPages={SYSTEM_ROUTES.filter(r => r.path === `/${child.id}` || r.path.startsWith(`/${child.id}/`))}
               customPages={pages.filter(p => p.route_path?.startsWith(`/${child.id}/`) || p.route_path === `/${child.id}`)}
               movingPage={movingPage}
               setMovingPage={setMovingPage}
