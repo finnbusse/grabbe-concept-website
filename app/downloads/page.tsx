@@ -2,10 +2,9 @@ import { SiteLayout } from "@/components/site-layout"
 import { PageHero } from "@/components/page-hero"
 import { createStaticClient as createClient } from "@/lib/supabase/static"
 import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
-import { Download, FileText, ImageIcon, ExternalLink } from "lucide-react"
+import { FileText } from "lucide-react"
 import { DownloadCategories } from "@/components/download-categories"
 import { generatePageMetadata } from "@/lib/seo"
-import type { DocumentListItem } from "@/lib/types/database.types"
 import type { Metadata } from "next"
 
 export const revalidate = 300
@@ -24,23 +23,28 @@ export default async function DownloadsPage() {
   ])
   const supabase = createClient()
   const heroImageUrl = (heroContent.hero_image_url as string) || undefined
+
+  // Fetch all published public folders
+  const { data: folders } = await supabase
+    .from("document_folders")
+    .select("id, name, parent_id")
+    .eq("is_public", true)
+    .order("name", { ascending: true })
+
   const { data: docs } = await supabase
     .from("documents")
-    .select("id, title, file_url, file_name, file_size, file_type, category")
+    .select("id, title, file_url, file_name, file_size, file_type, category, folder_id")
     .eq("status", "published")
-    .order("category", { ascending: true })
     .order("created_at", { ascending: false })
-    .returns<DocumentListItem[]>()
 
-  const items = docs || []
+  // Since we use the flat output and nest it client-side or pass a structured map:
+  const validFolderIds = new Set((folders || []).map(f => f.id))
 
-  // Group by category
-  const grouped: Record<string, typeof items> = {}
-  items.forEach((doc) => {
-    const cat = doc.category || "allgemein"
-    if (!grouped[cat]) grouped[cat] = []
-    grouped[cat].push(doc)
-  })
+  // Only show docs in valid public folders OR root level docs (folder_id is null)
+  // For docs in a folder that isn't public, they are filtered out entirely
+  const items = (docs || []).filter(doc =>
+    doc.folder_id === null || validFolderIds.has(doc.folder_id)
+  )
 
   return (
     <SiteLayout>
@@ -73,7 +77,7 @@ export default async function DownloadsPage() {
               </div>
             ) : (
               <div className="mt-16">
-                <DownloadCategories grouped={grouped} />
+                <DownloadCategories docs={items} folders={folders || []} />
               </div>
             )}
           </div>
