@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Textarea } from "@/components/ui/textarea"
 import { usePermissions } from "@/components/cms/permissions-context"
 import type { CmsRole } from "@/lib/permissions-shared"
+import { UsersRolesTabs } from "@/components/cms/users-roles-tabs"
 
 interface UserProfile {
   user_id: string
@@ -499,6 +500,8 @@ export default function UsersPage() {
           )}
         </div>
       </div>
+
+      <UsersRolesTabs activeTab="users" />
 
       <div className="mt-6 space-y-6">
 
