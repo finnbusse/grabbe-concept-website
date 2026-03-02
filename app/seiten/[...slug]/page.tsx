@@ -7,7 +7,7 @@ import { MarkdownContent } from "@/components/markdown-content"
 import { BlockContentRenderer } from "@/components/block-content-renderer"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import { generatePageMetadata } from "@/lib/seo"
+import { generatePageMetadata, getSEOSettings, generateWebPageJsonLd, JsonLd } from "@/lib/seo"
 
 export const revalidate = 3600
 
@@ -123,9 +123,19 @@ export default async function DynamicPage({ params }: Props) {
   const routePrefix = page.route_path || ""
   const fullPath = routePrefix ? `${routePrefix}/${page.slug}` : `/seiten/${page.slug}`
 
+  const seo = await getSEOSettings()
+  const webPageJsonLd = generateWebPageJsonLd({
+    seo,
+    title: page.seo_title || page.title,
+    description: page.meta_description || seo.defaultDescription,
+    url: `${seo.siteUrl}${fullPath}`,
+    breadcrumbs: [{ name: page.title, href: fullPath }],
+  })
+
   return (
     <SiteLayout>
       <main>
+        <JsonLd data={webPageJsonLd} />
         <PageHero
           title={page.title}
           label={page.section || undefined}

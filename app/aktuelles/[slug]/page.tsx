@@ -13,6 +13,7 @@ import {
   generatePageMetadata,
   getSEOSettings,
   generateArticleJsonLd,
+  generateWebPageJsonLd,
   JsonLd,
 } from "@/lib/seo"
 
@@ -120,10 +121,22 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
     section: post.category || undefined,
   })
 
+  const webPageJsonLd = generateWebPageJsonLd({
+    seo,
+    title: post.seo_title || post.title,
+    description: post.meta_description || post.excerpt || seo.defaultDescription,
+    url: postUrl,
+    breadcrumbs: [
+      { name: "Aktuelles", href: "/aktuelles" },
+      { name: post.title, href: `/aktuelles/${slug}` },
+    ],
+  })
+
   return (
     <SiteLayout>
       <main>
         <JsonLd data={articleJsonLd} />
+        <JsonLd data={webPageJsonLd} />
         <PageHero
           title={post.title}
           label={post.category || "Aktuelles"}
