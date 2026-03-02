@@ -1,5 +1,3 @@
-import Link from "next/link"
-import { Mail, Phone, MapPin, ArrowRight } from "lucide-react"
 import { getSettings } from "@/lib/settings"
 import { ContactSectionClient } from "./contact-section-client"
 
