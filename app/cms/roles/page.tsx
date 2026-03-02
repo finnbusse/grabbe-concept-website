@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { ShieldCheck, Plus, Trash2, Pencil, Loader2, Eye } from "lucide-react"
 import { RoleEditorSheet } from "@/components/cms/role-editor-sheet"
+import { UsersRolesTabs } from "@/components/cms/users-roles-tabs"
 import type { CmsRole } from "@/lib/permissions-shared"
 
 export default function RolesPage() {
@@ -72,6 +73,8 @@ export default function RolesPage() {
           Neue Rolle
         </Button>
       </div>
+
+      <UsersRolesTabs activeTab="roles" />
 
       <div className="mt-6 space-y-6">
 
