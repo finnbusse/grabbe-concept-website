@@ -45,7 +45,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!post) return {}
 
   return generatePageMetadata({
-    title: post.title,
+    title: post.seo_title || post.title,
+    seoTitleOverride: post.seo_title || undefined,
     description: post.meta_description || post.excerpt || undefined,
     ogImage: post.seo_og_image || post.image_url || undefined,
     path: `/aktuelles/${post.slug}`,
@@ -54,6 +55,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     modifiedTime: post.updated_at,
     author: post.author_name || undefined,
     section: post.category || undefined,
+    canonicalOverride: post.seo_canonical_override || undefined,
+    noIndex: post.seo_no_index || false,
   })
 }
 

@@ -92,10 +92,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `${routePrefix}/${page.slug}`
     : `/seiten/${page.slug}`
   return generatePageMetadata({
-    title: page.title,
+    title: page.seo_title || page.title,
+    seoTitleOverride: page.seo_title || undefined,
     description: page.meta_description || undefined,
     ogImage: page.seo_og_image || undefined,
     path: canonicalPath,
+    canonicalOverride: page.seo_canonical_override || undefined,
+    noIndex: page.seo_no_index || false,
+    ogType: (page.og_type as "website" | "article") || "website",
   })
 }
 
