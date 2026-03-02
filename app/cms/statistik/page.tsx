@@ -13,8 +13,9 @@ type AnalyticsResponse = {
     pageviews: number
     visits: number
     bounceRate: number | null
+    secondsOnPage: number | null
   }
-  topPages: Array<{ page: string; pageviews: number; visitors: number }>
+  topPages: Array<{ page: string; pageviews: number; visitors: number; secondsOnPage: number | null }>
   timeseries: Array<{ date: string; pageviews: number; visitors: number }>
   error?: string
   details?: string
@@ -77,7 +78,7 @@ export default function StatistikPage() {
         <Card className="mt-6 border-destructive/40 p-4">
           <p className="text-sm font-medium text-destructive">{error}</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Prüfe in Vercel die Variablen SIMPLE_ANALYTICS_USER_ID und SIMPLE_ANALYTICS_API_KEY.
+            Prüfe die Domain-Konfiguration (optional: SIMPLE_ANALYTICS_DOMAIN). Standard ist grabbe.site.
           </p>
         </Card>
       )}
@@ -107,6 +108,9 @@ export default function StatistikPage() {
                 <p className="text-sm text-muted-foreground">Besuche</p>
               </div>
               <p className="mt-3 text-2xl font-semibold">{loading ? "…" : formatNumber(data?.summary.visits || 0)}</p>
+              {!loading && data?.summary.secondsOnPage != null && (
+                <p className="mt-1 text-xs text-muted-foreground">Median Verweildauer: {Math.round(data.summary.secondsOnPage)}s</p>
+              )}
             </Card>
           </div>
 

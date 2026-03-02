@@ -11,8 +11,9 @@ type NormalizedAnalytics = {
     pageviews: number
     visits: number
     bounceRate: number | null
+    secondsOnPage: number | null
   }
-  topPages: Array<{ page: string; pageviews: number; visitors: number }>
+  topPages: Array<{ page: string; pageviews: number; visitors: number; secondsOnPage: number | null }>
   timeseries: Array<{ date: string; pageviews: number; visitors: number }>
 }
 
@@ -25,47 +26,43 @@ function toNumber(value: unknown): number {
   return 0
 }
 
-function normalizeAnalytics(raw: any, source: string, start: string, end: string): NormalizedAnalytics {
-  const payload = raw?.data ?? raw?.results ?? raw
-  const rows = Array.isArray(payload) ? payload : Array.isArray(payload?.rows) ? payload.rows : []
+function normalizeAnalytics(raw: any, source: string): NormalizedAnalytics {
+  const histogramSource = Array.isArray(raw?.histogram) ? raw.histogram : []
+  const pagesSource = Array.isArray(raw?.pages) ? raw.pages : []
 
-  const totals = payload?.totals ?? payload?.summary ?? raw?.totals ?? raw?.summary ?? {}
-
-  const timeseries = rows
+  const timeseries = histogramSource
     .map((row: any) => ({
-      date: String(row.date ?? row.day ?? row.x ?? ""),
-      pageviews: toNumber(row.pageviews ?? row.views ?? row.value),
+      date: String(row.date ?? row.value ?? row.day ?? ""),
+      pageviews: toNumber(row.pageviews ?? row.views ?? row.count ?? row.value),
       visitors: toNumber(row.visitors ?? row.unique_visitors ?? row.uniques),
     }))
     .filter((row: { date: string }) => Boolean(row.date))
 
-  const topPagesSource = Array.isArray(raw?.pages)
-    ? raw.pages
-    : Array.isArray(payload?.pages)
-      ? payload.pages
-      : Array.isArray(raw?.topPages)
-        ? raw.topPages
-        : []
-
-  const topPages = topPagesSource
+  const topPages = pagesSource
     .map((page: any) => ({
-      page: String(page.page ?? page.path ?? page.url ?? "/"),
-      pageviews: toNumber(page.pageviews ?? page.views ?? page.value),
+      page: String(page.value ?? page.page ?? page.path ?? "/"),
+      pageviews: toNumber(page.pageviews ?? page.views),
       visitors: toNumber(page.visitors ?? page.unique_visitors ?? page.uniques),
+      secondsOnPage: page.seconds_on_page == null ? null : toNumber(page.seconds_on_page),
     }))
+    .sort((a: { pageviews: number }, b: { pageviews: number }) => b.pageviews - a.pageviews)
     .slice(0, 10)
 
-  const sumPageviews = timeseries.reduce((acc: number, item: { pageviews: number }) => acc + item.pageviews, 0)
-  const sumVisitors = timeseries.reduce((acc: number, item: { visitors: number }) => acc + item.visitors, 0)
+  const pageviewsFromSeries = timeseries.reduce((acc: number, item: { pageviews: number }) => acc + item.pageviews, 0)
+  const visitorsFromSeries = timeseries.reduce((acc: number, item: { visitors: number }) => acc + item.visitors, 0)
 
   return {
     source,
-    range: { start, end },
+    range: {
+      start: String(raw?.start ?? "today-30d"),
+      end: String(raw?.end ?? "yesterday"),
+    },
     summary: {
-      visitors: toNumber(totals.visitors ?? totals.unique_visitors) || sumVisitors,
-      pageviews: toNumber(totals.pageviews ?? totals.views) || sumPageviews,
-      visits: toNumber(totals.visits ?? totals.sessions),
-      bounceRate: totals.bounce_rate == null ? null : toNumber(totals.bounce_rate),
+      visitors: toNumber(raw?.visitors) || visitorsFromSeries,
+      pageviews: toNumber(raw?.pageviews) || pageviewsFromSeries,
+      visits: toNumber(raw?.visits),
+      bounceRate: raw?.bounce_rate == null ? null : toNumber(raw?.bounce_rate),
+      secondsOnPage: raw?.seconds_on_page == null ? null : toNumber(raw?.seconds_on_page),
     },
     topPages,
     timeseries,
@@ -82,67 +79,33 @@ export async function GET() {
     return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 })
   }
 
-  const userId = process.env.SIMPLE_ANALYTICS_USER_ID
-  const apiKey = process.env.SIMPLE_ANALYTICS_API_KEY
+  const domain = process.env.SIMPLE_ANALYTICS_DOMAIN || "grabbe.site"
+  const query = new URLSearchParams({
+    version: "6",
+    fields: "histogram,pages,seconds_on_page",
+    start: "today-30d",
+    end: "yesterday",
+    timezone: "Europe/Berlin",
+  })
 
-  if (!userId || !apiKey) {
+  const url = `https://simpleanalytics.com/${domain}.json?${query.toString()}`
+
+  const response = await fetch(url, {
+    next: { revalidate: 300 },
+  })
+
+  if (!response.ok) {
     return NextResponse.json(
       {
-        error: "Simple Analytics nicht konfiguriert",
-        details: "SIMPLE_ANALYTICS_USER_ID und SIMPLE_ANALYTICS_API_KEY müssen gesetzt sein.",
+        error: "Simple Analytics API Anfrage fehlgeschlagen",
+        status: response.status,
+        details: await response.text(),
+        source: url,
       },
-      { status: 500 }
+      { status: 502 }
     )
   }
 
-  const end = new Date().toISOString().slice(0, 10)
-  const startDate = new Date()
-  startDate.setDate(startDate.getDate() - 30)
-  const start = startDate.toISOString().slice(0, 10)
-
-  const attempts = [
-    {
-      label: "v2/stats",
-      url: `https://api.simpleanalytics.com/v2/${userId}/stats?start=${start}&end=${end}`,
-    },
-    {
-      label: "v2/overview",
-      url: `https://api.simpleanalytics.com/v2/${userId}/overview?start=${start}&end=${end}`,
-    },
-    {
-      label: "legacy",
-      url: `https://api.simpleanalytics.com/${userId}.json?start=${start}&end=${end}`,
-    },
-  ]
-
-  const authHeaders = {
-    Authorization: `Api-Key ${apiKey}`,
-    "X-Api-Key": apiKey,
-  }
-
-  const errors: Array<{ source: string; status: number; body: string }> = []
-
-  for (const attempt of attempts) {
-    const response = await fetch(attempt.url, {
-      headers: authHeaders,
-      next: { revalidate: 300 },
-    })
-
-    if (!response.ok) {
-      errors.push({ source: attempt.label, status: response.status, body: await response.text() })
-      continue
-    }
-
-    const raw = await response.json()
-    const normalized = normalizeAnalytics(raw, attempt.label, start, end)
-    return NextResponse.json(normalized)
-  }
-
-  return NextResponse.json(
-    {
-      error: "Simple Analytics API Anfrage fehlgeschlagen",
-      attempts: errors,
-    },
-    { status: 502 }
-  )
+  const raw = await response.json()
+  return NextResponse.json(normalizeAnalytics(raw, `simpleanalytics.com/${domain}.json`))
 }
