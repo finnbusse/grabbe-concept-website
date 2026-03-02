@@ -128,7 +128,7 @@ export function CmsSidebar({ userEmail, userProfile, isOpen, onClose, collapsed,
 
   return (
     <TooltipProvider delayDuration={0}>
-      <aside className={`flex ${sidebarWidth} shrink-0 flex-col border-r border-border bg-card fixed inset-y-0 left-0 z-30 transform transition-all duration-300 lg:relative lg:translate-x-0 lg:z-auto ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-30 flex h-svh ${sidebarWidth} shrink-0 flex-col overflow-hidden border-r border-border bg-card transform transition-all duration-300 lg:relative lg:inset-auto lg:h-full lg:translate-x-0 lg:z-auto ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {/* Sidebar Header */}
         <div className={`flex items-center border-b border-border ${collapsed ? "justify-center px-2 py-4" : "gap-3 px-5 py-4"}`}>
           <Image
@@ -156,7 +156,7 @@ export function CmsSidebar({ userEmail, userProfile, isOpen, onClose, collapsed,
         </div>
 
         {/* Navigation */}
-        <nav className={`flex-1 overflow-y-auto py-4 ${collapsed ? "px-2" : "px-3"}`} aria-label="CMS Navigation">
+        <nav className={`min-h-0 flex-1 overflow-y-auto py-4 ${collapsed ? "px-2" : "px-3"}`} aria-label="CMS Navigation">
           {sections.map((section, idx) => (
             <div key={section.title} className={idx > 0 ? "mt-5" : ""}>
               {!collapsed && (
@@ -196,7 +196,7 @@ export function CmsSidebar({ userEmail, userProfile, isOpen, onClose, collapsed,
         </nav>
 
         {/* Footer Links */}
-        <div className={`border-t border-border py-3 ${collapsed ? "px-2" : "px-3"}`}>
+        <div className={`border-t border-border py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] ${collapsed ? "px-2" : "px-3"}`}>
           {visibleFooter.length > 0 && (
             <div className="space-y-1 mb-3">
               {visibleFooter.map((link) => {

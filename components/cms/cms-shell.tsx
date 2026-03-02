@@ -44,7 +44,7 @@ export function CmsShell({ children, userEmail, userProfile, permissions, roleSl
 
   return (
     <PermissionsProvider value={{ permissions, roleSlugs, pagePermissions }}>
-      <div className="flex min-h-svh">
+      <div className="flex h-svh overflow-hidden">
         <CmsSidebar
           userEmail={userEmail}
           userProfile={userProfile}
@@ -80,7 +80,7 @@ export function CmsShell({ children, userEmail, userProfile, permissions, roleSl
             </div>
           </div>
 
-          <main className="flex-1 overflow-auto bg-muted">
+          <main className="min-h-0 flex-1 overflow-auto bg-muted">
             <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-6 lg:py-8">
               {children}
             </div>
