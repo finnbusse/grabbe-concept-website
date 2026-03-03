@@ -14,28 +14,21 @@ export default async function EditParentLetterPage({ params }: { params: Promise
     id: string
     title: string
     slug: string
-    content: string
+    content: unknown
     number: number
     status: string
-    image_url: string | null
     date_from: string | null
     date_to: string | null
   }
 
-  let blocks = []
-  try {
-    const parsed = JSON.parse(l.content)
-    if (Array.isArray(parsed)) blocks = parsed
-  } catch {
-    // not block content
-  }
+  const blocks = Array.isArray(l.content) ? l.content : []
 
   return (
     <ParentLetterWizardProvider initialState={{
       title: l.title,
       dateFrom: l.date_from || "",
       dateTo: l.date_to || "",
-      coverImageUrl: l.image_url,
+      coverImageUrl: null,
       blocks,
       currentStep: 2,
       isSaving: false,

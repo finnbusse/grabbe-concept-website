@@ -55,12 +55,11 @@ export function ParentLetterWizardStep2() {
 
       const payload: Record<string, unknown> = {
         title: state.title,
-        content: JSON.stringify(state.blocks),
+        content: state.blocks,
         status: publish ? "published" : "draft",
-        image_url: state.coverImageUrl || null,
         date_from: state.dateFrom || null,
         date_to: state.dateTo || null,
-        user_id: user.id,
+        author_id: user.id,
         updated_at: new Date().toISOString(),
       }
 
