@@ -37,7 +37,7 @@ export async function generateStaticParams() {
       .select("slug")
       .eq("status", "published")
       .returns<Array<{ slug: string }>>()
-      .then((r) => r, () => ({ data: null })),
+      .then((r) => r, () => ({ data: null })), // parent_letters table may not exist yet
   ])
   const postSlugs = (postsRes.data ?? []).map((p) => ({ slug: p.slug }))
   const letterSlugs = (lettersRes.data ?? []).map((l) => ({ slug: l.slug }))

@@ -33,7 +33,7 @@ export function ShareButton({ title, text, url }: ShareButtonProps) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      // last resort
+      // Silently fail — clipboard access denied or not supported
     }
   }
 
