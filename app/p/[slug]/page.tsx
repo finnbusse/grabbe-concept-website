@@ -159,7 +159,7 @@ function PresentationBlockRenderer({ block }: { block: PresentationBlock }) {
             <figure>
               <img
                 src={block.imageUrl}
-                alt={block.alt}
+                alt={block.alt || "Bild"}
                 className="h-auto w-full object-cover"
               />
               {block.caption && (
@@ -190,7 +190,7 @@ function PresentationBlockRenderer({ block }: { block: PresentationBlock }) {
                 <figure>
                   <img
                     src={img.imageUrl}
-                    alt={img.alt}
+                    alt={img.alt || "Galeriebild"}
                     className="h-auto w-full rounded-lg object-cover"
                   />
                   {img.caption && (
@@ -329,7 +329,7 @@ function PresentationBlockRenderer({ block }: { block: PresentationBlock }) {
       const imageEl = (
         <img
           src={block.imageUrl}
-          alt={block.imageAlt}
+          alt={block.imageAlt || "Bild"}
           className="h-auto w-full rounded-lg object-cover"
         />
       )

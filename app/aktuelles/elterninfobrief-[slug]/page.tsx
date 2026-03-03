@@ -20,12 +20,15 @@ export const revalidate = 300
 // Data helpers
 // ============================================================================
 
-async function getLetter(slug: string) {
+async function getLetter(slugParam: string) {
   const supabase = createClient()
+  // The URL param is the part after "elterninfobrief-" in the path,
+  // but the DB stores the full slug including the prefix
+  const fullSlug = `elterninfobrief-${slugParam}`
   const { data } = await supabase
     .from("parent_letters")
     .select("*")
-    .eq("slug", slug)
+    .eq("slug", fullSlug)
     .eq("status", "published")
     .single()
   return data
@@ -38,7 +41,10 @@ export async function generateStaticParams() {
     .select("slug")
     .eq("status", "published")
     .returns<Array<{ slug: string }>>()
-  return (data ?? []).map((l) => ({ slug: l.slug }))
+  // Strip the "elterninfobrief-" prefix since the folder name already includes it
+  return (data ?? []).map((l) => ({
+    slug: l.slug.replace(/^elterninfobrief-/, ""),
+  }))
 }
 
 export async function generateMetadata({
@@ -53,7 +59,7 @@ export async function generateMetadata({
   return generatePageMetadata({
     title: `${letter.number}. Elterninfobrief – ${letter.title}`,
     description: `Elterninfobrief Nr. ${letter.number}: ${letter.title}`,
-    path: `/aktuelles/elterninfobrief-${letter.slug}`,
+    path: `/aktuelles/${letter.slug}`,
     type: "article",
     publishedTime: letter.created_at,
     modifiedTime: letter.updated_at,
@@ -247,7 +253,7 @@ export default async function ElterninfobriefPage({
   const { data: letter } = await supabase
     .from("parent_letters")
     .select("*")
-    .eq("slug", slug)
+    .eq("slug", `elterninfobrief-${slug}`)
     .eq("status", "published")
     .single()
 
@@ -257,7 +263,7 @@ export default async function ElterninfobriefPage({
 
   // JSON-LD
   const seo = await getSEOSettings()
-  const pageUrl = `${seo.siteUrl}/aktuelles/elterninfobrief-${slug}`
+  const pageUrl = `${seo.siteUrl}/aktuelles/${letter.slug}`
 
   const articleJsonLd = generateArticleJsonLd({
     seo,
@@ -277,7 +283,7 @@ export default async function ElterninfobriefPage({
       { name: "Aktuelles", href: "/aktuelles" },
       {
         name: `${letter.number}. Elterninfobrief`,
-        href: `/aktuelles/elterninfobrief-${slug}`,
+        href: `/aktuelles/${letter.slug}`,
       },
     ],
   })
@@ -347,7 +353,7 @@ export default async function ElterninfobriefPage({
             { name: "Aktuelles", href: "/aktuelles" },
             {
               name: `${letter.number}. Elterninfobrief`,
-              href: `/aktuelles/elterninfobrief-${slug}`,
+              href: `/aktuelles/${letter.slug}`,
             },
           ]}
         />

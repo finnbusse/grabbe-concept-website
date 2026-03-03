@@ -378,7 +378,7 @@ function PraesentationenTab() {
               {pres.cover_image_url && (
                 <div className="h-12 w-20 shrink-0 overflow-hidden rounded-lg border border-border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={pres.cover_image_url} alt="" className="h-full w-full object-cover" />
+                  <img src={pres.cover_image_url} alt={`Titelbild für ${pres.title}`} className="h-full w-full object-cover" />
                 </div>
               )}
               <div>

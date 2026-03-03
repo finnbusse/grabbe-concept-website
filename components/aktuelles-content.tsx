@@ -137,7 +137,7 @@ function NewsCard({ item }: { item: ContentItem }) {
           {item.authorName && (
             <div className="flex items-center gap-1.5">
               {item.authorAvatar ? (
-                <img src={item.authorAvatar} alt="" className="h-4 w-4 rounded-full object-cover" />
+                <img src={item.authorAvatar} alt={item.authorName || "Autor"} className="h-4 w-4 rounded-full object-cover" />
               ) : (
                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-primary/10 text-[7px] font-bold text-primary">
                   {item.authorInitials || item.authorName.charAt(0)}
@@ -166,7 +166,7 @@ function PresentationCard({ item }: { item: ContentItem }) {
         <div className="mb-3 overflow-hidden rounded-lg">
           <img
             src={item.coverImageUrl}
-            alt=""
+            alt={item.title}
             className="h-36 w-full object-cover transition-transform group-hover:scale-105"
           />
         </div>

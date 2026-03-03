@@ -157,7 +157,7 @@ export function PresentationWizardStep3() {
                 <p className="text-xs text-muted-foreground mb-1">Titelbild</p>
                 <div className="overflow-hidden rounded-lg border border-border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={state.coverImageUrl} alt="Cover" className="h-24 w-full object-cover" />
+                  <img src={state.coverImageUrl} alt={`Titelbild für ${state.title}`} className="h-24 w-full object-cover" />
                 </div>
               </div>
             )}

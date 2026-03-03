@@ -120,7 +120,7 @@ export default async function AktuellesPage() {
       id: pl.id,
       title: pl.title,
       slug: pl.slug,
-      href: `/aktuelles/elterninfobrief-${pl.slug}`,
+      href: `/aktuelles/${pl.slug}`,
       date: pl.created_at,
       number: pl.number,
       datePeriod: period,
