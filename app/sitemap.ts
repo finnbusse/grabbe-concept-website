@@ -19,6 +19,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .select("slug, route_path, updated_at")
     .eq("status", "published")
 
+  // Fetch all published parent letters
+  const { data: parentLetters } = await supabase
+    .from("parent_letters")
+    .select("slug, updated_at, created_at")
+    .eq("status", "published")
+    .order("number", { ascending: false })
+
+  // Fetch all published presentations
+  const { data: presentations } = await supabase
+    .from("presentations")
+    .select("slug, updated_at, created_at")
+    .eq("status", "published")
+    .order("created_at", { ascending: false })
+
   const entries: MetadataRoute.Sitemap = []
 
   // Homepage
@@ -80,6 +94,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         lastModified: new Date(page.updated_at),
         changeFrequency: "monthly",
         priority: 0.5,
+      })
+    }
+  }
+
+  // Dynamic parent letters
+  if (parentLetters) {
+    for (const letter of parentLetters) {
+      entries.push({
+        url: `${baseUrl}/aktuelles/${letter.slug}`,
+        lastModified: new Date(letter.updated_at || letter.created_at),
+        changeFrequency: "monthly",
+        priority: 0.6,
+      })
+    }
+  }
+
+  // Dynamic presentations
+  if (presentations) {
+    for (const pres of presentations) {
+      entries.push({
+        url: `${baseUrl}/p/${pres.slug}`,
+        lastModified: new Date(pres.updated_at || pres.created_at),
+        changeFrequency: "monthly",
+        priority: 0.7,
       })
     }
   }

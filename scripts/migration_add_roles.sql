@@ -42,6 +42,8 @@ INSERT INTO public.cms_roles (name, slug, is_system, permissions) VALUES
   '{
     "posts": { "create": true, "edit": "all", "delete": "all", "publish": true },
     "events": { "create": true, "edit": "all", "delete": "all", "publish": true },
+    "parent_letters": { "create": true, "edit": "all", "delete": "all", "publish": true },
+    "presentations": { "create": true, "edit": "all", "delete": "all", "publish": true },
     "pages": { "edit": true },
     "documents": { "upload": true, "delete": "all" },
     "settings": { "basic": true, "advanced": true, "seo": true },
@@ -63,6 +65,8 @@ INSERT INTO public.cms_roles (name, slug, is_system, permissions) VALUES
   '{
     "posts": { "create": true, "edit": "all", "delete": "all", "publish": true },
     "events": { "create": true, "edit": "all", "delete": "all", "publish": true },
+    "parent_letters": { "create": true, "edit": "all", "delete": "all", "publish": true },
+    "presentations": { "create": true, "edit": "all", "delete": "all", "publish": true },
     "pages": { "edit": true },
     "documents": { "upload": true, "delete": "all" },
     "settings": { "basic": true, "advanced": false, "seo": false },
@@ -84,6 +88,8 @@ INSERT INTO public.cms_roles (name, slug, is_system, permissions) VALUES
   '{
     "posts": { "create": true, "edit": "own", "delete": "own", "publish": true },
     "events": { "create": true, "edit": "own", "delete": "own", "publish": true },
+    "parent_letters": { "create": true, "edit": "own", "delete": "own", "publish": false },
+    "presentations": { "create": true, "edit": "own", "delete": "own", "publish": false },
     "pages": { "edit": false },
     "documents": { "upload": true, "delete": "own" },
     "settings": { "basic": false, "advanced": false, "seo": false },
@@ -105,6 +111,8 @@ INSERT INTO public.cms_roles (name, slug, is_system, permissions) VALUES
   '{
     "posts": { "create": false, "edit": false, "delete": false, "publish": false },
     "events": { "create": false, "edit": false, "delete": false, "publish": false },
+    "parent_letters": { "create": false, "edit": false, "delete": false, "publish": false },
+    "presentations": { "create": false, "edit": false, "delete": false, "publish": false },
     "pages": { "edit": false },
     "documents": { "upload": false, "delete": false },
     "settings": { "basic": false, "advanced": false, "seo": false },
