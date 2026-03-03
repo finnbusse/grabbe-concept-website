@@ -6,6 +6,7 @@ import { isIpBlocked } from '@/lib/rate-limiter'
 const KNOWN_ROUTES = new Set([
   '', 'aktuelles', 'termine', 'downloads', 'kontakt', 'impressum', 'datenschutz',
   'unsere-schule', 'schulleben', 'unterricht', 'seiten', 'cms', 'auth', 'api', 'protected', 'onboarding',
+  'p',
 ])
 
 export async function middleware(request: NextRequest) {

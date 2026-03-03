@@ -56,7 +56,7 @@ const homeLinks: SidebarLink[] = [
 
 const contentLinks: SidebarLink[] = [
   { icon: FileText, label: "Seiten", href: "/cms/seiten", permCheck: (p) => checkPermission(p, "seitenEditor") || p.pages?.edit },
-  { icon: Newspaper, label: "News", href: "/cms/posts", permCheck: (p) => checkPermission(p, "posts") },
+  { icon: Newspaper, label: "Beiträge", href: "/cms/posts", permCheck: (p) => checkPermission(p, "posts") },
   { icon: CalendarDays, label: "Termine", href: "/cms/events", permCheck: (p) => checkPermission(p, "events") },
   { icon: FolderOpen, label: "Dateien", href: "/cms/dateien", permCheck: (p) => checkPermission(p, "documents") },
 ]
@@ -168,11 +168,11 @@ export function CommandPalette() {
           {recentPosts.map(post => (
             <CommandItem
               key={`post-${post.id}`}
-              value={`News bearbeiten: ${post.title}`}
+              value={`Beitrag bearbeiten: ${post.title}`}
               onSelect={() => runCommand(() => router.push(`/cms/posts/${post.id}`))}
             >
               <Newspaper className="mr-2 h-4 w-4" />
-              <span>News bearbeiten: {post.title}</span>
+              <span>Beitrag bearbeiten: {post.title}</span>
             </CommandItem>
           ))}
           {recentPages.map(page => (

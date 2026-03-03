@@ -379,6 +379,61 @@ export type CampaignInsert = Omit<Campaign, 'id' | 'created_at' | 'updated_at'> 
 export type CampaignUpdate = Partial<Omit<Campaign, 'id' | 'created_at'>>
 
 // ============================================================================
+// Parent Letters (Elterninfobriefe)
+// ============================================================================
+
+export interface ParentLetter {
+  id: string; // UUID
+  number: number;
+  title: string;
+  slug: string;
+  content: Record<string, unknown>[]; // ContentBlock[] stored as JSONB
+  status: 'draft' | 'published';
+  date_from: string | null; // date (YYYY-MM-DD)
+  date_to: string | null; // date (YYYY-MM-DD)
+  author_id: string | null; // UUID, references auth.users
+  created_at: string; // timestamptz
+  updated_at: string; // timestamptz
+}
+
+export type ParentLetterInsert = Omit<ParentLetter, 'id' | 'created_at' | 'updated_at'> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type ParentLetterUpdate = Partial<Omit<ParentLetter, 'id' | 'created_at'>>;
+
+// ============================================================================
+// Presentations (Präsentationen)
+// ============================================================================
+
+export interface Presentation {
+  id: string; // UUID
+  title: string;
+  slug: string;
+  subtitle: string | null;
+  blocks: Record<string, unknown>[]; // PresentationBlock[] stored as JSONB
+  status: 'draft' | 'published';
+  show_on_aktuelles: boolean;
+  tag_ids: string[]; // UUID[]
+  cover_image_url: string | null;
+  meta_description: string | null;
+  seo_og_image: string | null;
+  author_id: string | null; // UUID, references auth.users
+  created_at: string; // timestamptz
+  updated_at: string; // timestamptz
+}
+
+export type PresentationInsert = Omit<Presentation, 'id' | 'created_at' | 'updated_at'> & {
+  id?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type PresentationUpdate = Partial<Omit<Presentation, 'id' | 'created_at'>>;
+
+// ============================================================================
 // List-view types (narrow projections for card/list views without large blobs)
 // ============================================================================
 
@@ -492,6 +547,18 @@ export interface Database {
         Row: Campaign;
         Insert: CampaignInsert;
         Update: CampaignUpdate;
+        Relationships: [];
+      };
+      parent_letters: {
+        Row: ParentLetter;
+        Insert: ParentLetterInsert;
+        Update: ParentLetterUpdate;
+        Relationships: [];
+      };
+      presentations: {
+        Row: Presentation;
+        Insert: PresentationInsert;
+        Update: PresentationUpdate;
         Relationships: [];
       };
       cms_roles: {

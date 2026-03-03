@@ -44,6 +44,8 @@ export interface RolePermission {
 export interface CmsPermissions {
   posts: ContentPermission
   events: ContentPermission
+  parent_letters: ContentPermission
+  presentations: ContentPermission
   pages: { edit: boolean }
   documents: DocumentPermission
   settings: SettingsPermission
@@ -87,6 +89,8 @@ export interface UserRole {
 export const EMPTY_PERMISSIONS: CmsPermissions = {
   posts: { create: false, edit: false, delete: false, publish: false },
   events: { create: false, edit: false, delete: false, publish: false },
+  parent_letters: { create: false, edit: false, delete: false, publish: false },
+  presentations: { create: false, edit: false, delete: false, publish: false },
   pages: { edit: false },
   documents: { upload: false, delete: false },
   settings: { basic: false, advanced: false, seo: false },
@@ -124,6 +128,8 @@ export function mergePermissions(a: CmsPermissions, b: CmsPermissions): CmsPermi
   return {
     posts: mergeContentPermission(a.posts, b.posts),
     events: mergeContentPermission(a.events, b.events),
+    parent_letters: mergeContentPermission(a.parent_letters, b.parent_letters),
+    presentations: mergeContentPermission(a.presentations, b.presentations),
     pages: { edit: a.pages.edit || b.pages.edit },
     documents: {
       upload: a.documents.upload || b.documents.upload,
@@ -178,6 +184,8 @@ export function coercePermissions(raw: unknown): CmsPermissions {
 
   const posts = obj(p.posts)
   const events = obj(p.events)
+  const parent_letters = obj(p.parent_letters)
+  const presentations = obj(p.presentations)
   const pages = obj(p.pages)
   const documents = obj(p.documents)
   const settings = obj(p.settings)
@@ -187,6 +195,8 @@ export function coercePermissions(raw: unknown): CmsPermissions {
   return {
     posts: { create: bool(posts.create), edit: editDel(posts.edit), delete: editDel(posts.delete), publish: bool(posts.publish) },
     events: { create: bool(events.create), edit: editDel(events.edit), delete: editDel(events.delete), publish: bool(events.publish) },
+    parent_letters: { create: bool(parent_letters.create), edit: editDel(parent_letters.edit), delete: editDel(parent_letters.delete), publish: bool(parent_letters.publish) },
+    presentations: { create: bool(presentations.create), edit: editDel(presentations.edit), delete: editDel(presentations.delete), publish: bool(presentations.publish) },
     pages: { edit: bool(pages.edit) },
     documents: { upload: bool(documents.upload), delete: editDel(documents.delete) },
     settings: { basic: bool(settings.basic), advanced: bool(settings.advanced), seo: bool(settings.seo) },
@@ -225,6 +235,10 @@ export type PermissionCheck =
   | "posts.create"
   | "events"
   | "events.create"
+  | "parent_letters"
+  | "parent_letters.create"
+  | "presentations"
+  | "presentations.create"
   | "documents"
   | "documents.upload"
 
@@ -264,6 +278,14 @@ export function checkPermission(permissions: CmsPermissions, check: PermissionCh
       return permissions.events.create || permissions.events.edit !== false
     case "events.create":
       return permissions.events.create
+    case "parent_letters":
+      return permissions.parent_letters.create || permissions.parent_letters.edit !== false
+    case "parent_letters.create":
+      return permissions.parent_letters.create
+    case "presentations":
+      return permissions.presentations.create || permissions.presentations.edit !== false
+    case "presentations.create":
+      return permissions.presentations.create
     case "documents":
       return permissions.documents.upload || permissions.documents.delete !== false
     case "documents.upload":
