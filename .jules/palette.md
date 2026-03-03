@@ -1,0 +1,3 @@
+## 2024-05-24 - Missing ARIA Labels on Dynamic Editor Buttons
+**Learning:** In dynamic editor components (like `block-editor.tsx`), utility buttons such as "move up", "move down", or "delete block" are frequently implemented as icon-only `<Button>` elements. While visually intuitive, these often lack `aria-label` attributes, making them inaccessible to screen readers which would otherwise just announce "Button".
+**Action:** Always verify that dynamic, repeating icon-only buttons (like delete buttons in lists or cards) include descriptive `aria-label` and `title` attributes (e.g. `aria-label="Baustein löschen"`).
