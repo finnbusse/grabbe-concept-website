@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS public.teachers (
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   email TEXT,
-  abbreviation TEXT NOT NULL UNIQUE,  -- e.g. "hig" (Kürzel, usually 3 letters)
+  abbreviation TEXT NOT NULL,  -- e.g. "hig" (Kürzel, usually 3 letters, stored lowercase)
   image_url TEXT,
   user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,  -- optional link to user account
   is_active BOOLEAN NOT NULL DEFAULT true,
@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS public.teachers (
 );
 
 CREATE INDEX IF NOT EXISTS idx_teachers_abbreviation ON public.teachers(abbreviation);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_teachers_abbreviation_unique ON public.teachers(lower(abbreviation));
 CREATE INDEX IF NOT EXISTS idx_teachers_last_name ON public.teachers(last_name);
 CREATE INDEX IF NOT EXISTS idx_teachers_user_id ON public.teachers(user_id);
 

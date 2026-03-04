@@ -131,18 +131,20 @@ export function PresentationWizardStep3() {
           .insert(payload as never)
         if (saveError) throw saveError
 
-        // Get the created ID for author teachers
-        const { data: newPres } = await supabase
-          .from("presentations")
-          .select("id")
-          .eq("slug", finalSlug)
-          .order("created_at", { ascending: false })
-          .limit(1)
-        const presentations = newPres as Array<{ id: string }> | null
-        if (presentations && presentations.length > 0 && authorTeacherIds.length > 0) {
-          await supabase.from("presentation_authors").insert(
-            authorTeacherIds.map((teacher_id) => ({ presentation_id: presentations[0].id, teacher_id })) as never
-          )
+        // Save author teachers for new presentation
+        if (authorTeacherIds.length > 0) {
+          const { data: newPres } = await supabase
+            .from("presentations")
+            .select("id")
+            .eq("slug", finalSlug)
+            .order("created_at", { ascending: false })
+            .limit(1)
+          const presentations = newPres as Array<{ id: string }> | null
+          if (presentations && presentations.length > 0) {
+            await supabase.from("presentation_authors").insert(
+              authorTeacherIds.map((teacher_id) => ({ presentation_id: presentations[0].id, teacher_id })) as never
+            )
+          }
         }
       }
 
