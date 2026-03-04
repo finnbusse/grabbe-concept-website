@@ -114,7 +114,11 @@ export function CmsSidebar({ userEmail, userProfile, isOpen, onClose, collapsed,
 
   const visibleHome = filterLinks(homeLinks, permissions)
   const visibleContent = filterLinks(contentLinks, permissions)
-  const visibleAdmin = filterLinks(adminLinks, permissions)
+  // Admin/Schulleitung always see all admin links (existing roles may lack
+  // the "organisation" permission flag that was added later).
+  const visibleAdmin = isAdminOrSchulleitung(roleSlugs)
+    ? adminLinks
+    : filterLinks(adminLinks, permissions)
   const visibleFooter = isAdminOrSchulleitung(roleSlugs)
     ? filterLinks(footerLinks, permissions)
     : filterLinks([footerLinks[2]], permissions) // Only Dokumentation for non-admins

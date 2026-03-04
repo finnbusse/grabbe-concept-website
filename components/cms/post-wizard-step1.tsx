@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { TagSelector } from "./tag-selector"
+import { TeacherAuthorSelector } from "./teacher-author-selector"
 import { ImagePicker } from "./image-picker"
 import { ArrowRight } from "lucide-react"
 
@@ -170,6 +171,20 @@ export function PostWizardStep1() {
         <TagSelector
           selectedTagIds={state.tagIds}
           onChange={(ids) => dispatch({ type: "SET_TAG_IDS", payload: ids })}
+        />
+      </div>
+
+      {/* Author Teachers */}
+      <div className="rounded-2xl border bg-card p-6 space-y-3">
+        <Label className="text-base font-semibold">Autor/innen</Label>
+        <p className="text-xs text-muted-foreground">
+          Wählen Sie die Lehrkräfte aus, die als Autoren dieses Beitrags angezeigt werden.
+          Standardmäßig werden Sie selbst eingetragen, falls Ihr Account mit einer Lehrkraft verknüpft ist.
+        </p>
+        <TeacherAuthorSelector
+          selectedTeacherIds={state.authorTeacherIds}
+          onChange={(ids) => dispatch({ type: "SET_AUTHOR_TEACHER_IDS", payload: ids })}
+          autoPopulateCurrentUser={!state.postId}
         />
       </div>
 

@@ -14,6 +14,7 @@ export interface ParentLetterWizardState {
   dateFrom: string
   dateTo: string
   coverImageUrl: string | null
+  authorTeacherIds: string[]
 
   // Step 2
   blocks: ContentBlock[]
@@ -32,6 +33,7 @@ export type ParentLetterWizardAction =
   | { type: "SET_DATE_FROM"; payload: string }
   | { type: "SET_DATE_TO"; payload: string }
   | { type: "SET_COVER_IMAGE"; payload: string | null }
+  | { type: "SET_AUTHOR_TEACHER_IDS"; payload: string[] }
   | { type: "SET_BLOCKS"; payload: ContentBlock[] }
   | { type: "SET_STEP"; payload: 1 | 2 }
   | { type: "SET_SAVING"; payload: boolean }
@@ -50,6 +52,7 @@ const initialState: ParentLetterWizardState = {
   dateFrom: "",
   dateTo: "",
   coverImageUrl: null,
+  authorTeacherIds: [],
   blocks: [],
   currentStep: 1,
   isSaving: false,
@@ -73,6 +76,8 @@ function wizardReducer(state: ParentLetterWizardState, action: ParentLetterWizar
       return { ...state, dateTo: action.payload }
     case "SET_COVER_IMAGE":
       return { ...state, coverImageUrl: action.payload }
+    case "SET_AUTHOR_TEACHER_IDS":
+      return { ...state, authorTeacherIds: action.payload }
     case "SET_BLOCKS":
       return { ...state, blocks: action.payload }
     case "SET_STEP":

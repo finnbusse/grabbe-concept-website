@@ -16,6 +16,7 @@ export interface PostWizardState {
   coverImageUrl: string | null
   publishDate: string
   tagIds: string[]
+  authorTeacherIds: string[]
 
   // Step 2
   contentMode: "blocks" | "markdown"
@@ -45,6 +46,7 @@ export type PostWizardAction =
   | { type: "SET_COVER_IMAGE"; payload: string | null }
   | { type: "SET_PUBLISH_DATE"; payload: string }
   | { type: "SET_TAG_IDS"; payload: string[] }
+  | { type: "SET_AUTHOR_TEACHER_IDS"; payload: string[] }
   | { type: "SET_CONTENT_MODE"; payload: "blocks" | "markdown" }
   | { type: "SET_BLOCKS"; payload: ContentBlock[] }
   | { type: "SET_MARKDOWN"; payload: string }
@@ -72,6 +74,7 @@ const initialState: PostWizardState = {
   coverImageUrl: null,
   publishDate: new Date().toISOString().split("T")[0],
   tagIds: [],
+  authorTeacherIds: [],
   contentMode: "blocks",
   blocks: [],
   markdownContent: "",
@@ -107,6 +110,8 @@ function wizardReducer(state: PostWizardState, action: PostWizardAction): PostWi
       return { ...state, publishDate: action.payload }
     case "SET_TAG_IDS":
       return { ...state, tagIds: action.payload }
+    case "SET_AUTHOR_TEACHER_IDS":
+      return { ...state, authorTeacherIds: action.payload }
     case "SET_CONTENT_MODE":
       return { ...state, contentMode: action.payload }
     case "SET_BLOCKS":

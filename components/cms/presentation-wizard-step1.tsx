@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { TagSelector } from "./tag-selector"
 import { ImagePicker } from "./image-picker"
+import { TeacherAuthorSelector } from "./teacher-author-selector"
 import { ArrowRight } from "lucide-react"
 
 // ============================================================================
@@ -97,6 +98,19 @@ export function PresentationWizardStep1() {
         <TagSelector
           selectedTagIds={state.tagIds}
           onChange={(ids) => dispatch({ type: "SET_TAG_IDS", payload: ids })}
+        />
+      </div>
+
+      {/* Author Teachers */}
+      <div className="rounded-2xl border bg-card p-6 space-y-3">
+        <Label className="text-base font-semibold">Autor/innen</Label>
+        <p className="text-xs text-muted-foreground">
+          Wählen Sie die Lehrkräfte aus, die als Autoren dieser Präsentation angezeigt werden.
+        </p>
+        <TeacherAuthorSelector
+          selectedTeacherIds={state.authorTeacherIds}
+          onChange={(ids) => dispatch({ type: "SET_AUTHOR_TEACHER_IDS", payload: ids })}
+          autoPopulateCurrentUser={!state.presentationId}
         />
       </div>
 

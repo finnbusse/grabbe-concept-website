@@ -125,12 +125,31 @@ export function PostEditor({ post }: PostEditorProps) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Nicht angemeldet")
 
+      // Build author_name from teacher IDs if any are selected
+      let resolvedAuthorName = authorName
+      if (authorTeacherIds.length > 0) {
+        try {
+          const teacherRes = await fetch("/api/teachers")
+          const teacherData = await teacherRes.json()
+          if (Array.isArray(teacherData)) {
+            const selected = teacherData.filter((t: { id: string }) => authorTeacherIds.includes(t.id))
+            const names = selected.map((t: { gender: string; first_name: string; last_name: string }) => {
+              const prefix = t.gender === "male" ? "Herr" : t.gender === "female" ? "Frau" : ""
+              return [prefix, t.first_name, t.last_name].filter(Boolean).join(" ")
+            }).join(", ")
+            if (names) resolvedAuthorName = names
+          }
+        } catch {
+          // use existing authorName
+        }
+      }
+
       const basePayload: Record<string, unknown> = {
         title, slug, content,
         excerpt: excerpt || null,
         category, status: published ? 'published' : 'draft', featured,
         image_url: imageUrl || null,
-        author_name: authorName || user.email?.split("@")[0] || "Redaktion",
+        author_name: resolvedAuthorName || user.email?.split("@")[0] || "Redaktion",
         user_id: user.id,
         updated_at: new Date().toISOString(),
         meta_description: metaDescription || null,

@@ -23,12 +23,22 @@ export default async function EditParentLetterPage({ params }: { params: Promise
 
   const blocks = Array.isArray(l.content) ? l.content : []
 
+  // Load author teacher IDs
+  let authorTeacherIds: string[] = []
+  try {
+    const { data: letterAuthors } = await supabase.from("parent_letter_authors").select("teacher_id").eq("parent_letter_id", id)
+    authorTeacherIds = (letterAuthors || []).map((a: { teacher_id: string }) => a.teacher_id)
+  } catch {
+    // Table may not exist yet
+  }
+
   return (
     <ParentLetterWizardProvider initialState={{
       title: l.title,
       dateFrom: l.date_from || "",
       dateTo: l.date_to || "",
       coverImageUrl: null,
+      authorTeacherIds,
       blocks,
       currentStep: 2,
       isSaving: false,

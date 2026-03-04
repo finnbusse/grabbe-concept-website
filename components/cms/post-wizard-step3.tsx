@@ -11,7 +11,6 @@ import { Switch } from "@/components/ui/switch"
 import { ImagePicker } from "./image-picker"
 import { SeoPreview } from "./seo-preview"
 import { TagBadge, type TagData } from "./tag-selector"
-import { TeacherAuthorSelector } from "./teacher-author-selector"
 import { PublishCelebration } from "./publish-celebration"
 import { ArrowLeft, Loader2, Save, Rocket, Check } from "lucide-react"
 import { toast } from "sonner"
@@ -26,8 +25,6 @@ export function PostWizardStep3() {
   const [publishState, setPublishState] = useState<"idle" | "saving" | "success">("idle")
   const [error, setError] = useState<string | null>(null)
   const [allTags, setAllTags] = useState<TagData[]>([])
-  const [authorName, setAuthorName] = useState("")
-  const [authorTeacherIds, setAuthorTeacherIds] = useState<string[]>([])
   const [seoSeparator, setSeoSeparator] = useState(" / ")
   const [seoSuffix, setSeoSuffix] = useState("Grabbe-Gymnasium")
   const [celebrationUrl, setCelebrationUrl] = useState("")
@@ -38,19 +35,6 @@ export function PostWizardStep3() {
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setAllTags(data)
-      })
-      .catch(() => {})
-  }, [])
-
-  // Load author name from user profile
-  useEffect(() => {
-    fetch("/api/user-profile")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { profile?: { title?: string; first_name?: string; last_name?: string } } | null) => {
-        if (data?.profile) {
-          const parts = [data.profile.title, data.profile.first_name, data.profile.last_name].filter(Boolean)
-          if (parts.length > 0) setAuthorName(parts.join(" "))
-        }
       })
       .catch(() => {})
   }, [])
@@ -76,20 +60,6 @@ export function PostWizardStep3() {
     }
     loadSeoSettings()
   }, [])
-
-  // Load existing author teachers when editing
-  useEffect(() => {
-    if (!state.postId) return
-    const supabase = createClient()
-    supabase
-      .from("post_authors")
-      .select("teacher_id")
-      .eq("post_id", state.postId)
-      .then(({ data }) => {
-        if (data) setAuthorTeacherIds(data.map((a: { teacher_id: string }) => a.teacher_id))
-      })
-      .catch(() => {})
-  }, [state.postId])
 
   const selectedTags = allTags.filter((t) => state.tagIds.includes(t.id))
   const postUrl = `/aktuelles/${state.slug || "..."}`
@@ -136,6 +106,37 @@ export function PostWizardStep3() {
           finalSlug = `${state.slug}-${counter}`
           dispatch({ type: "SET_SLUG", payload: finalSlug })
         }
+      }
+
+      // Build author_name from selected teachers
+      let authorName = ""
+      if (state.authorTeacherIds.length > 0) {
+        try {
+          const teacherRes = await fetch("/api/teachers")
+          const teacherData = await teacherRes.json()
+          if (Array.isArray(teacherData)) {
+            const selected = teacherData.filter((t: { id: string }) => state.authorTeacherIds.includes(t.id))
+            authorName = selected.map((t: { gender: string; first_name: string; last_name: string }) => {
+              const prefix = t.gender === "male" ? "Herr" : t.gender === "female" ? "Frau" : ""
+              return [prefix, t.first_name, t.last_name].filter(Boolean).join(" ")
+            }).join(", ")
+          }
+        } catch {
+          // fallback below
+        }
+      }
+      if (!authorName) {
+        // Fallback to user profile name
+        try {
+          const profileRes = await fetch("/api/user-profile")
+          if (profileRes.ok) {
+            const profileData = await profileRes.json()
+            if (profileData?.profile) {
+              const parts = [profileData.profile.title, profileData.profile.first_name, profileData.profile.last_name].filter(Boolean)
+              if (parts.length > 0) authorName = parts.join(" ")
+            }
+          }
+        } catch { /* use fallback */ }
       }
 
       const basePayload: Record<string, unknown> = {
@@ -188,9 +189,9 @@ export function PostWizardStep3() {
         }
         // Save author teachers
         await supabase.from("post_authors").delete().eq("post_id", state.postId)
-        if (authorTeacherIds.length > 0) {
+        if (state.authorTeacherIds.length > 0) {
           await supabase.from("post_authors").insert(
-            authorTeacherIds.map((teacher_id) => ({ post_id: state.postId!, teacher_id })) as never
+            state.authorTeacherIds.map((teacher_id) => ({ post_id: state.postId!, teacher_id })) as never
           )
         }
       } else {
@@ -213,9 +214,9 @@ export function PostWizardStep3() {
             )
           }
           // Save author teachers for new post
-          if (authorTeacherIds.length > 0) {
+          if (state.authorTeacherIds.length > 0) {
             await supabase.from("post_authors").insert(
-              authorTeacherIds.map((teacher_id) => ({ post_id: newPostId, teacher_id })) as never
+              state.authorTeacherIds.map((teacher_id) => ({ post_id: newPostId, teacher_id })) as never
             )
           }
         }
@@ -327,25 +328,13 @@ export function PostWizardStep3() {
               </p>
             </div>
 
-            {/* Author */}
-            {authorName && (
+            {/* Authors */}
+            {state.authorTeacherIds.length > 0 && (
               <div>
-                <p className="text-xs text-muted-foreground">Autor</p>
-                <p className="text-sm">{authorName}</p>
+                <p className="text-xs text-muted-foreground">Autor/innen</p>
+                <p className="text-sm">{state.authorTeacherIds.length} Lehrkraft/Lehrkräfte zugewiesen</p>
               </div>
             )}
-
-            {/* Author Teachers */}
-            <div>
-              <p className="text-xs text-muted-foreground mb-1">Autor/innen (Lehrkräfte)</p>
-              <TeacherAuthorSelector
-                selectedTeacherIds={authorTeacherIds}
-                onChange={setAuthorTeacherIds}
-              />
-              <p className="text-[10px] text-muted-foreground mt-1">
-                Tippen Sie @Kürzel ein, um Lehrkräfte als Autoren zuzuweisen.
-              </p>
-            </div>
 
             {/* Date */}
             <div>

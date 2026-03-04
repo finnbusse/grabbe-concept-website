@@ -322,16 +322,65 @@ export default async function PostOrLetterPage({ params }: { params: Promise<{ s
 async function PostView({ post, slug }: { post: Record<string, unknown>; slug: string }) {
   const supabase = createClient()
 
-  // Fetch author profile if post has user_id
-  let authorProfile: { first_name?: string; last_name?: string; title?: string; avatar_url?: string | null } | null = null
-  if (post.user_id) {
+  // Fetch teacher authors from junction table
+  let teacherAuthors: Array<{
+    first_name: string
+    last_name: string
+    gender: string
+    abbreviation: string
+    image_url: string | null
+  }> = []
+  try {
+    const { data: authorLinks } = await supabase
+      .from("post_authors")
+      .select("teacher_id")
+      .eq("post_id", post.id as string)
+    if (authorLinks && authorLinks.length > 0) {
+      const teacherIds = authorLinks.map((a: { teacher_id: string }) => a.teacher_id)
+      const { data: teachers } = await supabase
+        .from("teachers")
+        .select("first_name, last_name, gender, abbreviation, image_url")
+        .in("id", teacherIds)
+        .eq("is_active", true)
+      if (teachers) {
+        teacherAuthors = teachers as typeof teacherAuthors
+      }
+    }
+  } catch {
+    // Table may not exist yet
+  }
+
+  // Build display name: prefer teacher authors, then author_name from post, then user profile
+  let authorDisplayName: string | null = null
+  let authorAvatar: string | null = null
+  let authorInitials = ""
+
+  if (teacherAuthors.length > 0) {
+    // Build from teacher records
+    authorDisplayName = teacherAuthors.map((t) => {
+      const prefix = t.gender === "male" ? "Herr" : t.gender === "female" ? "Frau" : ""
+      return [prefix, t.first_name, t.last_name].filter(Boolean).join(" ")
+    }).join(", ")
+    // Use first teacher's avatar
+    authorAvatar = teacherAuthors[0].image_url
+    authorInitials = (teacherAuthors[0].first_name?.charAt(0) || "") + (teacherAuthors[0].last_name?.charAt(0) || "")
+  } else if (post.author_name) {
+    // Use the stored author_name (set during save from teacher selection or user profile)
+    authorDisplayName = post.author_name as string
+    authorInitials = authorDisplayName.charAt(0)?.toUpperCase() || ""
+  }
+
+  // Fallback: fetch author profile from user_profiles if no teacher authors and no author_name
+  if (!authorDisplayName && post.user_id) {
     const { data, error: profileError } = await supabase
       .from("user_profiles")
       .select("first_name, last_name, title, avatar_url")
       .eq("user_id", post.user_id as string)
       .single()
     if (data) {
-      authorProfile = data
+      authorDisplayName = [data.title, data.first_name, data.last_name].filter(Boolean).join(" ") || null
+      authorAvatar = data.avatar_url || null
+      authorInitials = (data.first_name?.charAt(0) || "") + (data.last_name?.charAt(0) || "")
     } else if (profileError?.message?.includes("avatar_url")) {
       const { data: fallbackData } = await supabase
         .from("user_profiles")
@@ -339,20 +388,12 @@ async function PostView({ post, slug }: { post: Record<string, unknown>; slug: s
         .eq("user_id", post.user_id as string)
         .single()
       if (fallbackData) {
-        authorProfile = { ...(fallbackData as { first_name?: string; last_name?: string; title?: string }), avatar_url: null }
+        const fd = fallbackData as { first_name?: string; last_name?: string; title?: string }
+        authorDisplayName = [fd.title, fd.first_name, fd.last_name].filter(Boolean).join(" ") || null
+        authorInitials = (fd.first_name?.charAt(0) || "") + (fd.last_name?.charAt(0) || "")
       }
     }
   }
-
-  const authorDisplayName = (post.author_name as string) || (
-    authorProfile
-      ? [authorProfile.title, authorProfile.first_name, authorProfile.last_name].filter(Boolean).join(" ")
-      : null
-  )
-
-  const authorInitials = authorProfile
-    ? (authorProfile.first_name?.charAt(0) || "") + (authorProfile.last_name?.charAt(0) || "")
-    : authorDisplayName?.charAt(0)?.toUpperCase() || ""
 
   // JSON-LD structured data
   const seo = await getSEOSettings()
@@ -408,8 +449,8 @@ async function PostView({ post, slug }: { post: Record<string, unknown>; slug: s
             </div>
             {authorDisplayName && (
               <div className="flex items-center gap-2">
-                {authorProfile?.avatar_url ? (
-                  <img src={authorProfile.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+                {authorAvatar ? (
+                  <img src={authorAvatar} alt="" className="h-6 w-6 rounded-full object-cover" />
                 ) : authorInitials ? (
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10">
                     <span className="text-[10px] font-bold text-primary">{authorInitials}</span>

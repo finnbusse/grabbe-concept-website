@@ -9,11 +9,19 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from "react"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { ImagePicker } from "@/components/cms/image-picker"
 import {
   Sheet,
@@ -33,9 +41,10 @@ import {
   Save,
   AtSign,
   Users,
+  Check,
 } from "lucide-react"
 import { toast } from "sonner"
-import { SUBJECTS, getSubjectsByIds, type Subject } from "@/lib/constants/subjects"
+import { SUBJECTS, getSubjectsByIds } from "@/lib/constants/subjects"
 import type { TeacherWithSubjects, TeacherGender } from "@/lib/types/database.types"
 
 // ---------------------------------------------------------------------------
@@ -79,8 +88,6 @@ function genderPrefix(gender: string): string {
 // ---------------------------------------------------------------------------
 
 export default function OrganisationPage() {
-  const [activeTab, setActiveTab] = useState<TabId>("lehrer")
-
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -91,31 +98,20 @@ export default function OrganisationPage() {
         </p>
       </div>
 
-      {/* Tab bar */}
-      <div className="border-b">
-        <nav className="flex gap-4 -mb-px" aria-label="Organisation Tabs">
-          {TABS.map((tab) => {
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 border-b-2 px-1 pb-3 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "border-primary text-primary"
-                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30"
-                }`}
-              >
-                <tab.icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            )
-          })}
-        </nav>
-      </div>
-
-      {/* Tab content */}
-      {activeTab === "lehrer" && <TeacherTab />}
+      {/* Tabs */}
+      <Tabs defaultValue="lehrer">
+        <TabsList>
+          {TABS.map((tab) => (
+            <TabsTrigger key={tab.id} value={tab.id} className="gap-2">
+              <tab.icon className="h-4 w-4" />
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <TabsContent value="lehrer" className="mt-6">
+          <TeacherTab />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
@@ -470,17 +466,18 @@ function TeacherForm({ teacher, onSaved, onCancel }: TeacherFormProps) {
       {/* Gender */}
       <div className="grid gap-2">
         <Label>Geschlecht</Label>
-        <select
-          value={gender}
-          onChange={(e) => setGender(e.target.value as TeacherGender)}
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          {GENDER_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <Select value={gender || "__none"} onValueChange={(v) => setGender((v === "__none" ? "" : v) as TeacherGender)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Geschlecht wählen" />
+          </SelectTrigger>
+          <SelectContent>
+            {GENDER_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value || "__none"} value={opt.value || "__none"}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* First & Last name */}
@@ -573,24 +570,16 @@ function TeacherForm({ teacher, onSaved, onCancel }: TeacherFormProps) {
       {/* Active toggle */}
       <div className="flex items-center justify-between">
         <div>
-          <Label>Status</Label>
+          <Label htmlFor="teacher-active">Status</Label>
           <p className="text-[11px] text-muted-foreground">
             Inaktive Lehrkräfte werden nicht in der Auswahl angezeigt.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsActive(!isActive)}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            isActive ? "bg-primary" : "bg-muted"
-          }`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              isActive ? "translate-x-6" : "translate-x-1"
-            }`}
-          />
-        </button>
+        <Switch
+          id="teacher-active"
+          checked={isActive}
+          onCheckedChange={setIsActive}
+        />
       </div>
 
       {/* Actions */}
@@ -654,15 +643,15 @@ function SubjectPicker({
               }`}
               onClick={() => onToggle(subject.id)}
             >
-              <span
-                className={`flex h-4 w-4 items-center justify-center rounded border text-[10px] ${
+              <div
+                className={`flex h-4 w-4 items-center justify-center rounded border text-[10px] shrink-0 ${
                   isSelected
                     ? "bg-primary border-primary text-primary-foreground"
                     : "border-input"
                 }`}
               >
-                {isSelected && "✓"}
-              </span>
+                {isSelected && <Check className="h-3 w-3" />}
+              </div>
               <span className="flex-1 text-left">{subject.name}</span>
               <span className="text-xs text-muted-foreground">{subject.shortName}</span>
             </button>
