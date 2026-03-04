@@ -25,3 +25,11 @@ export function teacherDisplayName(teacher: { gender: string; first_name: string
   const prefix = genderPrefix(teacher.gender)
   return [prefix, teacher.first_name, teacher.last_name].filter(Boolean).join(" ")
 }
+
+/**
+ * Public-facing display name — first + last name only, **no** gender salutation.
+ * Use this on visitor-facing pages (e.g. /aktuelles/[slug]).
+ */
+export function teacherPublicName(teacher: { first_name: string; last_name: string }): string {
+  return [teacher.first_name, teacher.last_name].filter(Boolean).join(" ")
+}

@@ -34,10 +34,10 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { cn } from "@/lib/utils"
-import { teacherDisplayName } from "@/lib/teacher-utils"
+import { genderPrefix, teacherDisplayName, teacherPublicName } from "@/lib/teacher-utils"
 
 // Re-export so existing imports from this module keep working in client code
-export { teacherDisplayName } from "@/lib/teacher-utils"
+export { teacherDisplayName, teacherPublicName, genderPrefix } from "@/lib/teacher-utils"
 
 // ---------------------------------------------------------------------------
 // Types

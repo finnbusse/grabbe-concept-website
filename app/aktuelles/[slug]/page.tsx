@@ -10,7 +10,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import type { Metadata } from "next"
 import type { ContentBlock } from "@/components/cms/block-editor"
-import { teacherDisplayName } from "@/lib/teacher-utils"
+import { teacherPublicName } from "@/lib/teacher-utils"
 import {
   generatePageMetadata,
   getSEOSettings,
@@ -358,7 +358,7 @@ async function PostView({ post, slug }: { post: Record<string, unknown>; slug: s
 
   if (teacherAuthors.length > 0) {
     // Build from teacher records
-    authorDisplayName = teacherAuthors.map((t) => teacherDisplayName(t)).join(", ")
+    authorDisplayName = teacherAuthors.map((t) => teacherPublicName(t)).join(", ")
     // Use first teacher's avatar (additional authors shown via name)
     authorAvatar = teacherAuthors[0].image_url
     authorInitials = (teacherAuthors[0].first_name?.charAt(0) || "") + (teacherAuthors[0].last_name?.charAt(0) || "")

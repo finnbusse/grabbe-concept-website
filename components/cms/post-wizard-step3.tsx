@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { ImagePicker } from "./image-picker"
 import { SeoPreview } from "./seo-preview"
 import { TagBadge, type TagData } from "./tag-selector"
-import { teacherDisplayName } from "@/lib/teacher-utils"
+import { teacherPublicName } from "@/lib/teacher-utils"
 import { PublishCelebration } from "./publish-celebration"
 import { ArrowLeft, Loader2, Save, Rocket, Check } from "lucide-react"
 import { toast } from "sonner"
@@ -118,7 +118,7 @@ export function PostWizardStep3() {
           if (Array.isArray(teacherData)) {
             const selected = teacherData.filter((t: { id: string }) => state.authorTeacherIds.includes(t.id))
             authorName = selected.map((t: { gender: string; first_name: string; last_name: string }) =>
-              teacherDisplayName(t)
+              teacherPublicName(t)
             ).join(", ")
           }
         } catch {

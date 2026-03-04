@@ -11,7 +11,7 @@ import { ArrowLeft, Save, Eye, Loader2 } from "lucide-react"
 import { FileUploader, FileListItem } from "./file-uploader"
 import { ImagePicker } from "./image-picker"
 import { TagSelector } from "./tag-selector"
-import { TeacherAuthorSelector, teacherDisplayName } from "./teacher-author-selector"
+import { TeacherAuthorSelector, teacherPublicName } from "./teacher-author-selector"
 import Link from "next/link"
 
 interface PostEditorProps {
@@ -134,7 +134,7 @@ export function PostEditor({ post }: PostEditorProps) {
           if (Array.isArray(teacherData)) {
             const selected = teacherData.filter((t: { id: string }) => authorTeacherIds.includes(t.id))
             const names = selected.map((t: { gender: string; first_name: string; last_name: string }) =>
-              teacherDisplayName(t)
+              teacherPublicName(t)
             ).join(", ")
             if (names) resolvedAuthorName = names
           }
