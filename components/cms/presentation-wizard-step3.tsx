@@ -101,11 +101,35 @@ export function PresentationWizardStep3() {
           .update(payload as never)
           .eq("id", state.presentationId!)
         if (saveError) throw saveError
+
+        // Save author teachers
+        await supabase.from("presentation_authors").delete().eq("presentation_id", state.presentationId!)
+        if (state.authorTeacherIds.length > 0) {
+          await supabase.from("presentation_authors").insert(
+            state.authorTeacherIds.map((teacher_id) => ({ presentation_id: state.presentationId!, teacher_id })) as never
+          )
+        }
       } else {
         const { error: saveError } = await supabase
           .from("presentations")
           .insert(payload as never)
         if (saveError) throw saveError
+
+        // Save author teachers for new presentation
+        if (state.authorTeacherIds.length > 0) {
+          const { data: newPres } = await supabase
+            .from("presentations")
+            .select("id")
+            .eq("slug", finalSlug)
+            .order("created_at", { ascending: false })
+            .limit(1)
+          const presentations = newPres as Array<{ id: string }> | null
+          if (presentations && presentations.length > 0) {
+            await supabase.from("presentation_authors").insert(
+              state.authorTeacherIds.map((teacher_id) => ({ presentation_id: presentations[0].id, teacher_id })) as never
+            )
+          }
+        }
       }
 
       // Revalidate

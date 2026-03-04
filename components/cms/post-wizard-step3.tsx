@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch"
 import { ImagePicker } from "./image-picker"
 import { SeoPreview } from "./seo-preview"
 import { TagBadge, type TagData } from "./tag-selector"
+import { teacherPublicName } from "@/lib/teacher-utils"
 import { PublishCelebration } from "./publish-celebration"
 import { ArrowLeft, Loader2, Save, Rocket, Check } from "lucide-react"
 import { toast } from "sonner"
@@ -25,7 +26,6 @@ export function PostWizardStep3() {
   const [publishState, setPublishState] = useState<"idle" | "saving" | "success">("idle")
   const [error, setError] = useState<string | null>(null)
   const [allTags, setAllTags] = useState<TagData[]>([])
-  const [authorName, setAuthorName] = useState("")
   const [seoSeparator, setSeoSeparator] = useState(" / ")
   const [seoSuffix, setSeoSuffix] = useState("Grabbe-Gymnasium")
   const [celebrationUrl, setCelebrationUrl] = useState("")
@@ -36,19 +36,6 @@ export function PostWizardStep3() {
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) setAllTags(data)
-      })
-      .catch(() => {})
-  }, [])
-
-  // Load author name from user profile
-  useEffect(() => {
-    fetch("/api/user-profile")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { profile?: { title?: string; first_name?: string; last_name?: string } } | null) => {
-        if (data?.profile) {
-          const parts = [data.profile.title, data.profile.first_name, data.profile.last_name].filter(Boolean)
-          if (parts.length > 0) setAuthorName(parts.join(" "))
-        }
       })
       .catch(() => {})
   }, [])
@@ -122,6 +109,36 @@ export function PostWizardStep3() {
         }
       }
 
+      // Build author_name from selected teachers
+      let authorName = ""
+      if (state.authorTeacherIds.length > 0) {
+        try {
+          const teacherRes = await fetch("/api/teachers")
+          const teacherData = await teacherRes.json()
+          if (Array.isArray(teacherData)) {
+            const selected = teacherData.filter((t: { id: string }) => state.authorTeacherIds.includes(t.id))
+            authorName = selected.map((t: { gender: string; first_name: string; last_name: string }) =>
+              teacherPublicName(t)
+            ).join(", ")
+          }
+        } catch {
+          // fallback below
+        }
+      }
+      if (!authorName) {
+        // Fallback to user profile name
+        try {
+          const profileRes = await fetch("/api/user-profile")
+          if (profileRes.ok) {
+            const profileData = await profileRes.json()
+            if (profileData?.profile) {
+              const parts = [profileData.profile.title, profileData.profile.first_name, profileData.profile.last_name].filter(Boolean)
+              if (parts.length > 0) authorName = parts.join(" ")
+            }
+          }
+        } catch { /* use fallback */ }
+      }
+
       const basePayload: Record<string, unknown> = {
         title: state.title,
         slug: finalSlug,
@@ -170,6 +187,13 @@ export function PostWizardStep3() {
             state.tagIds.map((tag_id) => ({ post_id: state.postId!, tag_id })) as never
           )
         }
+        // Save author teachers
+        await supabase.from("post_authors").delete().eq("post_id", state.postId)
+        if (state.authorTeacherIds.length > 0) {
+          await supabase.from("post_authors").insert(
+            state.authorTeacherIds.map((teacher_id) => ({ post_id: state.postId!, teacher_id })) as never
+          )
+        }
       } else {
         // For new posts, get the created ID and assign tags
         const { data: newPosts } = await supabase
@@ -187,6 +211,12 @@ export function PostWizardStep3() {
           if (state.tagIds.length > 0) {
             await supabase.from("post_tags").insert(
               state.tagIds.map((tag_id) => ({ post_id: newPostId, tag_id })) as never
+            )
+          }
+          // Save author teachers for new post
+          if (state.authorTeacherIds.length > 0) {
+            await supabase.from("post_authors").insert(
+              state.authorTeacherIds.map((teacher_id) => ({ post_id: newPostId, teacher_id })) as never
             )
           }
         }
@@ -298,11 +328,11 @@ export function PostWizardStep3() {
               </p>
             </div>
 
-            {/* Author */}
-            {authorName && (
+            {/* Authors */}
+            {state.authorTeacherIds.length > 0 && (
               <div>
-                <p className="text-xs text-muted-foreground">Autor</p>
-                <p className="text-sm">{authorName}</p>
+                <p className="text-xs text-muted-foreground">Autor/innen</p>
+                <p className="text-sm">{state.authorTeacherIds.length} Lehrkraft/Lehrkräfte zugewiesen</p>
               </div>
             )}
 

@@ -15,6 +15,7 @@ export interface PresentationWizardState {
   subtitle: string
   coverImageUrl: string | null
   tagIds: string[]
+  authorTeacherIds: string[]
 
   // Step 2
   blocks: PresentationBlock[]
@@ -38,6 +39,7 @@ export type PresentationWizardAction =
   | { type: "SET_SUBTITLE"; payload: string }
   | { type: "SET_COVER_IMAGE"; payload: string | null }
   | { type: "SET_TAG_IDS"; payload: string[] }
+  | { type: "SET_AUTHOR_TEACHER_IDS"; payload: string[] }
   | { type: "SET_BLOCKS"; payload: PresentationBlock[] }
   | { type: "SET_SHOW_ON_AKTUELLES"; payload: boolean }
   | { type: "SET_META_DESCRIPTION"; payload: string }
@@ -59,6 +61,7 @@ const initialState: PresentationWizardState = {
   subtitle: "",
   coverImageUrl: null,
   tagIds: [],
+  authorTeacherIds: [],
   blocks: [],
   showOnAktuelles: true,
   metaDescription: "",
@@ -86,6 +89,8 @@ function wizardReducer(state: PresentationWizardState, action: PresentationWizar
       return { ...state, coverImageUrl: action.payload }
     case "SET_TAG_IDS":
       return { ...state, tagIds: action.payload }
+    case "SET_AUTHOR_TEACHER_IDS":
+      return { ...state, authorTeacherIds: action.payload }
     case "SET_BLOCKS":
       return { ...state, blocks: action.payload }
     case "SET_SHOW_ON_AKTUELLES":

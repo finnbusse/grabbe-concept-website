@@ -14,6 +14,15 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
   const { data: postTags } = await supabase.from("post_tags").select("tag_id").eq("post_id", id)
   const tagIds = (postTags || []).map((t: { tag_id: string }) => t.tag_id)
 
+  // Load author teacher IDs
+  let authorTeacherIds: string[] = []
+  try {
+    const { data: postAuthors } = await supabase.from("post_authors").select("teacher_id").eq("post_id", id)
+    authorTeacherIds = (postAuthors || []).map((a: { teacher_id: string }) => a.teacher_id)
+  } catch {
+    // Table may not exist yet
+  }
+
   const p = post as unknown as {
     id: string; title: string; slug: string; content: string; excerpt: string | null;
     category: string | null; status: string; featured: boolean; image_url: string | null;
@@ -30,6 +39,7 @@ export default async function EditPostPage({ params }: { params: Promise<{ id: s
       coverImageUrl: p.image_url,
       publishDate: p.event_date || p.created_at.split("T")[0],
       tagIds,
+      authorTeacherIds,
       contentMode: isBlockContent(p.content) ? "blocks" : "markdown",
       blocks: isBlockContent(p.content) ? JSON.parse(p.content) : [],
       markdownContent: isBlockContent(p.content) ? "" : p.content,

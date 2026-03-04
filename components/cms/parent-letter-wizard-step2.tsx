@@ -69,6 +69,14 @@ export function ParentLetterWizardStep2() {
           .update(payload as never)
           .eq("id", state.letterId!)
         if (saveError) throw saveError
+
+        // Save author teachers
+        await supabase.from("parent_letter_authors").delete().eq("parent_letter_id", state.letterId!)
+        if (state.authorTeacherIds.length > 0) {
+          await supabase.from("parent_letter_authors").insert(
+            state.authorTeacherIds.map((teacher_id) => ({ parent_letter_id: state.letterId!, teacher_id })) as never
+          )
+        }
       } else {
         const insertPayload = {
           ...payload,
@@ -91,6 +99,13 @@ export function ParentLetterWizardStep2() {
         const letters = newLetters as Array<{ id: string }> | null
         if (letters && letters.length > 0) {
           dispatch({ type: "SET_LETTER_ID", payload: letters[0].id })
+
+          // Save author teachers for new letter
+          if (state.authorTeacherIds.length > 0) {
+            await supabase.from("parent_letter_authors").insert(
+              state.authorTeacherIds.map((teacher_id) => ({ parent_letter_id: letters[0].id, teacher_id })) as never
+            )
+          }
         }
       }
 

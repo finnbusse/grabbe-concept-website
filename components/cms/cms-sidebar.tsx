@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import {
   Gauge, Inbox, BarChart2, FileText, Newspaper, CalendarDays, FolderOpen,
   FolderTree, Globe, Users, Settings, HelpCircle, LogOut, X, UserCircle,
-  PanelLeftClose, PanelLeftOpen,
+  PanelLeftClose, PanelLeftOpen, Building2,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -51,6 +51,7 @@ const contentLinks: SidebarLink[] = [
 ]
 
 const adminLinks: SidebarLink[] = [
+  { icon: Building2, label: "Organisation", href: "/cms/organisation", permCheck: (p) => checkPermission(p, "organisation") },
   { icon: FolderTree, label: "Seitenstruktur", href: "/cms/seitenstruktur", permCheck: (p) => checkPermission(p, "seitenstruktur") },
   { icon: Globe, label: "Website-Einstellungen", href: "/cms/settings/website", permCheck: (p) => checkPermission(p, "settings") },
 ]
@@ -113,7 +114,11 @@ export function CmsSidebar({ userEmail, userProfile, isOpen, onClose, collapsed,
 
   const visibleHome = filterLinks(homeLinks, permissions)
   const visibleContent = filterLinks(contentLinks, permissions)
-  const visibleAdmin = filterLinks(adminLinks, permissions)
+  // Admin/Schulleitung always see all admin links (existing roles may lack
+  // the "organisation" permission flag that was added later).
+  const visibleAdmin = isAdminOrSchulleitung(roleSlugs)
+    ? adminLinks
+    : filterLinks(adminLinks, permissions)
   const visibleFooter = isAdminOrSchulleitung(roleSlugs)
     ? filterLinks(footerLinks, permissions)
     : filterLinks([footerLinks[2]], permissions) // Only Dokumentation for non-admins

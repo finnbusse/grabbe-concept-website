@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ImagePicker } from "./image-picker"
+import { TeacherAuthorSelector } from "./teacher-author-selector"
 import { ArrowRight } from "lucide-react"
 
 // ============================================================================
@@ -85,6 +86,19 @@ export function ParentLetterWizardStep1() {
           value={state.coverImageUrl}
           onChange={(url) => dispatch({ type: "SET_COVER_IMAGE", payload: url })}
           aspectRatio="16/9"
+        />
+      </div>
+
+      {/* Author Teachers */}
+      <div className="rounded-2xl border bg-card p-6 space-y-3">
+        <Label className="text-base font-semibold">Autor/innen</Label>
+        <p className="text-xs text-muted-foreground">
+          Wählen Sie die Lehrkräfte aus, die als Autoren dieses Elterninfobriefs angezeigt werden.
+        </p>
+        <TeacherAuthorSelector
+          selectedTeacherIds={state.authorTeacherIds}
+          onChange={(ids) => dispatch({ type: "SET_AUTHOR_TEACHER_IDS", payload: ids })}
+          autoPopulateCurrentUser={!state.letterId}
         />
       </div>
 

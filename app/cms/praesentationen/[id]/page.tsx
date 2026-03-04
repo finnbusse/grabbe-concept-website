@@ -28,6 +28,15 @@ export default async function EditPresentationPage({ params }: { params: Promise
   const blocks: PresentationBlock[] =
     typeof p.blocks === "string" ? JSON.parse(p.blocks) : Array.isArray(p.blocks) ? p.blocks : []
 
+  // Load author teacher IDs
+  let authorTeacherIds: string[] = []
+  try {
+    const { data: presAuthors } = await supabase.from("presentation_authors").select("teacher_id").eq("presentation_id", id)
+    authorTeacherIds = (presAuthors || []).map((a: { teacher_id: string }) => a.teacher_id)
+  } catch {
+    // Table may not exist yet
+  }
+
   return (
     <PresentationWizardProvider
       initialState={{
@@ -36,6 +45,7 @@ export default async function EditPresentationPage({ params }: { params: Promise
         subtitle: p.subtitle || "",
         coverImageUrl: p.cover_image_url,
         tagIds: p.tag_ids || [],
+        authorTeacherIds,
         blocks,
         showOnAktuelles: p.show_on_aktuelles ?? false,
         metaDescription: p.meta_description || "",
