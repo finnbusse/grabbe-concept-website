@@ -106,7 +106,7 @@ export async function middleware(request: NextRequest) {
     const firstSegment = segments[0]
 
     // Don't rewrite system root files
-    if (['ads.txt', 'llms.txt', 'robots.txt', 'sitemap.xml'].includes(pathname.substring(1))) {
+    if (['llms.txt', 'robots.txt', 'sitemap.xml'].includes(pathname.substring(1))) {
       return sessionResponse
     }
 
@@ -130,6 +130,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|ads\\.txt|llms\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt|llms\\.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
