@@ -205,10 +205,10 @@ export function SiteHeader({
                     onMouseLeave={handleDropdownLeave}
                   >
                     <div
-                      className="min-w-[220px] backdrop-blur-md rounded-2xl p-1.5 shadow-xl animate-blur-in"
+                      className="min-w-[220px] backdrop-blur-3xl rounded-2xl p-1.5 shadow-xl animate-blur-in"
                       style={{
-                        backgroundColor: "rgb(var(--nav-dropdown-bg) / 0.2)",
-                        border: "1px solid rgb(var(--nav-glass-border) / 0.26)",
+                        backgroundColor: "rgb(var(--nav-dropdown-bg) / 0.85)",
+                        border: "1px solid rgb(var(--nav-glass-border) / 0.4)",
                       }}
                     >
                       {item.children.map((child) => (
