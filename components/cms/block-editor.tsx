@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ImagePicker } from "@/components/cms/image-picker"
 import { DocumentPicker } from "@/components/cms/document-picker"
-import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, CreditCard, ImageIcon, HelpCircle, Type, List, Quote, Minus, Video, MousePointerClick, Columns, MoveVertical, ListCollapse, Table2, CalendarDays, Download, Newspaper, Globe, FileDown } from "lucide-react"
+import { Plus, Trash2, GripVertical, ChevronDown, ChevronUp, CreditCard, ImageIcon, HelpCircle, Type, List, Quote, Minus, Video, MousePointerClick, Columns, MoveVertical, ListCollapse, Table2, CalendarDays, Download, Newspaper, Globe, FileDown, FileText } from "lucide-react"
 
 // ============================================================================
 // Block Types
