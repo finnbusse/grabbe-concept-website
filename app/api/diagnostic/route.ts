@@ -234,7 +234,7 @@ export async function GET() {
     results.checks.global_error = {
       status: 'EXCEPTION',
       error: error.message,
-      stack: error.stack,
+      // 🛡️ Sentinel: Removed stack trace to prevent internal information leak
     }
     results.errors.push(`Global error: ${error.message}`)
     
