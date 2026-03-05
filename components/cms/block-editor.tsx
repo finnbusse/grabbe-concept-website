@@ -162,6 +162,8 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 variant="ghost" size="icon" className="h-7 w-7"
                 onClick={() => moveBlock(index, 'up')}
                 disabled={index === 0}
+                title="Nach oben verschieben"
+                aria-label="Nach oben verschieben"
               >
                 <ChevronUp className="h-3.5 w-3.5" />
               </Button>
@@ -169,12 +171,16 @@ export function BlockEditor({ blocks, onChange }: BlockEditorProps) {
                 variant="ghost" size="icon" className="h-7 w-7"
                 onClick={() => moveBlock(index, 'down')}
                 disabled={index === blocks.length - 1}
+                title="Nach unten verschieben"
+                aria-label="Nach unten verschieben"
               >
                 <ChevronDown className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive"
                 onClick={() => removeBlock(index)}
+                title="Block löschen"
+                aria-label="Block löschen"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -318,7 +324,7 @@ function CardsBlockEditor({ data, onChange }: { data: Record<string, unknown>; o
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium">Karte {i + 1}</Label>
             {cards.length > 1 && (
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeCard(i)}>
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeCard(i)} title="Karte löschen" aria-label="Karte löschen">
                 <Trash2 className="h-3 w-3 text-muted-foreground" />
               </Button>
             )}
@@ -370,7 +376,7 @@ function FaqBlockEditor({ data, onChange }: { data: Record<string, unknown>; onC
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium">Frage {i + 1}</Label>
             {items.length > 1 && (
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeItem(i)}>
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeItem(i)} title="Frage löschen" aria-label="Frage löschen">
                 <Trash2 className="h-3 w-3 text-muted-foreground" />
               </Button>
             )}
@@ -432,7 +438,7 @@ function GalleryBlockEditor({ data, onChange }: { data: Record<string, unknown>;
             />
           </div>
           {images.length > 1 && (
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeImage(i)}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeImage(i)} title="Bild löschen" aria-label="Bild löschen">
               <Trash2 className="h-3 w-3 text-muted-foreground" />
             </Button>
           )}
@@ -485,7 +491,7 @@ function ListBlockEditor({ data, onChange }: { data: Record<string, unknown>; on
               className="flex-1 text-sm"
             />
             {items.length > 1 && (
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeItem(i)}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={() => removeItem(i)} title="Listenpunkt löschen" aria-label="Listenpunkt löschen">
                 <Trash2 className="h-3 w-3 text-muted-foreground" />
               </Button>
             )}
@@ -763,7 +769,7 @@ function AccordionBlockEditor({ data, onChange }: { data: Record<string, unknown
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium">Abschnitt {i + 1}</Label>
             {items.length > 1 && (
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeItem(i)}>
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeItem(i)} title="Abschnitt löschen" aria-label="Abschnitt löschen">
                 <Trash2 className="h-3 w-3 text-muted-foreground" />
               </Button>
             )}
@@ -836,7 +842,7 @@ function TableBlockEditor({ data, onChange }: { data: Record<string, unknown>; o
                 ))}
                 <td className="p-1 w-8">
                   {rows.length > 1 && (
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeRow(ri)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => removeRow(ri)} title="Zeile löschen" aria-label="Zeile löschen">
                       <Trash2 className="h-3 w-3 text-muted-foreground" />
                     </Button>
                   )}
