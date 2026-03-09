@@ -76,13 +76,7 @@ export function resolveBaseUrl(dbValue?: string): string {
   const pubUrl = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "")
   if (pubUrl) return pubUrl
 
-  const vercelProd = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  if (vercelProd) return `https://${vercelProd}`
-
-  const vercelUrl = process.env.VERCEL_URL
-  if (vercelUrl) return `https://${vercelUrl}`
-
-  return "http://localhost:3000"
+  return "https://grabbe.site"
 }
 
 /** True on non-production Vercel deploys (preview / dev) */
