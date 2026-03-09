@@ -31,8 +31,6 @@ export default function LoginPage() {
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
   const [mfaCode, setMfaCode] = useState("")
   const [mfaVerifying, setMfaVerifying] = useState(false)
-  // Hold session tokens in memory until MFA is verified to prevent session-based bypass
-  const [pendingSession, setPendingSession] = useState<{ access_token: string; refresh_token: string } | null>(null)
 
   // Live countdown timer
   useEffect(() => {
@@ -104,15 +102,9 @@ export default function LoginPage() {
           const verifiedTotpFactor = factorsData?.totp?.find((f) => f.status === "verified")
 
           if (verifiedTotpFactor) {
-            // Clear local session so the AAL1 cookies cannot be used to access /cms.
-            // Use scope: 'local' to only remove cookies without revoking the tokens
-            // on the server — the tokens are needed for MFA verification.
-            await supabase.auth.signOut({ scope: 'local' })
-            // Store session tokens in memory for re-authentication after MFA
-            setPendingSession({
-              access_token: data.session.access_token,
-              refresh_token: data.session.refresh_token,
-            })
+            // Keep the AAL1 session active — it's needed for MFA challenge/verify.
+            // The middleware enforces AAL2 for /cms routes, so even if the user
+            // opens a new tab they cannot access /cms at AAL1.
             setMfaRequired(true)
             setMfaFactorId(verifiedTotpFactor.id)
             setIsLoading(false)
@@ -141,42 +133,29 @@ export default function LoginPage() {
 
   const handleMfaVerify = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!mfaFactorId || mfaCode.length !== 6 || !pendingSession) return
+    if (!mfaFactorId || mfaCode.length !== 6) return
 
     setMfaVerifying(true)
     setError(null)
 
     try {
+      // Use the existing browser client — the AAL1 session from handleLogin
+      // is still active, so challenge/verify work without re-establishing it.
       const supabase = createClient()
-
-      // Re-establish session for MFA verification
-      await supabase.auth.setSession({
-        access_token: pendingSession.access_token,
-        refresh_token: pendingSession.refresh_token,
-      })
 
       const { data: challengeData, error: challengeError } = await supabase.auth.mfa.challenge({
         factorId: mfaFactorId,
       })
-      if (challengeError) {
-        // Clear local session on failure to prevent AAL1 access
-        await supabase.auth.signOut({ scope: 'local' })
-        throw challengeError
-      }
+      if (challengeError) throw challengeError
 
       const { error: verifyError } = await supabase.auth.mfa.verify({
         factorId: mfaFactorId,
         challengeId: challengeData.id,
         code: mfaCode,
       })
-      if (verifyError) {
-        // Clear local session on failure to prevent AAL1 access
-        await supabase.auth.signOut({ scope: 'local' })
-        throw verifyError
-      }
+      if (verifyError) throw verifyError
 
       // MFA verified — session is now at AAL2
-      setPendingSession(null)
 
       if (rememberMe) {
         localStorage.setItem("cms_remember_me", "true")
@@ -252,11 +231,13 @@ export default function LoginPage() {
                       type="button"
                       variant="ghost"
                       className="w-full"
-                      onClick={() => {
+                      onClick={async () => {
+                        // Sign out the AAL1 session so it doesn't linger
+                        const supabase = createClient()
+                        await supabase.auth.signOut({ scope: 'local' })
                         setMfaRequired(false)
                         setMfaCode("")
                         setError(null)
-                        setPendingSession(null)
                       }}
                     >
                       Zurück zum Login
