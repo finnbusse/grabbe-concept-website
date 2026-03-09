@@ -217,7 +217,11 @@ export default function LoginPage() {
                       type="button"
                       variant="ghost"
                       className="w-full"
-                      onClick={() => { setMfaRequired(false); setMfaCode(""); setError(null) }}
+                      onClick={() => {
+                        setMfaRequired(false)
+                        setMfaCode("")
+                        setError(null)
+                      }}
                     >
                       Zurück zum Login
                     </Button>

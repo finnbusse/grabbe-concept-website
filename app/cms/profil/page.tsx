@@ -183,7 +183,10 @@ export default function ProfilPage() {
         const canvas = document.createElement("canvas")
         let w = img.width
         let h = img.height
-        if (w > maxWidth) { h = (h * maxWidth) / w; w = maxWidth }
+        if (w > maxWidth) {
+          h = (h * maxWidth) / w
+          w = maxWidth
+        }
         canvas.width = w
         canvas.height = h
         const ctx = canvas.getContext("2d")
@@ -595,7 +598,12 @@ export default function ProfilPage() {
                         type="button"
                         variant="ghost"
                         className="flex-1"
-                        onClick={() => { setMfaSetupMode(false); setMfaQrCode(null); setMfaSecret(null); setMfaVerifyCode("") }}
+                        onClick={() => {
+                          setMfaSetupMode(false)
+                          setMfaQrCode(null)
+                          setMfaSecret(null)
+                          setMfaVerifyCode("")
+                        }}
                       >
                         Abbrechen
                       </Button>

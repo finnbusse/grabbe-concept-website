@@ -594,7 +594,17 @@ export default function UsersPage() {
                   <Copy className="h-4 w-4" />
                   Link kopieren
                 </Button>
-                <Button variant="outline" onClick={() => { setInviteLink(null); setInviteEmail(""); setInviteRoleId(""); setInviteMessage(""); setInviteDialogOpen(false) }}>
+                <Button
+                  variant="outline"
+                  aria-label="Einladungsdialog schließen"
+                  onClick={() => {
+                    setInviteLink(null)
+                    setInviteEmail("")
+                    setInviteRoleId("")
+                    setInviteMessage("")
+                    setInviteDialogOpen(false)
+                  }}
+                >
                   Schließen
                 </Button>
               </div>
