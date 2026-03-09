@@ -25,6 +25,8 @@ export interface SEOSettings {
   socialInstagram: string
   socialFacebook: string
   socialYoutube: string
+  socialLinkedin: string
+  socialX: string
   robotsTxt: string
   isPreview: boolean
   twitterHandle: string
@@ -76,6 +78,8 @@ export function resolveBaseUrl(dbValue?: string): string {
   const pubUrl = (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "")
   if (pubUrl) return pubUrl
 
+  if (process.env.NODE_ENV === "development") return "http://localhost:3000"
+
   return "https://grabbe.site"
 }
 
@@ -124,6 +128,8 @@ export async function getSEOSettings(): Promise<SEOSettings> {
     socialInstagram: s.seo_social_instagram || "",
     socialFacebook: s.seo_social_facebook || "",
     socialYoutube: s.seo_social_youtube || "",
+    socialLinkedin: s.seo_social_linkedin || "",
+    socialX: s.seo_social_x || "",
     robotsTxt:
       s.seo_robots_txt ||
       "User-agent: *\nAllow: /\nDisallow: /cms/\nDisallow: /auth/\nDisallow: /api/",
@@ -229,6 +235,8 @@ export function generateOrganizationJsonLd(seo: SEOSettings) {
   if (seo.socialInstagram) sameAs.push(seo.socialInstagram)
   if (seo.socialFacebook) sameAs.push(seo.socialFacebook)
   if (seo.socialYoutube) sameAs.push(seo.socialYoutube)
+  if (seo.socialLinkedin) sameAs.push(seo.socialLinkedin)
+  if (seo.socialX) sameAs.push(seo.socialX)
   if (seo.orgWikidata) sameAs.push(seo.orgWikidata)
   if (sameAs.length > 0) org.sameAs = sameAs
 
