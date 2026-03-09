@@ -233,8 +233,12 @@ export default function LoginPage() {
                       className="w-full"
                       onClick={async () => {
                         // Sign out the AAL1 session so it doesn't linger
-                        const supabase = createClient()
-                        await supabase.auth.signOut({ scope: 'local' })
+                        try {
+                          const supabase = createClient()
+                          await supabase.auth.signOut({ scope: 'local' })
+                        } catch {
+                          // Proceed even if signOut fails
+                        }
                         setMfaRequired(false)
                         setMfaCode("")
                         setError(null)

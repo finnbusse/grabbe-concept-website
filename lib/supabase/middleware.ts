@@ -73,7 +73,13 @@ export async function updateSession(request: NextRequest) {
 
   // Enforce AAL2 for /cms when user has MFA factors — prevents AAL1 bypass
   if (user && request.nextUrl.pathname.startsWith('/cms')) {
-    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (aalError) {
+      // If AAL check fails, redirect to login to be safe
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/login'
+      return NextResponse.redirect(url)
+    }
     if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel !== 'aal2') {
       const url = request.nextUrl.clone()
       url.pathname = '/auth/login'
