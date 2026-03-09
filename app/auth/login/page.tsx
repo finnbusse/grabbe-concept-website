@@ -6,7 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
+import Image from "next/image"
 import { useState, useEffect, useCallback, useRef } from "react"
+import { Github } from "lucide-react"
 
 /** Calculate cooldown in seconds based on consecutive failure count.
  *  1→2s, 2→3s, 3→5s, 4→7s, 5→11s, 6→16s, 7→23s, 8+→30s */
@@ -107,12 +109,20 @@ export default function LoginPage() {
     <div className="flex min-h-svh w-full items-center justify-center bg-muted p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <span className="text-lg font-bold text-primary-foreground font-display">G</span>
-            </div>
+          <Link href="/" className="inline-flex flex-col items-center gap-2">
+            <Image
+              src="/images/grabbe-logo.svg"
+              alt="Grabbe-Gymnasium Logo"
+              width={64}
+              height={64}
+              className="h-16 w-16"
+              priority
+            />
             <span className="font-display text-lg font-semibold text-foreground">
               Grabbe-Gymnasium
+            </span>
+            <span className="text-sm text-muted-foreground -mt-1">
+              Content Management
             </span>
           </Link>
         </div>
@@ -139,7 +149,16 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="password">Passwort</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Passwort</Label>
+                    <Link
+                      href="/auth/passwort-vergessen"
+                      className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                      tabIndex={-1}
+                    >
+                      Passwort vergessen?
+                    </Link>
+                  </div>
                   <Input
                     id="password"
                     type="password"
@@ -179,6 +198,37 @@ export default function LoginPage() {
                     : isLoading
                       ? "Anmelden..."
                       : "Anmelden"}
+                </Button>
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs">
+                    <span className="bg-card px-2 text-muted-foreground">oder</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full gap-2"
+                  disabled={isBlocked}
+                  onClick={async () => {
+                    const supabase = createClient()
+                    const { data, error } = await supabase.auth.signInWithOAuth({
+                      provider: "github",
+                      options: { redirectTo: `${window.location.origin}/cms` },
+                    })
+                    if (error) {
+                      setError("GitHub-Anmeldung fehlgeschlagen.")
+                    } else if (data.url) {
+                      window.location.href = data.url
+                    }
+                  }}
+                >
+                  <Github className="h-4 w-4" />
+                  Mit GitHub anmelden
                 </Button>
               </div>
             </form>
