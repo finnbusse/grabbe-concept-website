@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr"
+import { createServerClient, type CookieOptions } from "@supabase/ssr"
 import { checkRateLimit, recordLoginAttempt, applyDelay } from "@/lib/rate-limiter"
 import { NextResponse, type NextRequest } from "next/server"
 import type { Database } from "@/lib/types/database.types"
@@ -75,14 +75,14 @@ export async function POST(request: NextRequest) {
 
     // Collect cookies that Supabase sets during signInWithPassword so
     // we can apply them to the response explicitly.
-    const cookiesToSet: Array<{ name: string; value: string; options: Record<string, string> }> = []
+    const cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }> = []
 
     const supabase = createServerClient<Database>(supabaseUrl, supabaseKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookies: Array<{ name: string; value: string; options: Record<string, string> }>) {
+        setAll(cookies: Array<{ name: string; value: string; options: CookieOptions }>) {
           cookies.forEach((cookie) => cookiesToSet.push(cookie))
         },
       },
