@@ -627,6 +627,12 @@ export default function WebsiteSettingsPage() {
         <Field label="YouTube">
           {field(values, "seo_social_youtube", set, { placeholder: "https://youtube.com/..." })}
         </Field>
+        <Field label="LinkedIn">
+          {field(values, "seo_social_linkedin", set, { placeholder: "https://linkedin.com/company/..." })}
+        </Field>
+        <Field label="X (Twitter)">
+          {field(values, "seo_social_x", set, { placeholder: "https://x.com/..." })}
+        </Field>
       </Section>
 
       {/* Section B — Schema.org */}
