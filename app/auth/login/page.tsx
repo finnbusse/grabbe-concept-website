@@ -104,8 +104,10 @@ export default function LoginPage() {
           const verifiedTotpFactor = factorsData?.totp?.find((f) => f.status === "verified")
 
           if (verifiedTotpFactor) {
-            // Sign out immediately so the AAL1 session cannot be used to access /cms
-            await supabase.auth.signOut()
+            // Clear local session so the AAL1 cookies cannot be used to access /cms.
+            // Use scope: 'local' to only remove cookies without revoking the tokens
+            // on the server — the tokens are needed for MFA verification.
+            await supabase.auth.signOut({ scope: 'local' })
             // Store session tokens in memory for re-authentication after MFA
             setPendingSession({
               access_token: data.session.access_token,
@@ -157,8 +159,8 @@ export default function LoginPage() {
         factorId: mfaFactorId,
       })
       if (challengeError) {
-        // Sign out on failure to prevent AAL1 access
-        await supabase.auth.signOut()
+        // Clear local session on failure to prevent AAL1 access
+        await supabase.auth.signOut({ scope: 'local' })
         throw challengeError
       }
 
@@ -168,8 +170,8 @@ export default function LoginPage() {
         code: mfaCode,
       })
       if (verifyError) {
-        // Sign out on failure to prevent AAL1 access
-        await supabase.auth.signOut()
+        // Clear local session on failure to prevent AAL1 access
+        await supabase.auth.signOut({ scope: 'local' })
         throw verifyError
       }
 
