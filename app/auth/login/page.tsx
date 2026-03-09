@@ -89,7 +89,7 @@ export default function LoginPage() {
       // Reset on success
       failCountRef.current = 0
 
-      // Set the session temporarily to check for MFA factors
+      // Set the session in the browser client (server already set cookies)
       if (data.session) {
         const supabase = createClient()
         await supabase.auth.setSession({
@@ -97,22 +97,27 @@ export default function LoginPage() {
           refresh_token: data.session.refresh_token,
         })
 
-        // Check if MFA is required
-        const { data: factorsData } = await supabase.auth.mfa.listFactors()
-        const verifiedTotpFactor = factorsData?.totp?.find((f) => f.status === "verified")
+        // Check if MFA is required — wrapped in try/catch so login
+        // still succeeds if MFA check fails for any reason.
+        try {
+          const { data: factorsData } = await supabase.auth.mfa.listFactors()
+          const verifiedTotpFactor = factorsData?.totp?.find((f) => f.status === "verified")
 
-        if (verifiedTotpFactor) {
-          // Sign out immediately so the AAL1 session cannot be used to access /cms
-          await supabase.auth.signOut()
-          // Store session tokens in memory for re-authentication after MFA
-          setPendingSession({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-          })
-          setMfaRequired(true)
-          setMfaFactorId(verifiedTotpFactor.id)
-          setIsLoading(false)
-          return
+          if (verifiedTotpFactor) {
+            // Sign out immediately so the AAL1 session cannot be used to access /cms
+            await supabase.auth.signOut()
+            // Store session tokens in memory for re-authentication after MFA
+            setPendingSession({
+              access_token: data.session.access_token,
+              refresh_token: data.session.refresh_token,
+            })
+            setMfaRequired(true)
+            setMfaFactorId(verifiedTotpFactor.id)
+            setIsLoading(false)
+            return
+          }
+        } catch {
+          // MFA check failed — proceed without MFA
         }
       }
 
