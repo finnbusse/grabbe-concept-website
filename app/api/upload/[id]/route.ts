@@ -24,6 +24,7 @@ export async function PATCH(
     if (typeof body.alt_text === "string") updates.alt_text = body.alt_text
     if (typeof body.description === "string") updates.description = body.description
     if (typeof body.category === "string") updates.category = body.category
+    if (typeof body.show_in_downloads === "boolean") updates.show_in_downloads = body.show_in_downloads
 
     if (Object.keys(updates).length === 0 && !Array.isArray(body.tagIds)) {
       return NextResponse.json({ error: "Keine Änderungen angegeben" }, { status: 400 })

@@ -26,8 +26,9 @@ export default async function DownloadsPage() {
   const heroImageUrl = (heroContent.hero_image_url as string) || undefined
   const { data: docs } = await supabase
     .from("documents")
-    .select("id, title, file_url, file_name, file_size, file_type, category")
+    .select("id, title, file_url, file_name, file_size, file_type, category, show_in_downloads")
     .eq("status", "published")
+    .eq("show_in_downloads", true)
     .order("category", { ascending: true })
     .order("created_at", { ascending: false })
     .returns<DocumentListItem[]>()
