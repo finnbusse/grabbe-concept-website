@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -123,6 +123,7 @@ export default function SocialMediaTab() {
   const [mediaPicture, setMediaPicture] = useState("")
   const [mediaDescription, setMediaDescription] = useState("")
   const [publishNow, setPublishNow] = useState(true)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [scheduledAt, setScheduledAt] = useState("")
   const [publishing, setPublishing] = useState(false)
   const [showMediaSection, setShowMediaSection] = useState(false)
@@ -524,6 +525,7 @@ export default function SocialMediaTab() {
             hint={`${charCount} Zeichen · Unterstützt Hashtags (#), Erwähnungen (@) und Links.`}
           >
             <Textarea
+              ref={textareaRef}
               value={postText}
               onChange={(e) => setPostText(e.target.value)}
               placeholder="Was möchtest du teilen? Verwende #Hashtags, @Erwähnungen und Links…"
@@ -547,7 +549,8 @@ export default function SocialMediaTab() {
               variant="outline"
               size="sm"
               onClick={() => {
-                const cursorPos = postText.length
+                const el = textareaRef.current
+                const cursorPos = el ? el.selectionStart : postText.length
                 setPostText(postText.slice(0, cursorPos) + " #" + postText.slice(cursorPos))
               }}
             >
@@ -558,7 +561,8 @@ export default function SocialMediaTab() {
               variant="outline"
               size="sm"
               onClick={() => {
-                const cursorPos = postText.length
+                const el = textareaRef.current
+                const cursorPos = el ? el.selectionStart : postText.length
                 setPostText(postText.slice(0, cursorPos) + " https://" + postText.slice(cursorPos))
               }}
             >
@@ -642,7 +646,7 @@ export default function SocialMediaTab() {
               <span>
                 {selectedProfiles.length} Profil{selectedProfiles.length !== 1 ? "e" : ""} ausgewählt
               </span>
-              {!publishNow && scheduledAt && (
+              {!publishNow && scheduledAt && !isNaN(new Date(scheduledAt).getTime()) && (
                 <span>
                   · Geplant für{" "}
                   {new Date(scheduledAt).toLocaleString("de-DE", {
