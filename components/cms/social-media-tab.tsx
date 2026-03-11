@@ -190,6 +190,10 @@ export default function SocialMediaTab() {
         }
         setKeyStatus({ configured: true, masked_key: maskToken(newToken.trim()) })
         setNewToken("")
+        // Explicitly reload profiles – the useEffect on keyStatus?.configured
+        // only fires when the value *changes*, so updating an already-configured
+        // key would not trigger a re-fetch without this.
+        loadProfiles()
       } else {
         toast.error(data.error || "Token konnte nicht gespeichert werden.")
       }
