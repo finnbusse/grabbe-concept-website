@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { createBufferPost, type BufferCreatePostParams } from "@/lib/buffer"
 
 // ============================================================================
-// POST – Publish a post via Buffer
+// POST – Publish a post via Buffer (GraphQL API)
 // ============================================================================
 
 export async function POST(request: NextRequest) {
@@ -53,10 +53,10 @@ export async function POST(request: NextRequest) {
 
   // Parse request body
   const body = await request.json()
-  const { text, profile_ids, media, now, scheduled_at } = body as {
+  const { text, channel_ids, image_url, now, scheduled_at } = body as {
     text?: string
-    profile_ids?: string[]
-    media?: { link?: string; description?: string; picture?: string }
+    channel_ids?: string[]
+    image_url?: string
     now?: boolean
     scheduled_at?: string
   }
@@ -69,41 +69,53 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  if (!profile_ids || profile_ids.length === 0) {
+  if (!channel_ids || channel_ids.length === 0) {
     return NextResponse.json(
-      { error: "Mindestens ein Profil muss ausgewählt werden." },
+      { error: "Mindestens ein Kanal muss ausgewählt werden." },
       { status: 400 }
     )
   }
 
-  // Build post params
-  const params: BufferCreatePostParams = {
-    text: text.trim(),
-    profile_ids,
-    now: now ?? true,
-    shorten: true,
+  // Determine schedule time
+  const dueAt = scheduled_at
+    ? scheduled_at
+    : now !== false
+      ? new Date().toISOString()
+      : undefined
+
+  // Create post for each selected channel
+  const results: Array<{ channelId: string; success: boolean; postId?: string; error?: string }> = []
+
+  for (const channelId of channel_ids) {
+    try {
+      const params: BufferCreatePostParams = {
+        text: text.trim(),
+        channelId,
+        dueAt,
+        imageUrl: image_url,
+      }
+
+      const result = await createBufferPost(token, params)
+      results.push({
+        channelId,
+        success: result.success,
+        postId: result.post?.id,
+        error: result.message,
+      })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unbekannter Fehler"
+      results.push({ channelId, success: false, error: message })
+    }
   }
 
-  if (media && (media.link || media.picture || media.description)) {
-    params.media = {}
-    if (media.link) params.media.link = media.link
-    if (media.picture) params.media.picture = media.picture
-    if (media.description) params.media.description = media.description
-  }
+  const successCount = results.filter((r) => r.success).length
+  const allSucceeded = successCount === results.length
 
-  if (scheduled_at) {
-    params.now = false
-    params.scheduled_at = scheduled_at
-  }
-
-  try {
-    const result = await createBufferPost(token, params)
-    return NextResponse.json(result)
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unbekannter Fehler"
-    return NextResponse.json(
-      { error: `Fehler beim Veröffentlichen: ${message}` },
-      { status: 502 }
-    )
-  }
+  return NextResponse.json({
+    success: allSucceeded,
+    results,
+    message: allSucceeded
+      ? `${successCount} Post${successCount !== 1 ? "s" : ""} erfolgreich erstellt.`
+      : `${successCount}/${results.length} Posts erstellt. Einige sind fehlgeschlagen.`,
+  })
 }

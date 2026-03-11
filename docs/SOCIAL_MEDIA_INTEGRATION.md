@@ -38,7 +38,7 @@ Die Social-Media-Integration ermöglicht es Administratoren, direkt aus dem CMS 
            │
     ┌──────▼──────────────┐
     │  Buffer.com API      │  ← Externer Dienst
-    │  (v1 REST API)       │
+    │  (GraphQL API)       │
     └──────┬──────────────┘
            │
     ┌──────▼──────────────┐
@@ -55,7 +55,7 @@ Die Social-Media-Integration ermöglicht es Administratoren, direkt aus dem CMS 
 
 1. Registriere dich auf [buffer.com](https://buffer.com)
 2. Verbinde die gewünschten Social-Media-Kanäle im Buffer-Dashboard
-3. Erstelle einen Access Token unter [buffer.com/developers/apps](https://buffer.com/developers/apps)
+3. Erstelle einen Access Token unter [publish.buffer.com/settings/api](https://publish.buffer.com/settings/api)
 
 ### 2. Access Token im CMS hinterlegen
 
@@ -65,9 +65,9 @@ Die Social-Media-Integration ermöglicht es Administratoren, direkt aus dem CMS 
 
 ### 3. Posts erstellen
 
-1. Im **Post-Playground** (Social Media Tab) die Zielprofile auswählen
+1. Im **Post-Playground** (Social Media Tab) die Zielkanäle auswählen
 2. Post-Text eingeben (mit Hashtags, Links, Erwähnungen)
-3. Optional: Medien (Bilder, Links) anhängen
+3. Optional: Bild-URL anhängen
 4. Sofort veröffentlichen oder zeitgesteuert planen
 
 ---
@@ -92,7 +92,7 @@ Gibt den Status des gespeicherten Buffer-Tokens zurück (maskiert).
 
 #### `PUT /api/social-media/key`
 
-Speichert oder aktualisiert den Buffer Access Token. Der Token wird vor dem Speichern gegen die Buffer API validiert.
+Speichert oder aktualisiert den Buffer Access Token. Der Token wird **vor dem Speichern** gegen die Buffer GraphQL API validiert – ungültige Tokens werden abgelehnt.
 
 **Berechtigung:** Nur Administratoren
 
@@ -103,14 +103,21 @@ Speichert oder aktualisiert den Buffer Access Token. Der Token wird vor dem Spei
 }
 ```
 
-**Response:**
+**Response (Erfolg):**
 ```json
 {
   "success": true,
-  "buffer_user": {
-    "name": "Max Mustermann",
-    "plan": "free"
+  "buffer_account": {
+    "organization_name": "Grabbe-Gymnasium",
+    "organization_count": 1
   }
+}
+```
+
+**Response (Fehler – ungültiger Token):**
+```json
+{
+  "error": "Token ungültig: Buffer GraphQL Fehler: ..."
 }
 ```
 
@@ -122,26 +129,26 @@ Entfernt den gespeicherten Buffer Access Token.
 
 ---
 
-### Profile / Kanäle
+### Kanäle (Channels)
 
 #### `GET /api/social-media/profiles`
 
-Gibt alle mit Buffer verbundenen Social-Media-Profile zurück.
+Gibt alle mit Buffer verbundenen Social-Media-Kanäle zurück (über die GraphQL Organizations/Channels API).
 
 **Berechtigung:** Nur Administratoren
 
 **Response:**
 ```json
 {
-  "profiles": [
+  "channels": [
     {
       "id": "abc123",
+      "name": "grabbedetmold",
+      "displayName": "Grabbe-Gymnasium",
       "service": "twitter",
-      "service_username": "@grabbedetmold",
-      "formatted_service": "X (Twitter)",
       "avatar": "https://...",
-      "default": true,
-      "disabled": null
+      "isQueuePaused": false,
+      "organizationId": "org456"
     }
   ]
 }
@@ -153,7 +160,7 @@ Gibt alle mit Buffer verbundenen Social-Media-Profile zurück.
 
 #### `POST /api/social-media/publish`
 
-Erstellt einen neuen Post über Buffer.
+Erstellt einen neuen Post über Buffer (GraphQL `createPost` Mutation). Posts werden pro Kanal erstellt.
 
 **Berechtigung:** Nur Administratoren
 
@@ -161,13 +168,9 @@ Erstellt einen neuen Post über Buffer.
 ```json
 {
   "text": "Neuer Beitrag auf unserer Website! 🎓 #GrabbeGymnasium",
-  "profile_ids": ["abc123", "def456"],
+  "channel_ids": ["abc123", "def456"],
   "now": true,
-  "media": {
-    "picture": "https://example.com/bild.jpg",
-    "link": "https://grabbe.site/news/...",
-    "description": "Bildbeschreibung"
-  },
+  "image_url": "https://example.com/bild.jpg",
   "scheduled_at": "2025-03-15T10:00:00.000Z"
 }
 ```
@@ -175,25 +178,21 @@ Erstellt einen neuen Post über Buffer.
 | Feld | Typ | Pflicht | Beschreibung |
 |------|-----|---------|-------------|
 | `text` | string | ✓ | Der Post-Text |
-| `profile_ids` | string[] | ✓ | IDs der Zielprofile |
+| `channel_ids` | string[] | ✓ | IDs der Zielkanäle |
 | `now` | boolean | - | Sofort veröffentlichen (Standard: `true`) |
-| `media.picture` | string | - | URL eines Bildes |
-| `media.link` | string | - | URL eines Links |
-| `media.description` | string | - | Bildbeschreibung / Alt-Text |
+| `image_url` | string | - | URL eines Bildes |
 | `scheduled_at` | string | - | ISO-8601 Zeitstempel für geplante Veröffentlichung |
 
 **Response:**
 ```json
 {
   "success": true,
-  "message": "...",
-  "updates": [
+  "message": "2 Posts erfolgreich erstellt.",
+  "results": [
     {
-      "id": "upd123",
-      "created_at": 1710500000,
-      "status": "buffer",
-      "text": "...",
-      "profile_id": "abc123"
+      "channelId": "abc123",
+      "success": true,
+      "postId": "post_xyz"
     }
   ]
 }
@@ -219,9 +218,9 @@ Die Client-Bibliothek bietet folgende Funktionen:
 
 | Funktion | Beschreibung |
 |----------|-------------|
-| `validateBufferToken(token)` | Validiert einen Token gegen die Buffer API |
-| `getBufferProfiles(token)` | Listet alle verbundenen Profile |
-| `createBufferPost(token, params)` | Erstellt einen neuen Post |
+| `validateBufferToken(token)` | Validiert einen Token gegen die Buffer GraphQL API |
+| `getBufferChannels(token)` | Listet alle verbundenen Kanäle (Organizations → Channels) |
+| `createBufferPost(token, params)` | Erstellt einen neuen Post (GraphQL Mutation) |
 | `getServiceDisplayName(service)` | Gibt den Anzeigenamen eines Dienstes zurück |
 | `maskToken(token)` | Maskiert einen Token für die Anzeige |
 

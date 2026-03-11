@@ -1,10 +1,10 @@
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { NextResponse } from "next/server"
-import { getBufferProfiles } from "@/lib/buffer"
+import { getBufferChannels } from "@/lib/buffer"
 
 // ============================================================================
-// GET – Fetch connected Buffer profiles/channels
+// GET – Fetch connected Buffer channels (social media profiles)
 // ============================================================================
 
 export async function GET() {
@@ -52,12 +52,12 @@ export async function GET() {
   }
 
   try {
-    const profiles = await getBufferProfiles(token)
-    return NextResponse.json({ profiles })
+    const channels = await getBufferChannels(token)
+    return NextResponse.json({ channels })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unbekannter Fehler"
     return NextResponse.json(
-      { error: `Fehler beim Abrufen der Profile: ${message}` },
+      { error: `Fehler beim Abrufen der Kanäle: ${message}` },
       { status: 502 }
     )
   }

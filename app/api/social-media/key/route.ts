@@ -80,8 +80,20 @@ export async function PUT(request: NextRequest) {
     )
   }
 
-  // 1. Save the token to the database FIRST – this must always succeed
-  //    regardless of whether Buffer's external API is reachable.
+  // 1. Validate the token with Buffer's GraphQL API FIRST.
+  //    Only save if the token is actually valid – prevents garbage tokens.
+  let accountInfo: { organizations: Array<{ id: string; name: string }> }
+  try {
+    accountInfo = await validateBufferToken(access_token.trim())
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unbekannter Validierungsfehler"
+    return NextResponse.json(
+      { error: `Token ungültig: ${message}` },
+      { status: 400 }
+    )
+  }
+
+  // 2. Token is valid → save to database
   const { error: dbError } = await adminSupabase
     .from("site_settings")
     .upsert(
@@ -100,22 +112,13 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: dbError.message }, { status: 500 })
   }
 
-  // 2. Try to validate the token with Buffer API (non-blocking for the save).
-  //    If validation fails the token is still saved – the user can test later.
-  let bufferUser: { name: string; plan: string } | null = null
-  let validationError: string | null = null
-  try {
-    const user = await validateBufferToken(access_token.trim())
-    bufferUser = { name: user.name, plan: user.plan }
-  } catch (err) {
-    validationError =
-      err instanceof Error ? err.message : "Unbekannter Validierungsfehler"
-  }
-
+  const orgName = accountInfo.organizations[0]?.name ?? "Unbekannt"
   return NextResponse.json({
     success: true,
-    buffer_user: bufferUser,
-    validation_warning: validationError,
+    buffer_account: {
+      organization_name: orgName,
+      organization_count: accountInfo.organizations.length,
+    },
   })
 }
 

@@ -20,15 +20,14 @@ import { getServiceDisplayName, maskToken } from "@/lib/buffer"
 // Types
 // ============================================================================
 
-interface BufferProfile {
+interface BufferChannel {
   id: string
+  name: string
+  displayName: string
   service: string
-  service_username: string
-  service_type: string
   avatar: string
-  formatted_service: string
-  default: boolean
-  disabled: boolean | null
+  isQueuePaused: boolean
+  organizationId?: string
 }
 
 // ============================================================================
@@ -112,16 +111,14 @@ export default function SocialMediaTab() {
   const [savingKey, setSavingKey] = useState(false)
   const [deletingKey, setDeletingKey] = useState(false)
 
-  // ---- Profiles State ----
-  const [profiles, setProfiles] = useState<BufferProfile[]>([])
-  const [profilesLoading, setProfilesLoading] = useState(false)
+  // ---- Channels State ----
+  const [channels, setChannels] = useState<BufferChannel[]>([])
+  const [channelsLoading, setChannelsLoading] = useState(false)
 
   // ---- Post Composer State ----
   const [postText, setPostText] = useState("")
-  const [selectedProfiles, setSelectedProfiles] = useState<string[]>([])
-  const [mediaLink, setMediaLink] = useState("")
-  const [mediaPicture, setMediaPicture] = useState("")
-  const [mediaDescription, setMediaDescription] = useState("")
+  const [selectedChannels, setSelectedChannels] = useState<string[]>([])
+  const [imageUrl, setImageUrl] = useState("")
   const [publishNow, setPublishNow] = useState(true)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [scheduledAt, setScheduledAt] = useState("")
@@ -140,30 +137,30 @@ export default function SocialMediaTab() {
       .finally(() => setKeyLoading(false))
   }, [])
 
-  // ---- Load Profiles ----
-  const loadProfiles = useCallback(async () => {
-    setProfilesLoading(true)
+  // ---- Load Channels ----
+  const loadChannels = useCallback(async () => {
+    setChannelsLoading(true)
     try {
       const res = await fetch("/api/social-media/profiles")
       const data = await res.json()
-      if (res.ok && data.profiles) {
-        setProfiles(data.profiles)
+      if (res.ok && data.channels) {
+        setChannels(data.channels)
       } else {
-        toast.error(data.error || "Profile konnten nicht geladen werden.")
+        toast.error(data.error || "Kanäle konnten nicht geladen werden.")
       }
     } catch {
-      toast.error("Netzwerkfehler beim Laden der Profile.")
+      toast.error("Netzwerkfehler beim Laden der Kanäle.")
     } finally {
-      setProfilesLoading(false)
+      setChannelsLoading(false)
     }
   }, [])
 
-  // Load profiles when key is configured
+  // Load channels when key is configured
   useEffect(() => {
     if (keyStatus?.configured) {
-      loadProfiles()
+      loadChannels()
     }
-  }, [keyStatus?.configured, loadProfiles])
+  }, [keyStatus?.configured, loadChannels])
 
   // ---- Save API Key ----
   const handleSaveKey = async () => {
@@ -177,23 +174,15 @@ export default function SocialMediaTab() {
       })
       const data = await res.json()
       if (res.ok && data.success) {
-        // Token was saved to DB. Show validation result (if any).
-        if (data.buffer_user?.name) {
-          toast.success(`Buffer-Token gespeichert. Verbunden als: ${data.buffer_user.name}`)
-        } else if (data.validation_warning) {
-          toast.success("Buffer-Token gespeichert.", {
-            description: `Hinweis: Validierung fehlgeschlagen – ${data.validation_warning}. Du kannst den Token später erneut prüfen.`,
-            duration: 8000,
-          })
-        } else {
-          toast.success("Buffer-Token gespeichert.")
-        }
+        const orgName = data.buffer_account?.organization_name
+        toast.success(
+          orgName
+            ? `Buffer-Token gespeichert und validiert. Organisation: ${orgName}`
+            : "Buffer-Token gespeichert und validiert."
+        )
         setKeyStatus({ configured: true, masked_key: maskToken(newToken.trim()) })
         setNewToken("")
-        // Explicitly reload profiles – the useEffect on keyStatus?.configured
-        // only fires when the value *changes*, so updating an already-configured
-        // key would not trigger a re-fetch without this.
-        loadProfiles()
+        loadChannels()
       } else {
         toast.error(data.error || "Token konnte nicht gespeichert werden.")
       }
@@ -213,8 +202,8 @@ export default function SocialMediaTab() {
       if (res.ok && data.success) {
         toast.success("Buffer-Token wurde entfernt.")
         setKeyStatus({ configured: false, masked_key: "" })
-        setProfiles([])
-        setSelectedProfiles([])
+        setChannels([])
+        setSelectedChannels([])
       } else {
         toast.error(data.error || "Token konnte nicht entfernt werden.")
       }
@@ -225,10 +214,10 @@ export default function SocialMediaTab() {
     }
   }
 
-  // ---- Toggle Profile Selection ----
-  const toggleProfile = (profileId: string) => {
-    setSelectedProfiles((prev) =>
-      prev.includes(profileId) ? prev.filter((id) => id !== profileId) : [...prev, profileId]
+  // ---- Toggle Channel Selection ----
+  const toggleChannel = (channelId: string) => {
+    setSelectedChannels((prev) =>
+      prev.includes(channelId) ? prev.filter((id) => id !== channelId) : [...prev, channelId]
     )
   }
 
@@ -238,8 +227,8 @@ export default function SocialMediaTab() {
       toast.error("Bitte gib einen Post-Text ein.")
       return
     }
-    if (selectedProfiles.length === 0) {
-      toast.error("Bitte wähle mindestens ein Profil aus.")
+    if (selectedChannels.length === 0) {
+      toast.error("Bitte wähle mindestens einen Kanal aus.")
       return
     }
 
@@ -247,16 +236,12 @@ export default function SocialMediaTab() {
     try {
       const body: Record<string, unknown> = {
         text: postText.trim(),
-        profile_ids: selectedProfiles,
+        channel_ids: selectedChannels,
         now: publishNow,
       }
 
-      if (showMediaSection && (mediaLink || mediaPicture || mediaDescription)) {
-        body.media = {
-          ...(mediaLink && { link: mediaLink }),
-          ...(mediaPicture && { picture: mediaPicture }),
-          ...(mediaDescription && { description: mediaDescription }),
-        }
+      if (showMediaSection && imageUrl.trim()) {
+        body.image_url = imageUrl.trim()
       }
 
       if (!publishNow && scheduledAt) {
@@ -271,16 +256,14 @@ export default function SocialMediaTab() {
 
       const data = await res.json()
       if (res.ok && data.success) {
-        const count = data.updates?.length ?? 0
-        toast.success(`Post erfolgreich erstellt! (${count} Update${count !== 1 ? "s" : ""})`)
+        const count = data.results?.filter((r: { success: boolean }) => r.success).length ?? 0
+        toast.success(`Post erfolgreich erstellt! (${count} Kanal${count !== 1 ? "äle" : ""})`)
         // Reset form
         setPostText("")
-        setMediaLink("")
-        setMediaPicture("")
-        setMediaDescription("")
+        setImageUrl("")
         setShowMediaSection(false)
       } else {
-        toast.error(data.error || "Post konnte nicht erstellt werden.")
+        toast.error(data.error || data.message || "Post konnte nicht erstellt werden.")
       }
     } catch {
       toast.error("Netzwerkfehler beim Veröffentlichen.")
@@ -336,12 +319,12 @@ export default function SocialMediaTab() {
                   Der Buffer Access Token läuft regelmäßig ab und muss dann erneuert werden.
                   Du findest deinen Token unter{" "}
                   <a
-                    href="https://buffer.com/developers/apps"
+                    href="https://publish.buffer.com/settings/api"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="underline font-medium"
                   >
-                    buffer.com/developers/apps
+                    publish.buffer.com/settings/api
                   </a>
                   {" "}→ Access Token. Der Token wird sicher in der Datenbank gespeichert
                   und ist nur für Administratoren sichtbar.
@@ -352,7 +335,7 @@ export default function SocialMediaTab() {
             {/* Token input */}
             <Field
               label="Access Token"
-              hint="Gib den Buffer Access Token ein. Er wird sofort gespeichert. Die Validierung gegen Buffer erfolgt anschließend (nicht blockierend)."
+              hint="Gib den Buffer Access Token ein. Er wird erst nach erfolgreicher Validierung über die Buffer-API gespeichert."
             >
               <div className="flex items-center gap-3">
                 <Input
@@ -400,20 +383,20 @@ export default function SocialMediaTab() {
       {keyStatus?.configured && (
         <Section
           icon={Globe}
-          title="Verbundene Profile"
+          title="Verbundene Kanäle"
           description="Social-Media-Kanäle, die über Buffer verbunden sind."
         >
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {profiles.length} Profil{profiles.length !== 1 ? "e" : ""} verbunden
+              {channels.length} Kanal{channels.length !== 1 ? "äle" : ""} verbunden
             </p>
             <Button
               variant="outline"
               size="sm"
-              onClick={loadProfiles}
-              disabled={profilesLoading}
+              onClick={loadChannels}
+              disabled={channelsLoading}
             >
-              {profilesLoading ? (
+              {channelsLoading ? (
                 <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
               ) : (
                 <RefreshCw className="mr-2 h-3.5 w-3.5" />
@@ -422,15 +405,15 @@ export default function SocialMediaTab() {
             </Button>
           </div>
 
-          {profilesLoading ? (
+          {channelsLoading ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> Lade Profile…
+              <Loader2 className="h-4 w-4 animate-spin" /> Lade Kanäle…
             </div>
-          ) : profiles.length === 0 ? (
+          ) : channels.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Keine Profile gefunden. Verbinde Social-Media-Kanäle in deinem{" "}
+              Keine Kanäle gefunden. Verbinde Social-Media-Kanäle in deinem{" "}
               <a
-                href="https://buffer.com/publish"
+                href="https://publish.buffer.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline"
@@ -440,16 +423,16 @@ export default function SocialMediaTab() {
             </p>
           ) : (
             <div className="grid gap-2">
-              {profiles.map((profile) => (
+              {channels.map((channel) => (
                 <div
-                  key={profile.id}
+                  key={channel.id}
                   className="flex items-center gap-3 rounded-lg border border-border px-4 py-3"
                 >
-                  {profile.avatar ? (
+                  {channel.avatar ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={profile.avatar}
-                      alt={profile.service_username}
+                      src={channel.avatar}
+                      alt={channel.displayName || channel.name}
                       className="h-8 w-8 rounded-full"
                     />
                   ) : (
@@ -459,17 +442,18 @@ export default function SocialMediaTab() {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
-                      {profile.service_username}
+                      {channel.displayName || channel.name}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {profile.formatted_service || getServiceDisplayName(profile.service)}
+                      {getServiceDisplayName(channel.service)}
+                      {channel.isQueuePaused && " · Warteschlange pausiert"}
                     </p>
                   </div>
                   <Badge
                     variant="secondary"
-                    className={getServiceColor(profile.service)}
+                    className={getServiceColor(channel.service)}
                   >
-                    {getServiceDisplayName(profile.service)}
+                    {getServiceDisplayName(channel.service)}
                   </Badge>
                 </div>
               ))}
@@ -481,23 +465,23 @@ export default function SocialMediaTab() {
       {/* ================================================================== */}
       {/* SECTION 3: Post Playground / Composer                             */}
       {/* ================================================================== */}
-      {keyStatus?.configured && profiles.length > 0 && (
+      {keyStatus?.configured && channels.length > 0 && (
         <Section
           icon={Send}
           title="Post-Playground"
           description="Erstelle Test-Posts und veröffentliche sie über Buffer an deine verbundenen Kanäle."
         >
-          {/* Profile selection */}
+          {/* Channel selection */}
           <div className="grid gap-2">
-            <Label className="text-sm font-medium">Zielprofile auswählen</Label>
+            <Label className="text-sm font-medium">Zielkanäle auswählen</Label>
             <div className="flex flex-wrap gap-2">
-              {profiles.map((profile) => {
-                const isSelected = selectedProfiles.includes(profile.id)
+              {channels.map((channel) => {
+                const isSelected = selectedChannels.includes(channel.id)
                 return (
                   <button
-                    key={profile.id}
+                    key={channel.id}
                     type="button"
-                    onClick={() => toggleProfile(profile.id)}
+                    onClick={() => toggleChannel(channel.id)}
                     className={`
                       inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors
                       ${isSelected
@@ -506,27 +490,27 @@ export default function SocialMediaTab() {
                       }
                     `}
                   >
-                    {profile.avatar ? (
+                    {channel.avatar ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={profile.avatar}
+                        src={channel.avatar}
                         alt=""
                         className="h-5 w-5 rounded-full"
                       />
                     ) : (
                       <Globe className="h-4 w-4" />
                     )}
-                    <span className="font-medium">{profile.service_username}</span>
-                    <Badge variant="secondary" className={`text-[10px] ${getServiceColor(profile.service)}`}>
-                      {getServiceDisplayName(profile.service)}
+                    <span className="font-medium">{channel.displayName || channel.name}</span>
+                    <Badge variant="secondary" className={`text-[10px] ${getServiceColor(channel.service)}`}>
+                      {getServiceDisplayName(channel.service)}
                     </Badge>
                   </button>
                 )
               })}
             </div>
-            {selectedProfiles.length === 0 && (
+            {selectedChannels.length === 0 && (
               <p className="text-xs text-muted-foreground">
-                Klicke auf Profile, um sie auszuwählen.
+                Klicke auf Kanäle, um sie auszuwählen.
               </p>
             )}
           </div>
@@ -590,38 +574,17 @@ export default function SocialMediaTab() {
             <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-4">
               <h3 className="text-sm font-medium flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
-                Medien-Anhänge
+                Bild-Anhang
               </h3>
               <Field
                 label="Bild-URL"
-                hint="Direkte URL zu einem Bild (JPG, PNG, GIF). Wird als Vorschaubild angezeigt."
+                hint="Direkte URL zu einem Bild (JPG, PNG, GIF). Wird dem Post als Bild beigefügt."
               >
                 <Input
                   type="url"
-                  value={mediaPicture}
-                  onChange={(e) => setMediaPicture(e.target.value)}
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://example.com/bild.jpg"
-                />
-              </Field>
-              <Field
-                label="Link-URL"
-                hint="Ein Link, der dem Post beigefügt wird."
-              >
-                <Input
-                  type="url"
-                  value={mediaLink}
-                  onChange={(e) => setMediaLink(e.target.value)}
-                  placeholder="https://grabbe.site/news/..."
-                />
-              </Field>
-              <Field
-                label="Bildbeschreibung"
-                hint="Alt-Text / Beschreibung für das angehängte Bild."
-              >
-                <Input
-                  value={mediaDescription}
-                  onChange={(e) => setMediaDescription(e.target.value)}
-                  placeholder="Beschreibung des Bildes…"
                 />
               </Field>
             </div>
@@ -658,7 +621,7 @@ export default function SocialMediaTab() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Eye className="h-4 w-4" />
               <span>
-                {selectedProfiles.length} Profil{selectedProfiles.length !== 1 ? "e" : ""} ausgewählt
+                {selectedChannels.length} Kanal{selectedChannels.length !== 1 ? "äle" : ""} ausgewählt
               </span>
               {!publishNow && scheduledAt && !isNaN(new Date(scheduledAt).getTime()) && (
                 <span>
@@ -675,7 +638,7 @@ export default function SocialMediaTab() {
             </div>
             <Button
               onClick={handlePublish}
-              disabled={publishing || !postText.trim() || selectedProfiles.length === 0}
+              disabled={publishing || !postText.trim() || selectedChannels.length === 0}
             >
               {publishing ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
