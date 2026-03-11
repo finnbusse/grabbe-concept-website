@@ -10,7 +10,7 @@
  * 2. **Metadata stripping** – drawing the image onto an off-screen canvas
  *    inherently removes all EXIF / GPS / camera metadata.
  * 3. **Compression** – the WebP quality is iteratively reduced until the
- *    output is below {@link TARGET_MAX_BYTES} (700 KB).  The initial quality
+ *    output is below {@link TARGET_MAX_BYTES} (700 KB). The initial quality
  *    is already adjusted based on the source file size so that most images
  *    are compressed in a single pass.
  * 4. **Copyright injection** – a lightweight XMP packet containing
