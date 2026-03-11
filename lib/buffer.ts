@@ -55,7 +55,7 @@ export interface BufferAccountInfo {
 // Constants
 // ============================================================================
 
-const BUFFER_GRAPHQL_ENDPOINT = "https://api.buffer.com"
+const BUFFER_GRAPHQL_ENDPOINT = "https://api.buffer.com/graphql"
 
 /** Default timeout for external Buffer API calls (in ms) */
 const API_TIMEOUT_MS = 15_000
@@ -253,8 +253,12 @@ export async function validateBufferToken(accessToken: string): Promise<BufferAc
 
 /**
  * Fetch all connected channels (social media profiles) across all organizations.
+ * Returns channels and any per-organization errors encountered.
  */
-export async function getBufferChannels(accessToken: string): Promise<BufferChannel[]> {
+export async function getBufferChannels(accessToken: string): Promise<{
+  channels: BufferChannel[]
+  errors: Array<{ orgId: string; orgName: string; message: string }>
+}> {
   // Step 1: Get all organizations
   const accountData = await bufferGraphQL<{ account: { organizations: BufferOrganization[] } }>(
     accessToken,
@@ -263,11 +267,13 @@ export async function getBufferChannels(accessToken: string): Promise<BufferChan
 
   const orgs = accountData.account?.organizations ?? []
   if (orgs.length === 0) {
-    return []
+    return { channels: [], errors: [] }
   }
 
   // Step 2: Get channels for each organization
   const allChannels: BufferChannel[] = []
+  const orgErrors: Array<{ orgId: string; orgName: string; message: string }> = []
+
   for (const org of orgs) {
     try {
       const channelData = await bufferGraphQL<{ channels: BufferChannel[] }>(
@@ -280,12 +286,13 @@ export async function getBufferChannels(accessToken: string): Promise<BufferChan
       }))
       allChannels.push(...channels)
     } catch (err) {
-      // Log but continue — one failing org shouldn't block all channels
+      const message = err instanceof Error ? err.message : "Unbekannter Fehler"
       console.error(`[Buffer] Fehler beim Laden der Kanäle für Org ${org.id} (${org.name}):`, err)
+      orgErrors.push({ orgId: org.id, orgName: org.name, message })
     }
   }
 
-  return allChannels
+  return { channels: allChannels, errors: orgErrors }
 }
 
 /**

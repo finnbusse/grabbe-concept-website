@@ -147,8 +147,19 @@ export default function SocialMediaTab() {
       const data = await res.json()
       if (res.ok && data.channels) {
         setChannels(data.channels)
+        // Show errors from individual organizations if channels were found but some orgs failed
+        if (data.errors && data.errors.length > 0 && data.channels.length > 0) {
+          const orgNames = data.errors.map((e: { orgName: string; message: string }) => `${e.orgName}: ${e.message}`).join("; ")
+          toast.error(`Einige Organisationen konnten nicht geladen werden: ${orgNames}`)
+        }
+        // Show detailed error if no channels were found
         if (data.channels.length === 0) {
-          setChannelsError("Keine Kanäle gefunden. Verbinde Social-Media-Kanäle in deinem Buffer-Dashboard.")
+          if (data.errors && data.errors.length > 0) {
+            const details = data.errors.map((e: { orgName: string; message: string }) => e.message).join("; ")
+            setChannelsError(`Keine Kanäle geladen. Buffer-API-Fehler: ${details}`)
+          } else {
+            setChannelsError("Keine Kanäle gefunden. Verbinde Social-Media-Kanäle in deinem Buffer-Dashboard.")
+          }
         }
       } else {
         const errMsg = data.error || "Kanäle konnten nicht geladen werden."
@@ -266,7 +277,7 @@ export default function SocialMediaTab() {
       const data = await res.json()
       if (res.ok && data.success) {
         const count = data.results?.filter((r: { success: boolean }) => r.success).length ?? 0
-        toast.success(`Post erfolgreich erstellt! (${count} Kanal${count !== 1 ? "äle" : ""})`)
+        toast.success(`Post erfolgreich erstellt! (${count} ${count !== 1 ? "Kanäle" : "Kanal"})`)
         // Reset form
         setPostText("")
         setImageUrl("")
@@ -397,7 +408,7 @@ export default function SocialMediaTab() {
         >
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {channels.length} Kanal{channels.length !== 1 ? "äle" : ""} verbunden
+              {channels.length} {channels.length !== 1 ? "Kanäle" : "Kanal"} verbunden
             </p>
             <Button
               variant="outline"
@@ -646,7 +657,7 @@ export default function SocialMediaTab() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Eye className="h-4 w-4" />
               <span>
-                {selectedChannels.length} Kanal{selectedChannels.length !== 1 ? "äle" : ""} ausgewählt
+                {selectedChannels.length} {selectedChannels.length !== 1 ? "Kanäle" : "Kanal"} ausgewählt
               </span>
               {!publishNow && scheduledAt && !isNaN(new Date(scheduledAt).getTime()) && (
                 <span>

@@ -52,8 +52,11 @@ export async function GET() {
   }
 
   try {
-    const channels = await getBufferChannels(token)
-    return NextResponse.json({ channels })
+    const result = await getBufferChannels(token)
+    return NextResponse.json({
+      channels: result.channels,
+      errors: result.errors.length > 0 ? result.errors : undefined,
+    })
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unbekannter Fehler"
     console.error("[social-media/profiles] Fehler beim Abrufen der Kanäle:", err)
