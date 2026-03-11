@@ -8,7 +8,11 @@ import { Label } from "@/components/ui/label"
 import { FileUploader } from "./file-uploader"
 import { TagSelector, TagBadge } from "./tag-selector"
 import type { TagData } from "./tag-selector"
-import { Trash2, ExternalLink, FileText, ImageIcon, Copy, Check } from "lucide-react"
+import { Trash2, ExternalLink, FileText, ImageIcon, Copy, Check, Download } from "lucide-react"
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface Doc {
   id: string
@@ -19,6 +23,8 @@ interface Doc {
   file_type: string | null
   category: string
   status: string
+  /** Controls visibility on the public Downloads page. */
+  show_in_downloads: boolean
   created_at: string
 }
 
@@ -91,6 +97,9 @@ export function DocumentsManager({ initialDocuments }: { initialDocuments: Doc[]
       file_size: uploadedSize,
       file_type: uploadedType,
       category,
+      // Documents uploaded intentionally through the Downloads manager
+      // should appear on the public Downloads page immediately.
+      show_in_downloads: true,
       status: 'published',
       user_id: user.id,
     }).select().single()
@@ -113,6 +122,23 @@ export function DocumentsManager({ initialDocuments }: { initialDocuments: Doc[]
       setNewDocTagIds([])
     }
     setSaving(false)
+  }
+
+  /**
+   * Toggle the `show_in_downloads` flag for an existing document.
+   * This lets admins control precisely which documents appear on the
+   * public Downloads page without having to delete and re-upload files.
+   */
+  async function handleToggleShowInDownloads(id: string, current: boolean) {
+    const next = !current
+    const res = await fetch(`/api/upload/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ show_in_downloads: next }),
+    })
+    if (res.ok) {
+      setDocs(docs.map((d) => d.id === id ? { ...d, show_in_downloads: next } : d))
+    }
   }
 
   async function handleDelete(id: string, fileUrl: string) {
@@ -183,7 +209,11 @@ export function DocumentsManager({ initialDocuments }: { initialDocuments: Doc[]
       </div>
 
       <div className="mt-8">
-        <h3 className="font-display font-semibold mb-4">Alle Dokumente ({docs.length})</h3>
+        <h3 className="font-display font-semibold mb-1">Alle Dokumente ({docs.length})</h3>
+        <p className="text-xs text-muted-foreground mb-4">
+          Das Download-Symbol (<Download className="inline h-3 w-3" />) zeigt an, ob ein Dokument auf der öffentlichen
+          Download-Seite erscheint. Klicken Sie darauf, um die Sichtbarkeit umzuschalten.
+        </p>
         {docs.length === 0 ? (
           <p className="text-sm text-muted-foreground py-8 text-center">Noch keine Dokumente hochgeladen.</p>
         ) : (
@@ -207,15 +237,26 @@ export function DocumentsManager({ initialDocuments }: { initialDocuments: Doc[]
                   )}
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyUrl(doc.id, doc.file_url)} title="URL kopieren">
+                  {/* Toggle: show this document on the public Downloads page */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`h-8 w-8 ${doc.show_in_downloads ? "text-primary" : "text-muted-foreground"}`}
+                    onClick={() => handleToggleShowInDownloads(doc.id, doc.show_in_downloads)}
+                    title={doc.show_in_downloads ? "Auf Download-Seite sichtbar (klicken zum Ausblenden)" : "Nicht auf Download-Seite (klicken zum Anzeigen)"}
+                    aria-label={doc.show_in_downloads ? "Auf Download-Seite ausblenden" : "Auf Download-Seite anzeigen"}
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyUrl(doc.id, doc.file_url)} title="URL kopieren" aria-label="URL kopieren">
                     {copiedId === doc.id ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
                   </Button>
                   <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Öffnen">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" title="Öffnen" aria-label="Datei öffnen">
                       <ExternalLink className="h-3.5 w-3.5" />
                     </Button>
                   </a>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(doc.id, doc.file_url)} title="Löschen">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(doc.id, doc.file_url)} title="Löschen" aria-label="Dokument löschen">
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>

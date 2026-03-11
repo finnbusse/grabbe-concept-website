@@ -158,6 +158,10 @@ export async function POST(request: NextRequest) {
       file_size: file.size,
       file_type: file.type,
       category: docCategory || "allgemein",
+      // Images uploaded via the Image-Picker are intended as inline content
+      // media (e.g. hero images, blog post photos). They must NOT appear on the
+      // public Downloads page unless an admin explicitly enables this later.
+      show_in_downloads: false,
       user_id: user.id,
     } as never).select("id").single()
     revalidateTag("documents", "max")

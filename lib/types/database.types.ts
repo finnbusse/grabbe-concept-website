@@ -115,6 +115,14 @@ export interface Document {
   file_type: string | null;
   category: string; // Default: 'allgemein'
   status: ContentStatus; // Default: 'published'
+  /**
+   * Controls visibility on the public Downloads page.
+   * When true the document is listed there; when false it is only accessible
+   * as media (e.g. inline images uploaded via the Image-Picker).
+   * Default: false — so images uploaded purely as content media are NOT
+   * automatically shown on the Downloads page.
+   */
+  show_in_downloads: boolean; // Default: false
   published_at: string | null; // timestamptz
   created_by: string | null; // UUID, soft reference to auth.users
   updated_by: string | null; // UUID, soft reference to auth.users
@@ -444,7 +452,7 @@ export type PostListItem = Omit<Post, 'content'>
 export type EventListItem = Pick<Event, 'id' | 'title' | 'description' | 'starts_at' | 'ends_at' | 'is_all_day' | 'timezone' | 'location' | 'category'>
 
 /** Document fields fetched for card/list views */
-export type DocumentListItem = Pick<Document, 'id' | 'title' | 'description' | 'file_url' | 'file_name' | 'file_size' | 'file_type' | 'category'>
+export type DocumentListItem = Pick<Document, 'id' | 'title' | 'description' | 'file_url' | 'file_name' | 'file_size' | 'file_type' | 'category' | 'show_in_downloads'>
 
 // ============================================================================
 // Database Schema Type (for Supabase client)
