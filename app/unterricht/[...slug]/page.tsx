@@ -55,6 +55,11 @@ function isBlockContent(content: string): boolean {
   return false
 }
 
+/** Human-readable labels for intermediate URL segments under /unterricht */
+const UNTERRICHT_SEGMENT_LABELS: Record<string, string> = {
+  faecher: "Fächer",
+}
+
 export default async function UnterrichtDynamicPage({ params }: Props) {
   const { slug } = await params
   const pageSlug = slug[slug.length - 1]
@@ -76,6 +81,12 @@ export default async function UnterrichtDynamicPage({ params }: Props) {
         />
         <Breadcrumbs items={[
           { name: "Unterricht", href: "/unterricht" },
+          ...(slug.length > 1
+            ? slug.slice(0, -1).map((segment, idx) => ({
+                name: UNTERRICHT_SEGMENT_LABELS[segment] ?? segment,
+                href: "/unterricht/" + slug.slice(0, idx + 1).join("/"),
+              }))
+            : []),
           { name: page.title, href: `/unterricht/${slug.join("/")}` },
         ]} />
 

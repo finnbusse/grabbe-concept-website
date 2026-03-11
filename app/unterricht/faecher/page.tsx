@@ -66,18 +66,18 @@ export default async function FaecherPage() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm divide-y divide-border/60">
+              <div className="grid grid-cols-2 gap-2">
                 {SUBJECTS.map((subject) => (
                   <Link
                     key={subject.slug}
                     href={`/unterricht/faecher/${subject.slug}`}
-                    className="group flex items-center gap-4 px-6 py-4 transition-colors hover:bg-primary/5"
+                    className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm px-4 py-3 transition-colors hover:bg-primary/5 hover:border-primary/30"
                   >
-                    <span aria-hidden="true" className="text-lg">{subject.emoji}</span>
-                    <span className="flex-1 text-sm font-medium text-foreground underline decoration-primary/30 underline-offset-2 group-hover:decoration-primary">
+                    <span aria-hidden="true" className="text-base">{subject.emoji}</span>
+                    <span className="flex-1 text-sm font-medium text-foreground group-hover:text-primary truncate">
                       {subject.name}
                     </span>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/40 transition-all duration-500 group-hover:text-primary group-hover:translate-x-1" />
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-all duration-300 group-hover:text-primary group-hover:translate-x-0.5" />
                   </Link>
                 ))}
               </div>
