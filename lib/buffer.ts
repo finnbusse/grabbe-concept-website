@@ -1,12 +1,13 @@
 /**
  * Buffer API Client Library
  *
- * Provides a type-safe interface to the Buffer GraphQL API.
+ * Provides a type-safe interface to Buffer's APIs.
  * Used for social media publishing from the CMS.
  *
- * All queries use proper GraphQL variables so that Buffer's custom scalar
- * types (OrganizationId, ChannelId, etc.) are correctly coerced by the
- * server-side type system.
+ * - Organization & Channel queries use the GraphQL API (api.buffer.com/graphql)
+ *   with proper variables for custom scalar type coercion.
+ * - Post creation uses the REST API (api.bufferapp.com/1/updates/create.json)
+ *   which is well-documented and more reliable for write operations.
  *
  * @see https://developers.buffer.com/guides/getting-started.html
  */
@@ -56,6 +57,7 @@ export interface BufferAccountInfo {
 // ============================================================================
 
 const BUFFER_GRAPHQL_ENDPOINT = "https://api.buffer.com/graphql"
+const BUFFER_REST_ENDPOINT = "https://api.bufferapp.com/1"
 
 /** Default timeout for external Buffer API calls (in ms) */
 const API_TIMEOUT_MS = 15_000
@@ -167,33 +169,6 @@ function buildGetChannelsQuery(): string {
   `
 }
 
-/**
- * Build the CreatePost mutation using GraphQL variables.
- * This ensures ChannelId, DateTime, and other custom scalars are
- * properly coerced by the server.
- */
-function buildCreatePostMutation(): string {
-  return `
-    mutation CreatePost($input: CreatePostInput!) {
-      createPost(input: $input) {
-        ... on PostActionSuccess {
-          post {
-            id
-            text
-            assets {
-              id
-              mimeType
-            }
-          }
-        }
-        ... on MutationError {
-          message
-        }
-      }
-    }
-  `
-}
-
 // ============================================================================
 // API Functions
 // ============================================================================
@@ -261,45 +236,68 @@ export async function getBufferChannels(accessToken: string): Promise<{
 }
 
 /**
- * Create a new post via Buffer's GraphQL API.
- * Posts are created per channel (one at a time).
+ * Create a new post via Buffer's REST API.
+ *
+ * Uses the stable /1/updates/create.json endpoint instead of the GraphQL
+ * mutation, which avoids unknown-type-name issues with the GraphQL schema.
+ *
+ * @see https://publish.buffer.com/developers/api/updates
  */
 export async function createBufferPost(
   accessToken: string,
   params: BufferCreatePostParams
 ): Promise<BufferPostResult> {
-  const dueAt = params.dueAt || new Date().toISOString()
-  const imageUrl = params.imageUrl?.trim() || undefined
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
 
-  const input: Record<string, unknown> = {
-    text: params.text,
-    channelId: params.channelId,
-    schedulingType: "automatic",
-    mode: "customSchedule",
-    dueAt,
-  }
+  try {
+    const formData = new URLSearchParams()
+    formData.append("access_token", accessToken)
+    formData.append("text", params.text)
+    formData.append("profile_ids[]", params.channelId)
 
-  if (imageUrl) {
-    input.assets = {
-      images: [{ url: imageUrl }],
+    if (params.dueAt) {
+      formData.append("scheduled_at", params.dueAt)
+    } else {
+      formData.append("now", "true")
     }
-  }
 
-  const data = await bufferGraphQL<{
-    createPost: {
-      post?: { id: string; text: string; assets?: Array<{ id: string; mimeType: string }> }
+    if (params.imageUrl?.trim()) {
+      formData.append("media[photo]", params.imageUrl.trim())
+    }
+
+    const res = await fetch(`${BUFFER_REST_ENDPOINT}/updates/create.json`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString(),
+      signal: controller.signal,
+    })
+
+    const json = await res.json() as {
+      success?: boolean
       message?: string
+      updates?: Array<{ id: string; text: string }>
     }
-  }>(accessToken, buildCreatePostMutation(), { input })
 
-  if (data.createPost.message) {
-    // MutationError
-    return { success: false, message: data.createPost.message }
-  }
+    if (!res.ok || !json.success) {
+      return {
+        success: false,
+        message: json.message || `Buffer API HTTP ${res.status}`,
+      }
+    }
 
-  return {
-    success: true,
-    post: data.createPost.post ?? undefined,
+    const firstUpdate = json.updates?.[0]
+    return {
+      success: true,
+      post: firstUpdate ? { id: firstUpdate.id, text: firstUpdate.text } : undefined,
+    }
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error(`Buffer API Timeout: Keine Antwort innerhalb von ${API_TIMEOUT_MS / 1000}s.`)
+    }
+    throw err
+  } finally {
+    clearTimeout(timer)
   }
 }
 

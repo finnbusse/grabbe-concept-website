@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { createBufferPost, type BufferCreatePostParams } from "@/lib/buffer"
 
 // ============================================================================
-// POST – Publish a post via Buffer (GraphQL API)
+// POST – Publish a post via Buffer (REST API)
 // ============================================================================
 
 export async function POST(request: NextRequest) {
@@ -76,17 +76,16 @@ export async function POST(request: NextRequest) {
     )
   }
 
-  // Determine schedule time
+  // Determine schedule time – only set dueAt for scheduled posts, not for "now"
   const dueAt = scheduled_at
     ? scheduled_at
     : now !== false
-      ? new Date().toISOString()
+      ? undefined   // REST API uses now=true instead of a dueAt timestamp
       : undefined
 
-  // Create post for each selected channel
-  const results: Array<{ channelId: string; success: boolean; postId?: string; error?: string }> = []
-
-  for (const channelId of channel_ids) {
+  // Create post for each selected channel — in parallel to avoid
+  // serverless function timeouts when there are multiple channels.
+  const promises = channel_ids.map(async (channelId) => {
     try {
       const params: BufferCreatePostParams = {
         text: text.trim(),
@@ -96,17 +95,19 @@ export async function POST(request: NextRequest) {
       }
 
       const result = await createBufferPost(token, params)
-      results.push({
+      return {
         channelId,
         success: result.success,
         postId: result.post?.id,
         error: result.message,
-      })
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unbekannter Fehler"
-      results.push({ channelId, success: false, error: message })
+      return { channelId, success: false, error: message }
     }
-  }
+  })
+
+  const results = await Promise.all(promises)
 
   const successCount = results.filter((r) => r.success).length
   const allSucceeded = successCount === results.length

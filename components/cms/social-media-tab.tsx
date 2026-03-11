@@ -268,11 +268,21 @@ export default function SocialMediaTab() {
         body.scheduled_at = new Date(scheduledAt).toISOString()
       }
 
-      const res = await fetch("/api/social-media/publish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      })
+      // Client-side timeout to prevent hanging forever if the server doesn't respond
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 30_000)
+
+      let res: Response
+      try {
+        res = await fetch("/api/social-media/publish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        })
+      } finally {
+        clearTimeout(timer)
+      }
 
       const data = await res.json()
       if (res.ok && data.success) {
@@ -286,7 +296,7 @@ export default function SocialMediaTab() {
         toast.error(data.error || data.message || "Post konnte nicht erstellt werden.")
       }
     } catch {
-      toast.error("Netzwerkfehler beim Veröffentlichen.")
+      toast.error("Netzwerk-/Timeout-Fehler beim Veröffentlichen. Bitte versuche es erneut.")
     } finally {
       setPublishing(false)
     }
