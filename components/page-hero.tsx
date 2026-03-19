@@ -1,20 +1,12 @@
 import Image from "next/image"
+import { EditorialReveal, SplitRevealHeadline } from "@/components/cinematic-primitives"
 
-// ─── ASCII art fallback generator ──────────────────────────────────────────
-
-/** Simple DJB2-style hash for deterministic seeding */
 function djb2(str: string): number {
   let h = 5381
-  for (let i = 0; i < str.length; i++) {
-    h = Math.imul(h, 33) ^ str.charCodeAt(i)
-  }
+  for (let i = 0; i < str.length; i++) h = Math.imul(h, 33) ^ str.charCodeAt(i)
   return h >>> 0
 }
 
-/**
- * Generate a deterministic ASCII art grid for the decorative right panel.
- * Uses denser glyph set and more visible patterns.
- */
 function generateAsciiGrid(seed: string, cols = 56, rows = 16): string {
   const h = djb2(seed)
   const glyphs = ["·", ":", ".", "+", "×", "◇", "○", "▪", "▫", "◦", "∘", "⊙"]
@@ -32,18 +24,10 @@ function generateAsciiGrid(seed: string, cols = 56, rows = 16): string {
   return lines.join("\n")
 }
 
-// ─── Component ──────────────────────────────────────────────────────────────
-
 interface PageHeroProps {
-  /** Main heading displayed on the hero */
   title: string
-  /** Optional small label shown above the title (uppercase tracking) */
   label?: string
-  /** Optional subtitle shown below the title */
   subtitle?: string
-  /**
-   * Optional hero image URL shown in the decorative right panel instead of ASCII art.
-   */
   imageUrl?: string
 }
 
@@ -51,60 +35,47 @@ export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
   const ascii = imageUrl ? "" : generateAsciiGrid(title)
 
   return (
-    <section className="border-b border-border bg-background">
-      <div className="mx-auto max-w-7xl px-4 pb-12 pt-24 sm:pt-28 lg:px-8 lg:py-16">
-        <div className="flex items-center justify-between gap-8">
-
-          {/* ── Left: text ── */}
-          <div className="min-w-0 flex-1">
+    <section className="cinematic-section overflow-hidden border-b border-border/60">
+      <div className="cinematic-container">
+        <div className="cinematic-panel grid gap-8 px-6 py-8 md:grid-cols-[minmax(0,1fr)_minmax(280px,0.85fr)] md:px-10 md:py-12 lg:px-12 lg:py-14">
+          <div className="flex min-w-0 flex-col justify-center">
             {label && (
-              <p className="mb-2 text-xs font-sub uppercase tracking-[0.22em] text-primary">
+              <EditorialReveal className="text-[11px] uppercase tracking-[0.28em] text-primary">
                 {label}
-              </p>
+              </EditorialReveal>
             )}
-            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl text-balance">
-              {title}
-            </h1>
+            <EditorialReveal delay={120}>
+              <h1 className="mt-3 font-display text-4xl tracking-[-0.05em] text-foreground md:text-5xl lg:text-6xl text-balance">
+                <SplitRevealHeadline text={title} />
+              </h1>
+            </EditorialReveal>
             {subtitle && (
-              <p className="mt-3 max-w-xl text-base text-muted-foreground leading-relaxed">
+              <EditorialReveal delay={220} className="mt-5 max-w-2xl text-base leading-8 text-muted-foreground">
                 {subtitle}
-              </p>
+              </EditorialReveal>
             )}
           </div>
 
-          {/* ── Right: decorative / hero image panel (~50% width) ── */}
-          <div
-            className="hidden sm:block shrink-0 w-[45%] md:w-[48%] lg:w-[50%] h-48 md:h-60 lg:h-72 overflow-hidden relative"
-            aria-hidden={!imageUrl}
-          >
+          <EditorialReveal delay={280} className="relative min-h-[16rem] overflow-hidden rounded-[calc(var(--surface-radius)-0.5rem)] border border-border/60 bg-gradient-to-br from-primary/12 via-primary/5 to-transparent">
             {imageUrl ? (
               <Image
                 src={imageUrl}
                 alt=""
                 fill
-                className="object-cover rounded-lg"
-                sizes="(min-width: 1024px) 50vw, (min-width: 768px) 48vw, 45vw"
+                className="object-cover"
+                sizes="(min-width: 1024px) 40vw, 100vw"
               />
             ) : (
-              <div
-                className="absolute inset-0 rounded-lg"
-                style={{
-                  background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 50%, hsl(var(--primary) / 0.4) 100%)",
-                }}
-              >
-                {/* ASCII texture */}
-                <pre className="absolute inset-0 p-4 font-mono text-[9px] leading-[1.5] text-white/20 select-none overflow-hidden">
+              <>
+                <pre className="absolute inset-0 overflow-hidden p-5 font-mono text-[9px] leading-[1.5] text-primary/25 select-none">
                   {ascii}
                 </pre>
-                {/* Soft left edge blend */}
-                <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-transparent" />
-              </div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.55),transparent_30%),linear-gradient(135deg,rgba(37,99,235,0.22),transparent_60%)]" />
+              </>
             )}
-          </div>
-
+          </EditorialReveal>
         </div>
       </div>
     </section>
   )
 }
-

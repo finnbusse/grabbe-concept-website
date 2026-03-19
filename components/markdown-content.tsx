@@ -15,7 +15,7 @@ export function MarkdownContent({ content }: { content: string }) {
     if (currentParagraph.length > 0) {
       const text = currentParagraph.join(" ")
       if (text.trim()) {
-        elements.push(<p key={key++} className="text-muted-foreground leading-relaxed mb-4">{renderInline(text)}</p>)
+        elements.push(<p key={key++} className="text-muted-foreground leading-8 mb-4 text-[1.02rem]">{renderInline(text)}</p>)
       }
       currentParagraph = []
     }
@@ -93,17 +93,17 @@ export function MarkdownContent({ content }: { content: string }) {
     // Headings
     if (trimmed.startsWith("### ")) {
       flushParagraph()
-      elements.push(<h3 key={key++} className="font-display text-lg font-semibold mt-8 mb-3">{renderInline(trimmed.slice(4))}</h3>)
+      elements.push(<h3 key={key++} className="font-display text-2xl tracking-[-0.03em] mt-10 mb-3">{renderInline(trimmed.slice(4))}</h3>)
       continue
     }
     if (trimmed.startsWith("## ")) {
       flushParagraph()
-      elements.push(<h2 key={key++} className="font-display text-xl font-bold mt-8 mb-3">{renderInline(trimmed.slice(3))}</h2>)
+      elements.push(<h2 key={key++} className="font-display text-3xl tracking-[-0.04em] mt-12 mb-4">{renderInline(trimmed.slice(3))}</h2>)
       continue
     }
     if (trimmed.startsWith("# ")) {
       flushParagraph()
-      elements.push(<h1 key={key++} className="font-display text-2xl font-bold mt-8 mb-4">{renderInline(trimmed.slice(2))}</h1>)
+      elements.push(<h1 key={key++} className="font-display text-4xl tracking-[-0.05em] mt-12 mb-5">{renderInline(trimmed.slice(2))}</h1>)
       continue
     }
 
@@ -111,7 +111,7 @@ export function MarkdownContent({ content }: { content: string }) {
     if (trimmed.startsWith("> ")) {
       flushParagraph()
       elements.push(
-        <blockquote key={key++} className="border-l-4 border-primary pl-4 my-4 text-muted-foreground italic">
+        <blockquote key={key++} className="border-l-2 border-primary/60 pl-5 py-1 my-6 text-muted-foreground italic text-lg">
           {renderInline(trimmed.slice(2))}
         </blockquote>
       )
@@ -153,5 +153,5 @@ export function MarkdownContent({ content }: { content: string }) {
 
   flushParagraph()
 
-  return <div>{elements}</div>
+  return <div className="cinematic-richtext">{elements}</div>
 }

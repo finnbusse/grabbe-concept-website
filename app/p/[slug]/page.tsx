@@ -15,6 +15,7 @@ import {
   JsonLd,
 } from "@/lib/seo"
 import { AnimateOnScroll } from "@/components/animate-on-scroll"
+import { CinematicHeroFrame, DepthLayer, EditorialReveal, SplitRevealHeadline } from "@/components/cinematic-primitives"
 
 export const revalidate = 300
 
@@ -101,55 +102,48 @@ function PresentationHero({ block, title, subtitle }: {
   const ctaUrl = block?.ctaUrl
 
   return (
-    <section className="relative flex flex-col bg-background overflow-hidden">
-      <div className="relative w-full overflow-hidden rounded-b-[1.5rem] sm:rounded-b-[2rem] md:rounded-b-[3rem] h-[60vh] sm:h-auto sm:aspect-[16/9] lg:aspect-[21/9]">
-        {imageUrl ? (
-          <div className="absolute inset-0">
-            <img
-              src={imageUrl}
-              alt=""
-              className="h-full w-full object-cover"
+    <section className="relative overflow-hidden bg-background">
+      <CinematicHeroFrame contentClassName="flex h-full flex-col justify-end">
+        <div className="absolute inset-0">
+          {imageUrl ? (
+            <DepthLayer speed={0.14} className="absolute inset-0 h-full w-full">
+              <img src={imageUrl} alt="" className="h-full w-full object-cover" />
+            </DepthLayer>
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{
+                background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 50%, hsl(var(--primary) / 0.4) 100%)",
+              }}
             />
-          </div>
-        ) : (
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 50%, hsl(var(--primary) / 0.4) 100%)",
-            }}
-          />
-        )}
-        {/* Overlay for readability */}
-        {imageUrl && <div className="absolute inset-0 bg-black/30" />}
+          )}
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,14,28,0.14),rgba(6,14,28,0.6))]" />
+        </div>
 
-        {/* Content overlay -- bottom left */}
-        <div className="absolute inset-0 z-10 flex flex-col justify-end p-4 pb-8 sm:p-6 md:p-10 lg:p-14">
-          <h1
-            className="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl text-white leading-[1.1] tracking-tight"
-            style={{ textShadow: "0 2px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4)" }}
-          >
-            {heading}
+        <div className="relative z-10 max-w-4xl">
+          <EditorialReveal className="mb-4 inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] uppercase tracking-[0.3em] text-white/76 backdrop-blur-md">
+            Präsentation
+          </EditorialReveal>
+          <h1 className="font-display text-4xl leading-[0.96] tracking-[-0.05em] text-white sm:text-5xl lg:text-7xl">
+            <SplitRevealHeadline text={heading} />
           </h1>
           {sub && (
-            <p
-              className="mt-2 sm:mt-3 max-w-md text-white/90 text-xs sm:text-sm leading-relaxed font-sans"
-              style={{ textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
-            >
+            <EditorialReveal delay={200} className="mt-5 max-w-2xl text-sm leading-7 text-white/84 sm:text-base">
               {sub}
-            </p>
+            </EditorialReveal>
           )}
           {ctaLabel && ctaUrl && (
-            <div className="mt-4 sm:mt-5">
+            <EditorialReveal delay={320} className="mt-7">
               <Link
                 href={ctaUrl}
-                className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-primary shadow-lg transition-all hover:bg-white hover:shadow-xl"
+                className="hover-lift inline-flex items-center gap-2 rounded-full bg-white/95 px-5 py-3 text-sm font-medium text-primary shadow-lg transition-all hover:bg-white hover:shadow-xl"
               >
                 {ctaLabel}
               </Link>
-            </div>
+            </EditorialReveal>
           )}
         </div>
-      </div>
+      </CinematicHeroFrame>
     </section>
   )
 }
@@ -291,11 +285,11 @@ function PresentationBlockRenderer({ block }: { block: PresentationBlock }) {
     case "feature_cards":
       return (
         <AnimateOnScroll>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="cinematic-card-grid grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {block.cards.map((card, i) => (
               <div
                 key={i}
-                className="rounded-2xl border border-border bg-card p-6"
+                className="cinematic-panel hover-lift p-6"
               >
                 <h3 className="font-display text-lg font-semibold text-card-foreground">
                   {card.heading}
@@ -441,7 +435,7 @@ export default async function PresentationPage({
 
   return (
     <SiteLayout>
-      <main>
+      <main className="cinematic-shell">
         <JsonLd data={creativeWorkJsonLd} />
         <JsonLd data={webPageJsonLd} />
 
@@ -460,14 +454,14 @@ export default async function PresentationPage({
         />
 
         {/* Content blocks */}
-        <article className="mx-auto max-w-4xl space-y-12 px-4 py-12 lg:px-8 lg:py-16">
+        <article className="cinematic-container space-y-12 py-12 lg:py-16 max-w-4xl">
           {nonHeroBlocks.map((block) => (
             <PresentationBlockRenderer key={block.id} block={block} />
           ))}
         </article>
 
         {/* Footer actions */}
-        <div className="mx-auto max-w-4xl border-t border-border px-4 py-6 lg:px-8">
+        <div className="cinematic-container max-w-4xl border-t border-border/60 py-6">
           <div className="flex items-center justify-between">
             <Button variant="outline" size="sm" asChild>
               <Link href="/aktuelles">

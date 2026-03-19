@@ -133,7 +133,7 @@ export default async function DynamicPage({ params }: Props) {
 
   return (
     <SiteLayout>
-      <main>
+      <main className="cinematic-shell">
         <JsonLd data={webPageJsonLd} />
         <PageHero
           title={page.title}
@@ -143,7 +143,7 @@ export default async function DynamicPage({ params }: Props) {
         />
         <Breadcrumbs items={[{ name: page.title, href: fullPath }]} />
 
-        <section className="mx-auto max-w-6xl px-4 py-28 lg:py-36 lg:px-8">
+        <section className="cinematic-container py-20 lg:py-28 max-w-6xl">
           {useBlocks ? (
             <BlockContentRenderer content={page.content} />
           ) : (

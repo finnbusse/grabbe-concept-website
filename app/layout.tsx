@@ -16,6 +16,7 @@ import { getDesignSettings, DESIGN_DEFAULTS } from "@/lib/settings"
 import type { DesignSettings } from "@/lib/settings"
 import { tailwindToHex } from "@/lib/design-settings"
 import "./globals.css"
+import { CinematicPage } from "@/components/cinematic-primitives"
 
 const _instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
@@ -226,7 +227,7 @@ export default async function RootLayout({
       <body className="font-sans antialiased">
         <JsonLd data={orgJsonLd} />
         <JsonLd data={siteJsonLd} />
-        {children}
+        <CinematicPage>{children}</CinematicPage>
         <SpeedInsights />
       </body>
       <Script src="https://scripts.simpleanalyticscdn.com/latest.js" />

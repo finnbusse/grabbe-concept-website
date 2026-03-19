@@ -77,7 +77,7 @@ export default async function HomePage() {
 
   return (
     <SiteLayout>
-      <main>
+      <main className="cinematic-shell">
         <HeroSection content={pageContents['homepage-hero']} />
         <WelcomeSection content={pageContents['homepage-welcome']} />
         <NewsSection posts={postsWithProfiles} content={pageContents['homepage-news']} />

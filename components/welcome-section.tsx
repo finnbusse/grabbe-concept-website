@@ -55,8 +55,8 @@ export function WelcomeSection({ content }: { content?: Record<string, unknown> 
     },
   ]
   return (
-    <section id="welcome" className="relative py-28 lg:py-36 bg-mesh-blue">
-      <div className="mx-auto max-w-6xl px-4 lg:px-8">
+    <section id="welcome" className="cinematic-section relative bg-mesh-blue">
+      <div className="cinematic-container">
         <AnimateOnScroll>
           <div className="mx-auto max-w-2xl text-center">
             <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
@@ -74,10 +74,10 @@ export function WelcomeSection({ content }: { content?: Record<string, unknown> 
           </div>
         </AnimateOnScroll>
 
-        <div className="mt-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="cinematic-card-grid mt-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {dynamicValues.map((item, i) => (
             <AnimateOnScroll key={item.title} animation="fade-in-up" delay={i * 0.12}>
-              <div className="group relative h-full rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.06] hover:-translate-y-1">
+              <div className="group hover-lift relative h-full rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.06]">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-all duration-500 group-hover:bg-primary group-hover:text-white group-hover:rotate-3 group-hover:scale-110">
                   <item.icon className="h-5 w-5" />
                 </div>

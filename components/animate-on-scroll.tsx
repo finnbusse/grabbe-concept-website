@@ -13,7 +13,6 @@ interface AnimateOnScrollProps {
 export function AnimateOnScroll({
   children,
   className = "",
-  animation = "blur-in",
   delay = 0,
   threshold = 0.1,
 }: AnimateOnScrollProps) {
@@ -28,23 +27,18 @@ export function AnimateOnScroll({
           observer.unobserve(entry.target)
         }
       },
-      { threshold, rootMargin: "0px 0px -40px 0px" }
+      { threshold, rootMargin: "0px 0px -10% 0px" }
     )
 
-    if (ref.current) {
-      observer.observe(ref.current)
-    }
-
+    if (ref.current) observer.observe(ref.current)
     return () => observer.disconnect()
   }, [threshold])
-
-  const animationClass = isVisible ? `animate-${animation}` : "opacity-0"
 
   return (
     <div
       ref={ref}
-      className={`${animationClass} ${className}`}
-      style={{ animationDelay: isVisible ? `${delay}s` : undefined }}
+      className={`${isVisible ? "editorial-reveal" : "opacity-0"} ${className}`}
+      style={isVisible ? { animationDelay: `${delay}s` } : undefined}
     >
       {children}
     </div>

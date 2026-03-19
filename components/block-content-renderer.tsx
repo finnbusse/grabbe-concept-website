@@ -26,7 +26,7 @@ export async function BlockContentRenderer({ content }: { content: string }) {
   }
 
   return (
-    <div>
+    <div className="cinematic-richtext">
       {blocks.map((block) => {
         if (block.type === 'tagged-events' || block.type === 'tagged-downloads' || block.type === 'tagged-posts') {
           return <TaggedBlockRenderer key={block.id} block={block} />
@@ -93,7 +93,7 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
           {events.map((ev) => {
             const d = new Date(ev.starts_at)
             return (
-              <div key={ev.id} className="group flex gap-4 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]">
+              <div key={ev.id} className="group hover-lift flex gap-4 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]">
                 <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <span className="text-[10px] font-medium uppercase leading-none">{monthNamesShort[d.getMonth()]}</span>
                   <span className="text-lg font-bold leading-none mt-0.5">{d.getDate()}</span>
@@ -149,7 +149,7 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
               href={doc.file_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm px-4 py-3 text-sm transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]"
+              className="group hover-lift flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm px-4 py-3 text-sm transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]"
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-white">
                 <FileText className="h-4 w-4" />
@@ -200,7 +200,7 @@ async function TaggedBlockRenderer({ block }: { block: ContentBlock }) {
             <a
               key={post.id}
               href={`/aktuelles/${post.slug}`}
-              className="group block rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]"
+              className="group hover-lift block rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]"
             >
               <h3 className="font-display text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{post.title}</h3>
               {post.excerpt && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{post.excerpt}</p>}
@@ -234,9 +234,9 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
     case 'cards': {
       const cards = (block.data.cards as Array<{ title: string; text: string }>) || []
       return (
-        <div className={`mb-12 grid gap-6 ${cards.length <= 2 ? 'sm:grid-cols-2' : cards.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
+        <div className={`cinematic-card-grid mb-12 grid gap-6 ${cards.length <= 2 ? 'sm:grid-cols-2' : cards.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
           {cards.map((card, i) => (
-            <div key={i} className="group rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.06] hover:-translate-y-1">
+            <div key={i} className="group hover-lift rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8 transition-all duration-500 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.06]">
               <h3 className="font-display text-xl text-foreground">{card.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{card.text}</p>
             </div>
@@ -281,7 +281,7 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       return (
         <div className="mb-12">
           {heading && <h3 className="font-display text-xl font-semibold mb-4">{heading}</h3>}
-          <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-8">
+          <div className="cinematic-panel p-8">
             <ul className="space-y-3">
               {items.filter(Boolean).map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
@@ -330,7 +330,7 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
             href={fileUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm px-4 py-3 text-sm transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]"
+            className="group hover-lift flex items-center gap-3 rounded-xl border border-border/60 bg-card/80 backdrop-blur-sm px-4 py-3 text-sm transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06]"
           >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-white">
               <FileText className="h-4 w-4" />
