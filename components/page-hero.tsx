@@ -1,4 +1,8 @@
+"use client"
+
 import Image from "next/image"
+import { motion, useScroll, useTransform } from "framer-motion"
+import { useRef } from "react"
 
 // ─── ASCII art fallback generator ──────────────────────────────────────────
 
@@ -49,14 +53,27 @@ interface PageHeroProps {
 
 export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
   const ascii = imageUrl ? "" : generateAsciiGrid(title)
+  const ref = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  })
+
+  // Subtle parallax effect on the right panel
+  const y = useTransform(scrollYProgress, [0, 1], [0, 60])
 
   return (
-    <section className="border-b border-border bg-background">
+    <section ref={ref} className="border-b border-border bg-background overflow-hidden relative">
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-24 sm:pt-28 lg:px-8 lg:py-16">
         <div className="flex items-center justify-between gap-8">
 
           {/* ── Left: text ── */}
-          <div className="min-w-0 flex-1">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            className="min-w-0 flex-1 relative z-10"
+          >
             {label && (
               <p className="mb-2 text-xs font-sub uppercase tracking-[0.22em] text-primary">
                 {label}
@@ -70,10 +87,14 @@ export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
                 {subtitle}
               </p>
             )}
-          </div>
+          </motion.div>
 
           {/* ── Right: decorative / hero image panel (~50% width) ── */}
-          <div
+          <motion.div
+            style={{ y }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             className="hidden sm:block shrink-0 w-[45%] md:w-[48%] lg:w-[50%] h-48 md:h-60 lg:h-72 overflow-hidden relative"
             aria-hidden={!imageUrl}
           >
@@ -100,7 +121,7 @@ export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
                 <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-transparent" />
               </div>
             )}
-          </div>
+          </motion.div>
 
         </div>
       </div>
