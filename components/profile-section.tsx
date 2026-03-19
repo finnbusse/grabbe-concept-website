@@ -58,6 +58,7 @@ export function ProfileSection({ content }: { content?: Record<string, unknown> 
     ...p,
     title: (c[`profile${i + 1}_title`] as string) || p.title,
     tag: (c[`profile${i + 1}_tag`] as string) || p.tag,
+    image: (c[`profile${i + 1}_image`] as string) || p.image,
     description: (c[`profile${i + 1}_description`] as string) || p.description,
   }))
   return (
