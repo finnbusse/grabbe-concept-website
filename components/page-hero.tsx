@@ -1,4 +1,8 @@
+"use client"
+
 import Image from "next/image"
+import { motion } from "framer-motion"
+import { ease, duration as dur } from "@/lib/motion"
 
 // ─── ASCII art fallback generator ──────────────────────────────────────────
 
@@ -47,35 +51,75 @@ interface PageHeroProps {
   imageUrl?: string
 }
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.05 },
+  },
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: dur.slow, ease: ease.cinematic },
+  },
+}
+
+const panelVariants = {
+  hidden: { opacity: 0, x: 24 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: dur.cinematic, ease: ease.editorial },
+  },
+}
+
 export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
   const ascii = imageUrl ? "" : generateAsciiGrid(title)
 
   return (
     <section className="border-b border-border bg-background">
       <div className="mx-auto max-w-7xl px-4 pb-12 pt-24 sm:pt-28 lg:px-8 lg:py-16">
-        <div className="flex items-center justify-between gap-8">
-
+        <motion.div
+          className="flex items-center justify-between gap-8"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
           {/* ── Left: text ── */}
           <div className="min-w-0 flex-1">
             {label && (
-              <p className="mb-2 text-xs font-sub uppercase tracking-[0.22em] text-primary">
+              <motion.p
+                className="mb-2 text-xs font-sub uppercase tracking-[0.22em] text-primary"
+                variants={itemVariants}
+              >
                 {label}
-              </p>
+              </motion.p>
             )}
-            <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl text-balance">
+            <motion.h1
+              className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl text-balance"
+              variants={itemVariants}
+            >
               {title}
-            </h1>
+            </motion.h1>
             {subtitle && (
-              <p className="mt-3 max-w-xl text-base text-muted-foreground leading-relaxed">
+              <motion.p
+                className="mt-3 max-w-xl text-base text-muted-foreground leading-relaxed"
+                variants={itemVariants}
+              >
                 {subtitle}
-              </p>
+              </motion.p>
             )}
           </div>
 
           {/* ── Right: decorative / hero image panel (~50% width) ── */}
-          <div
+          <motion.div
             className="hidden sm:block shrink-0 w-[45%] md:w-[48%] lg:w-[50%] h-48 md:h-60 lg:h-72 overflow-hidden relative"
             aria-hidden={!imageUrl}
+            variants={panelVariants}
           >
             {imageUrl ? (
               <Image
@@ -100,9 +144,8 @@ export function PageHero({ title, label, subtitle, imageUrl }: PageHeroProps) {
                 <div className="absolute inset-0 bg-gradient-to-r from-background/20 via-transparent to-transparent" />
               </div>
             )}
-          </div>
-
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </section>
   )
