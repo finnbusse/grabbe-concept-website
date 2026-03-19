@@ -2,155 +2,145 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, ArrowDown } from "lucide-react"
-import { useEffect, useState } from "react"
+import { ArrowDown, ArrowRight } from "lucide-react"
 import { trackEvent } from "@/lib/analytics"
-
-function TypingText({ text, delay = 0, speed = 40 }: { text: string; delay?: number; speed?: number }) {
-  const [displayed, setDisplayed] = useState("")
-  const [started, setStarted] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setStarted(true), delay)
-    return () => clearTimeout(timer)
-  }, [delay])
-
-  useEffect(() => {
-    if (!started) return
-    let i = 0
-    const interval = setInterval(() => {
-      setDisplayed(text.slice(0, i + 1))
-      i++
-      if (i >= text.length) clearInterval(interval)
-    }, speed)
-    return () => clearInterval(interval)
-  }, [started, text, speed])
-
-  // Reserve space using min-height to prevent layout shift
-  return (
-    <span className="inline-block" style={{ minWidth: started ? 'auto' : `${text.length * 0.5}em` }}>
-      {displayed}
-      {started && displayed.length < text.length && (
-        <span className="inline-block w-[2px] h-[1em] bg-white align-middle ml-0.5 animate-pulse" />
-      )}
-    </span>
-  )
-}
+import {
+  CinematicHeroFrame,
+  DepthLayer,
+  EditorialReveal,
+  SplitRevealHeadline,
+} from "@/components/cinematic-primitives"
 
 export function HeroSection({ content }: { content?: Record<string, unknown> }) {
   const c = content || {}
-  const headline1 = (c.headline1 as string) || 'Deine Talente.'
-  const headline2 = (c.headline2 as string) || 'Deine Bühne.'
-  const headline3 = (c.headline3 as string) || 'Dein Grabbe.'
-  const subtitle = (c.subtitle as string) || 'Wir fördern Deine Talente und stärken Deine Persönlichkeit.'
-  const cta1Text = (c.cta1_text as string) || 'Anmeldung Klasse 5'
-  const cta1Link = (c.cta1_link as string) || '/unsere-schule/anmeldung'
-  const cta2Text = (c.cta2_text as string) || 'Profilprojekte entdecken'
-  const cta2Link = (c.cta2_link as string) || '/unsere-schule/profilprojekte'
-  const scrollText = (c.scroll_text as string) || 'Entdecken'
-  const heroImageUrl = (c.hero_image_url as string) || 'https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-light-JYVqm0zAQBXijY3qt5X7egYP4fmJow.webp'
-  const heroImageDarkUrl = (c.hero_image_dark_url as string) || 'https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-dark-9y46Mdl0OXCy6CpagXTisMr7j5Tcl8.webp'
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const headline1 = (c.headline1 as string) || "Deine Talente."
+  const headline2 = (c.headline2 as string) || "Deine Bühne."
+  const headline3 = (c.headline3 as string) || "Dein Grabbe."
+  const subtitle =
+    (c.subtitle as string) ||
+    "Wir fördern Deine Talente und stärken Deine Persönlichkeit."
+  const cta1Text = (c.cta1_text as string) || "Anmeldung Klasse 5"
+  const cta1Link = (c.cta1_link as string) || "/unsere-schule/anmeldung"
+  const cta2Text = (c.cta2_text as string) || "Profilprojekte entdecken"
+  const cta2Link = (c.cta2_link as string) || "/unsere-schule/profilprojekte"
+  const scrollText = (c.scroll_text as string) || "Entdecken"
+  const heroImageUrl =
+    (c.hero_image_url as string) ||
+    "https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-light-JYVqm0zAQBXijY3qt5X7egYP4fmJow.webp"
+  const heroImageDarkUrl =
+    (c.hero_image_dark_url as string) ||
+    "https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-dark-9y46Mdl0OXCy6CpagXTisMr7j5Tcl8.webp"
 
   return (
-    <section className="relative flex flex-col bg-background overflow-hidden">
-      {/* Hero image -- full width, flush to top, only rounded at bottom */}
-      {/* On mobile the explicit height fills almost the full viewport, leaving ~5.5rem (≈88 px)
-          for the scroll indicator below so both the rounded corners and "Entdecken" arrow
-          are visible without scrolling.  sm+ screens revert to the original aspect-ratio layout. */}
-      <div className="relative w-full overflow-hidden rounded-b-[1.5rem] sm:rounded-b-[2rem] md:rounded-b-[3rem] h-[calc(100svh-5.5rem)] sm:h-auto sm:aspect-[16/9] lg:aspect-[21/9]">
-        {/* Light mode hero image (default) */}
-        <div className="hero-image-light absolute inset-0">
-          <Image
-            src={heroImageUrl}
-            alt="Grabbe-Gymnasium Schulgebäude"
-            fill
-            className="object-cover"
-            priority
-            fetchPriority="high"
-            sizes="100vw"
-          />
-        </div>
-
-        {/* Dark / night-themed hero image (shown via prefers-color-scheme: dark CSS) */}
-        <div className="hero-image-dark absolute inset-0">
-          <Image
-            src={heroImageDarkUrl}
-            alt="Grabbe-Gymnasium Schulgebäude bei Nacht"
-            fill
-            className="object-cover"
-            priority
-            fetchPriority="high"
-            sizes="100vw"
-          />
-        </div>
-
-        {/* Content overlay -- bottom left, text has its own shadow for readability, NO image darkening */}
-        <div
-          className="absolute inset-0 z-10 flex flex-col justify-end p-4 pb-8 sm:p-6 md:p-10 lg:p-14"
-          style={{ opacity: mounted ? 1 : 0, transition: "opacity 0.5s ease" }}
-        >
-          {/* Headline */}
-          <h1
-            className={`font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl text-white leading-[1.1] tracking-tight transition-all duration-700 delay-200 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}
-            style={{ textShadow: "0 2px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4)" }}
-          >
-            <span className="block">{headline1}</span>
-            <span className="block">{headline2}</span>
-            <span className="block italic text-[hsl(200,85%,80%)]" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4)" }}>{headline3}</span>
-          </h1>
-
-          {/* Subtitle with typing animation */}
-          <p
-            className={`mt-2 sm:mt-3 max-w-md text-white/90 text-xs sm:text-sm leading-relaxed font-sans transition-all duration-700 delay-500 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
-            style={{ textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
-          >
-            <TypingText
-              text={subtitle}
-              delay={1200}
-              speed={30}
-            />
-          </p>
-
-          {/* CTA buttons */}
-          <div className={`mt-4 sm:mt-5 flex flex-col sm:flex-row items-start gap-2 sm:gap-3 transition-all duration-700 delay-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-            <Link
-              href={cta1Link}
-              onClick={() => trackEvent("hero_cta_click", { label: cta1Text, href: cta1Link })}
-              className="group flex items-center gap-2 rounded-full bg-white/95 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-primary shadow-lg transition-all hover:bg-white hover:shadow-xl w-full sm:w-auto justify-center sm:justify-start"
-            >
-              {cta1Text}
-              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              href={cta2Link}
-              onClick={() => trackEvent("hero_cta_click", { label: cta2Text, href: cta2Link })}
-              className="group flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-md border border-white/25 px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-white shadow-lg transition-all hover:bg-white/25 w-full sm:w-auto justify-center sm:justify-start"
-            >
-              {cta2Text}
-            </Link>
+    <section className="relative bg-background">
+      <CinematicHeroFrame contentClassName="flex h-full flex-col justify-between">
+        <div className="absolute inset-0">
+          <div className="hero-image-light absolute inset-0">
+            <DepthLayer speed={0.12} className="absolute inset-0 h-full w-full">
+              <Image
+                src={heroImageUrl}
+                alt="Grabbe-Gymnasium Schulgebäude"
+                fill
+                className="object-cover"
+                priority
+                fetchPriority="high"
+                sizes="100vw"
+              />
+            </DepthLayer>
           </div>
+          <div className="hero-image-dark absolute inset-0">
+            <DepthLayer speed={0.18} className="absolute inset-0 h-full w-full">
+              <Image
+                src={heroImageDarkUrl}
+                alt="Grabbe-Gymnasium Schulgebäude bei Nacht"
+                fill
+                className="object-cover"
+                priority
+                fetchPriority="high"
+                sizes="100vw"
+              />
+            </DepthLayer>
+          </div>
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,14,28,0.18),rgba(6,14,28,0.62))]" />
+          <div className="absolute inset-x-[12%] top-[14%] h-40 rounded-full bg-white/10 blur-3xl" />
         </div>
-      </div>
 
-      {/* Scroll indicator */}
-      <div className="relative z-10 flex justify-center py-6 sm:py-8">
-        <button
-          onClick={() => {
-            document.getElementById("welcome")?.scrollIntoView({ behavior: "smooth" })
-            trackEvent("hero_scroll_click")
-          }}
-          className="flex flex-col items-center gap-2 text-muted-foreground/50 hover:text-primary transition-colors"
-          aria-label="Weiter scrollen"
-        >
-          <span className="text-[10px] font-sub uppercase tracking-[0.25em]">{scrollText}</span>
-          <ArrowDown className="h-4 w-4 animate-bounce" />
-        </button>
-      </div>
+        <div className="relative z-10 flex min-h-full flex-col justify-between">
+          <div className="flex-1" />
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(240px,0.55fr)] lg:items-end">
+            <div className="max-w-4xl">
+              <EditorialReveal className="mb-5 inline-flex rounded-full border border-white/18 bg-white/8 px-4 py-2 text-[11px] uppercase tracking-[0.32em] text-white/78 backdrop-blur-md">
+                Premium Bildungserlebnis · Detmold
+              </EditorialReveal>
+              <h1
+                className="max-w-4xl font-display text-4xl leading-[0.95] tracking-[-0.05em] text-white sm:text-5xl md:text-6xl lg:text-7xl xl:text-[6rem]"
+                style={{ textShadow: "0 18px 60px rgba(0,0,0,0.28)" }}
+              >
+                <SplitRevealHeadline text={`${headline1}\n${headline2}`} />
+                <span className="mt-2 block italic text-[hsl(197,100%,89%)]">
+                  <SplitRevealHeadline text={headline3} stagger={120} />
+                </span>
+              </h1>
+              <EditorialReveal
+                delay={240}
+                className="mt-6 max-w-2xl text-sm leading-7 text-white/82 sm:text-base"
+              >
+                {subtitle}
+              </EditorialReveal>
+              <EditorialReveal delay={360} className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href={cta1Link}
+                  onClick={() => trackEvent("hero_cta_click", { label: cta1Text, href: cta1Link })}
+                  className="hover-lift group inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-slate-950 shadow-[0_12px_30px_rgba(255,255,255,0.18)] transition-all hover:bg-white"
+                >
+                  {cta1Text}
+                  <ArrowRight className="h-4 w-4 transition-transform duration-500 group-hover:translate-x-1" />
+                </Link>
+                <Link
+                  href={cta2Link}
+                  onClick={() => trackEvent("hero_cta_click", { label: cta2Text, href: cta2Link })}
+                  className="hover-lift inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-medium text-white backdrop-blur-md transition-all hover:bg-white/16"
+                >
+                  {cta2Text}
+                </Link>
+              </EditorialReveal>
+            </div>
+
+            <EditorialReveal delay={420} className="hidden lg:block">
+              <div className="cinematic-panel border-white/12 bg-black/18 p-6 text-white/75">
+                <p className="text-[10px] uppercase tracking-[0.32em] text-white/46">Warum Grabbe</p>
+                <div className="mt-5 grid gap-4">
+                  {[
+                    "Klarer Fokus auf Talente, Persönlichkeit und Zukunft.",
+                    "Ruhige, hochwertige Informationsarchitektur über alle Seiten hinweg.",
+                    "CMS-Inhalte bleiben kuratiert, lesbar und visuell konsistent.",
+                  ].map((item) => (
+                    <div key={item} className="border-t border-white/12 pt-4 text-sm leading-6 text-white/76">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </EditorialReveal>
+          </div>
+
+          <EditorialReveal delay={520} className="mt-10 flex justify-center pb-2">
+            <button
+              onClick={() => {
+                document.getElementById("welcome")?.scrollIntoView({ behavior: "smooth" })
+                trackEvent("hero_scroll_click")
+              }}
+              className="group inline-flex flex-col items-center gap-3 text-white/66 transition-colors hover:text-white"
+              aria-label="Weiter scrollen"
+            >
+              <span className="text-[10px] uppercase tracking-[0.35em]">{scrollText}</span>
+              <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/18 bg-white/8 backdrop-blur-md transition-all duration-500 group-hover:scale-105 group-hover:bg-white/14">
+                <ArrowDown className="h-4 w-4" />
+              </span>
+            </button>
+          </EditorialReveal>
+        </div>
+      </CinematicHeroFrame>
     </section>
   )
 }
