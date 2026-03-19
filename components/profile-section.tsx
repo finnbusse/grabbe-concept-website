@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Palette, Music, Dumbbell, FlaskConical } from "lucide-react"
 import { AnimateOnScroll } from "./animate-on-scroll"
+import { StaggerReveal, StaggerItem } from "./motion/stagger"
 
 const profiles = [
   {
@@ -63,21 +64,25 @@ export function ProfileSection({ content }: { content?: Record<string, unknown> 
   return (
     <section className="relative py-28 lg:py-36 overflow-hidden bg-mesh-blue">
       <div className="relative mx-auto max-w-6xl px-4 lg:px-8">
-        <AnimateOnScroll>
-          <div className="mx-auto max-w-2xl text-center">
+        <StaggerReveal className="mx-auto max-w-2xl text-center">
+          <StaggerItem>
             <p className="font-pixel text-sm uppercase tracking-[0.4em] text-primary">
               {sectionLabel}
             </p>
+          </StaggerItem>
+          <StaggerItem>
             <h2 className="mt-4 font-display text-4xl md:text-5xl lg:text-6xl tracking-tight text-foreground">
               {sectionHeadline.includes('Dein') ? (
                 <>{sectionHeadline.split('Dein')[0]}<span className="italic text-primary">Dein</span>{sectionHeadline.split('Dein')[1]}</>
               ) : sectionHeadline}
             </h2>
+          </StaggerItem>
+          <StaggerItem>
             <p className="mt-6 text-base leading-relaxed text-muted-foreground max-w-xl mx-auto">
               {sectionDescription}
             </p>
-          </div>
-        </AnimateOnScroll>
+          </StaggerItem>
+        </StaggerReveal>
 
         <div className="mt-16 grid gap-6 md:grid-cols-2">
           {dynamicProfiles.map((profile, i) => (

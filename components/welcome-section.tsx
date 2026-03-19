@@ -2,6 +2,7 @@
 
 import { BookOpen, Users, Sparkles, Heart } from "lucide-react"
 import { AnimateOnScroll } from "./animate-on-scroll"
+import { StaggerReveal, StaggerItem } from "./motion/stagger"
 
 const values = [
   {
@@ -57,22 +58,26 @@ export function WelcomeSection({ content }: { content?: Record<string, unknown> 
   return (
     <section id="welcome" className="relative py-28 lg:py-36 bg-mesh-blue">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
-        <AnimateOnScroll>
-          <div className="mx-auto max-w-2xl text-center">
+        <StaggerReveal className="mx-auto max-w-2xl text-center">
+          <StaggerItem>
             <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
               {label}
             </p>
             <div className="mt-2 divider-line" />
+          </StaggerItem>
+          <StaggerItem>
             <h2 className="mt-6 font-display text-4xl md:text-5xl lg:text-6xl tracking-tight text-foreground">
               {headline.includes('Grabbe') ? (
                 <>{headline.split('Grabbe')[0]}<span className="italic text-primary">Grabbe</span>{headline.split('Grabbe')[1]}</>
               ) : headline}
             </h2>
+          </StaggerItem>
+          <StaggerItem>
             <p className="mt-6 text-base leading-relaxed text-muted-foreground max-w-xl mx-auto">
               {text}
             </p>
-          </div>
-        </AnimateOnScroll>
+          </StaggerItem>
+        </StaggerReveal>
 
         <div className="mt-20 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {dynamicValues.map((item, i) => (

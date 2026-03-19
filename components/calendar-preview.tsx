@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, MapPin, Clock } from "lucide-react"
 import { AnimateOnScroll } from "./animate-on-scroll"
+import { StaggerReveal, StaggerItem } from "./motion/stagger"
 import { formatEventTime } from "@/lib/format-helpers"
 
 interface Event {
@@ -29,22 +30,26 @@ export function CalendarPreview({ events, content }: { events: Event[]; content?
   return (
     <section className="relative py-28 lg:py-36 bg-primary text-primary-foreground overflow-hidden noise-overlay">
       <div className="relative z-10 mx-auto max-w-6xl px-4 lg:px-8">
-        <AnimateOnScroll>
-          <div className="flex items-end justify-between">
-            <div>
+        <div className="flex items-end justify-between">
+          <StaggerReveal>
+            <StaggerItem>
               <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-[hsl(200,90%,80%)]">{sLabel}</p>
+            </StaggerItem>
+            <StaggerItem>
               <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-primary-foreground">
                 {sHeadline.includes('Veranstaltungen') ? (
                   <>{sHeadline.split('Veranstaltungen')[0]}<span className="italic text-[hsl(200,90%,80%)]">Veranstaltungen</span>{sHeadline.split('Veranstaltungen')[1]}</>
                 ) : sHeadline}
               </h2>
-            </div>
+            </StaggerItem>
+          </StaggerReveal>
+          <AnimateOnScroll animation="fade-in" delay={0.2}>
             <Link href="/termine" className="hidden items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-[hsl(200,90%,80%)] hover:text-primary-foreground transition-colors sm:flex group">
               {allLinkText}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
-          </div>
-        </AnimateOnScroll>
+          </AnimateOnScroll>
+        </div>
 
         <div className="mt-12">
           {events.length === 0 ? (

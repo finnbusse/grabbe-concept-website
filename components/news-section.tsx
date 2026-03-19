@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, Calendar } from "lucide-react"
 import { AnimateOnScroll } from "./animate-on-scroll"
+import { StaggerReveal, StaggerItem } from "./motion/stagger"
 
 interface Post {
   id: string
@@ -38,22 +39,26 @@ export function NewsSection({ posts, content }: { posts: Post[]; content?: Recor
   return (
     <section className="relative py-28 lg:py-36 bg-muted/40">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
-        <AnimateOnScroll>
-          <div className="flex items-end justify-between">
-            <div>
+        <div className="flex items-end justify-between">
+          <StaggerReveal>
+            <StaggerItem>
               <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">{sLabel}</p>
+            </StaggerItem>
+            <StaggerItem>
               <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-foreground">
                 {sHeadline.includes('Grabbe') ? (
                   <>{sHeadline.split('Grabbe')[0]}<span className="italic text-primary">Grabbe</span>{sHeadline.split('Grabbe')[1]}</>
                 ) : sHeadline}
               </h2>
-            </div>
+            </StaggerItem>
+          </StaggerReveal>
+          <AnimateOnScroll animation="fade-in" delay={0.25}>
             <Link href="/aktuelles" className="hidden items-center gap-2 font-sub text-xs uppercase tracking-[0.15em] text-primary hover:text-foreground transition-colors sm:flex group">
               {allLinkText}
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
-          </div>
-        </AnimateOnScroll>
+          </AnimateOnScroll>
+        </div>
 
         <div className="mt-12 grid gap-8 lg:grid-cols-5">
           {/* Featured post */}

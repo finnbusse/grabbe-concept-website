@@ -36,12 +36,15 @@ interface AnimateOnScrollProps {
  * Fully backwards-compatible with the previous IntersectionObserver
  * implementation; all existing callers continue to work unchanged.
  *
+ * Default animation is `fade-in-up` — a subtle y-lift with editorial ease.
+ * For section-header stagger sequences use <StaggerReveal> + <StaggerItem>.
+ *
  * Respects the user's `prefers-reduced-motion` preference.
  */
 export function AnimateOnScroll({
   children,
   className = "",
-  animation = "blur-in",
+  animation = "fade-in-up",
   delay = 0,
   threshold = 0.1,
 }: AnimateOnScrollProps) {
@@ -50,7 +53,9 @@ export function AnimateOnScroll({
 
   const inView = useInView(ref, {
     once: true,
-    margin: "0px 0px -60px 0px",
+    // Trigger slightly before the element is fully in view — feels eager
+    // but not rushed.
+    margin: "0px 0px -40px 0px",
     amount: threshold,
   })
 

@@ -55,82 +55,104 @@ export const tween = {
 
 /** Standard scroll-reveal variant presets */
 export const variants: Record<string, Variants> = {
+  /**
+   * Primary scroll-reveal: very subtle y lift with editorial ease.
+   * Used for most content blocks.
+   */
   fadeInUp: {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 12 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: duration.slow, ease: ease.cinematic },
+      transition: { duration: duration.slow, ease: ease.editorial },
     },
   },
   fadeIn: {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { duration: duration.normal, ease: ease.out },
+      transition: { duration: duration.slow, ease: ease.out },
     },
   },
+  /**
+   * Horizontal variants — very restrained offset so they read as
+   * "directional context" rather than a dramatic slide.
+   */
   slideInLeft: {
-    hidden: { opacity: 0, x: -24 },
+    hidden: { opacity: 0, x: -12 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: duration.slow, ease: ease.cinematic },
+      transition: { duration: duration.slow, ease: ease.editorial },
     },
   },
   slideInRight: {
-    hidden: { opacity: 0, x: 24 },
+    hidden: { opacity: 0, x: 12 },
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: duration.slow, ease: ease.cinematic },
+      transition: { duration: duration.slow, ease: ease.editorial },
     },
   },
   scaleIn: {
-    hidden: { opacity: 0, scale: 0.95 },
+    hidden: { opacity: 0, scale: 0.97 },
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: duration.normal, ease: ease.cinematic },
+      transition: { duration: duration.slow, ease: ease.editorial },
     },
   },
+  /**
+   * Soft blur-in — kept for backward compat but values reduced so
+   * it no longer reads as "dramatic". Blur is subtle, y is minimal.
+   */
   blurIn: {
-    hidden: { opacity: 0, filter: "blur(6px)", y: 10 },
+    hidden: { opacity: 0, filter: "blur(3px)", y: 6 },
     visible: {
       opacity: 1,
       filter: "blur(0px)",
       y: 0,
-      transition: { duration: duration.slow, ease: ease.cinematic },
+      transition: { duration: duration.slow, ease: ease.editorial },
     },
   },
   revealUp: {
-    hidden: { opacity: 0, y: 28 },
+    hidden: { opacity: 0, y: 16 },
     visible: {
       opacity: 1,
       y: 0,
       transition: { duration: duration.cinematic, ease: ease.editorial },
     },
   },
-  /** Stagger container — children animate in sequence */
-  container: {
-    hidden: { opacity: 0 },
+  /**
+   * Section-header stagger item.
+   * Used inside StaggerReveal containers for label → headline → text sequences.
+   * Slightly more vertical lift than fadeInUp so the cascade is perceptible.
+   */
+  headerItem: {
+    hidden: { opacity: 0, y: 14 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.05 },
+      y: 0,
+      transition: { duration: 0.75, ease: ease.editorial },
+    },
+  },
+  /** Stagger container — children animate in sequence */
+  container: {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.08, delayChildren: 0.05 },
     },
   },
   containerFast: {
-    hidden: { opacity: 0 },
+    hidden: {},
     visible: {
-      opacity: 1,
       transition: { staggerChildren: 0.06, delayChildren: 0.0 },
     },
   },
   containerSlow: {
-    hidden: { opacity: 0 },
+    hidden: {},
     visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.14, delayChildren: 0.1 },
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
     },
   },
   /**

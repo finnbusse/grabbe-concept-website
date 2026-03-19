@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { AnimateOnScroll } from "./animate-on-scroll"
+import { StaggerReveal, StaggerItem } from "./motion/stagger"
 import { motion, useInView } from "framer-motion"
 import { useRef } from "react"
 import { variants } from "@/lib/motion"
@@ -29,20 +30,24 @@ export function NachmittagSection({ content }: { content?: Record<string, unknow
     <section className="relative py-28 lg:py-36 bg-muted/40 overflow-hidden">
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
         <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
-          <AnimateOnScroll animation="slide-in-left">
-            <div>
+          <StaggerReveal>
+            <StaggerItem>
               <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
                 {sLabel}
               </p>
+            </StaggerItem>
+            <StaggerItem>
               <h2 className="mt-4 font-display text-4xl md:text-5xl tracking-tight text-foreground">
                 <span className="italic">{'"'}{sHeadline}{'"'}</span>
               </h2>
               <p className="mt-2 font-sub text-xs uppercase tracking-[0.15em] text-muted-foreground">{sAttribution}</p>
+            </StaggerItem>
+            <StaggerItem>
               <p className="mt-8 text-base leading-relaxed text-muted-foreground">
                 {sText}
               </p>
-            </div>
-          </AnimateOnScroll>
+            </StaggerItem>
+          </StaggerReveal>
 
           <AnimateOnScroll animation="slide-in-right" delay={0.2}>
             <div className="space-y-5">

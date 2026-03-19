@@ -38,14 +38,16 @@ interface RevealProps {
  * Scroll-triggered reveal component backed by Framer Motion.
  * Drop-in replacement for <AnimateOnScroll> with the same API.
  *
+ * Default animation is `fade-in-up`. For section-header stagger sequences
+ * use <StaggerReveal> + <StaggerItem> from components/motion/stagger.tsx.
+ *
  * Uses `useInView` with a negative bottom margin so the reveal starts
- * slightly before the element fully enters the viewport, giving a
- * natural, eager-but-not-rushed feel.
+ * slightly before the element fully enters the viewport.
  */
 export function Reveal({
   children,
   className,
-  animation = "blur-in",
+  animation = "fade-in-up",
   delay = 0,
   threshold = 0.1,
   once = true,
@@ -55,7 +57,7 @@ export function Reveal({
 
   const inView = useInView(ref, {
     once,
-    margin: "0px 0px -60px 0px",
+    margin: "0px 0px -40px 0px",
     amount: threshold,
   })
 

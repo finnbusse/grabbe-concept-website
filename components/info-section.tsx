@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, FileText, Clock, GraduationCap, BookOpen, CalendarDays, Utensils } from "lucide-react"
 import { AnimateOnScroll } from "./animate-on-scroll"
+import { StaggerReveal, StaggerItem } from "./motion/stagger"
 
 const quickLinks = [
   { icon: FileText, label: "Downloads", href: "/downloads" },
@@ -28,16 +29,20 @@ export function InfoSection({ content }: { content?: Record<string, unknown> }) 
       <div className="mx-auto max-w-6xl px-4 lg:px-8">
         <div className="grid gap-20 lg:grid-cols-2">
           {/* Left: Erprobungsstufe */}
-          <AnimateOnScroll animation="slide-in-left">
-            <div>
+          <StaggerReveal>
+            <StaggerItem>
               <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
                 {leftLabel}
               </p>
+            </StaggerItem>
+            <StaggerItem>
               <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-foreground">
                 {leftHeadline.includes('Grabbe') ? (
                   <>{leftHeadline.split('Grabbe')[0]}<span className="italic text-primary">Grabbe</span>{leftHeadline.split('Grabbe')[1]}</>
                 ) : leftHeadline}
               </h2>
+            </StaggerItem>
+            <StaggerItem>
               <div className="mt-8 space-y-5 text-muted-foreground">
                 <p className="text-sm leading-relaxed">
                   {leftText1}
@@ -61,21 +66,25 @@ export function InfoSection({ content }: { content?: Record<string, unknown> }) 
                 {leftLinkText}
                 <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
               </Link>
-            </div>
-          </AnimateOnScroll>
+            </StaggerItem>
+          </StaggerReveal>
 
           {/* Right: Quick Links */}
-          <AnimateOnScroll animation="slide-in-right" delay={0.2}>
-            <div>
+          <StaggerReveal delay={0.1}>
+            <StaggerItem>
               <p className="font-sub text-[11px] uppercase tracking-[0.3em] text-primary">
                 {rightLabel}
               </p>
+            </StaggerItem>
+            <StaggerItem>
               <h2 className="mt-3 font-display text-4xl md:text-5xl tracking-tight text-foreground">
                 {rightHeadline}
               </h2>
+            </StaggerItem>
+            <StaggerItem>
               <div className="mt-8 grid grid-cols-2 gap-4">
                 {quickLinks.map((link, i) => (
-                  <AnimateOnScroll key={link.label} animation="fade-in-up" delay={0.3 + i * 0.06}>
+                  <AnimateOnScroll key={link.label} animation="fade-in-up" delay={0.1 + i * 0.05}>
                     <Link
                       href={link.href}
                       className="group flex items-center gap-4 rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 transition-all duration-500 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06] hover:-translate-y-0.5"
@@ -88,8 +97,8 @@ export function InfoSection({ content }: { content?: Record<string, unknown> }) 
                   </AnimateOnScroll>
                 ))}
               </div>
-            </div>
-          </AnimateOnScroll>
+            </StaggerItem>
+          </StaggerReveal>
         </div>
       </div>
     </section>
