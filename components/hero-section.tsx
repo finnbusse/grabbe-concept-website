@@ -3,48 +3,15 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, ArrowDown } from "lucide-react"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef } from "react"
 import {
   motion,
   useScroll,
   useTransform,
-  useSpring,
   useReducedMotion,
 } from "framer-motion"
 import { trackEvent } from "@/lib/analytics"
 import { ease, duration as dur, HERO_MORPH_RANGE } from "@/lib/motion"
-
-// ─── Typing text sub-component ─────────────────────────────────────────────
-
-function TypingText({ text, delay = 0, speed = 40 }: { text: string; delay?: number; speed?: number }) {
-  const [displayed, setDisplayed] = useState("")
-  const [started, setStarted] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setStarted(true), delay)
-    return () => clearTimeout(timer)
-  }, [delay])
-
-  useEffect(() => {
-    if (!started) return
-    let i = 0
-    const interval = setInterval(() => {
-      setDisplayed(text.slice(0, i + 1))
-      i++
-      if (i >= text.length) clearInterval(interval)
-    }, speed)
-    return () => clearInterval(interval)
-  }, [started, text, speed])
-
-  return (
-    <span className="inline-block" style={{ minWidth: started ? "auto" : `${text.length * 0.5}em` }}>
-      {displayed}
-      {started && displayed.length < text.length && (
-        <span className="inline-block w-[2px] h-[1em] bg-white align-middle ml-0.5 animate-pulse" />
-      )}
-    </span>
-  )
-}
 
 // ─── Hero section ───────────────────────────────────────────────────────────
 
@@ -60,48 +27,34 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
   const cta2Link = (c.cta2_link as string) || "/unsere-schule/profilprojekte"
   const scrollText = (c.scroll_text as string) || "Entdecken"
 
-  const [mounted, setMounted] = useState(false)
   const prefersReducedMotion = useReducedMotion()
 
   // Container ref drives scroll progress
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Raw page scroll (px)
+  // Raw page scroll — no spring, no wobble
   const { scrollY } = useScroll()
 
-  // Spring-smooth the scroll value so the morph feels physically weighted
-  const smoothY = useSpring(scrollY, {
-    stiffness: 180,
-    damping: 35,
-    mass: 0.6,
-  })
-
-  const morphY = prefersReducedMotion ? scrollY : smoothY
-
   // ── Scroll-driven style values ────────────────────────────────────────────
-  // Full-bleed  →  contained card as the user scrolls down
+  // Full-bleed → contained card as the user scrolls down
+  // No scale transform — that was the main source of wobble
   const borderRadius = useTransform(
-    morphY,
+    scrollY,
     [0, HERO_MORPH_RANGE],
     ["0px", "1.75rem"]
   )
-  const scale = useTransform(
-    morphY,
-    [0, HERO_MORPH_RANGE],
-    [1, 0.975]
-  )
   const marginX = useTransform(
-    morphY,
+    scrollY,
     [0, HERO_MORPH_RANGE],
     ["0px", "1.25rem"]
   )
   const marginTop = useTransform(
-    morphY,
+    scrollY,
     [0, HERO_MORPH_RANGE],
     ["0px", "0.75rem"]
   )
   const boxShadow = useTransform(
-    morphY,
+    scrollY,
     [0, HERO_MORPH_RANGE],
     [
       "0 0px 0px 0px rgba(0,0,0,0)",
@@ -109,36 +62,25 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
     ]
   )
 
-  // Content overlay fades out during the first half of the morph range
-  const contentOpacity = useTransform(morphY, [0, HERO_MORPH_RANGE * 0.55], [1, 0])
+  // Content overlay fades out gently during the first half of the morph range
+  const contentOpacity = useTransform(scrollY, [0, HERO_MORPH_RANGE * 0.6], [1, 0])
 
   // Background parallax — image drifts gently upward
-  const bgParallaxY = useTransform(morphY, [0, HERO_MORPH_RANGE * 1.5], ["0%", "-6%"])
+  const bgParallaxY = useTransform(scrollY, [0, HERO_MORPH_RANGE * 1.5], ["0%", "-6%"])
 
   // ── Entrance animation ────────────────────────────────────────────────────
   // Brief scroll lock so the cinematic entrance can play uninterrupted.
-  // `prefersReducedMotion` is intentionally omitted from the dependency array:
-  // the lock must only run once on mount, not re-run when the OS preference
-  // changes mid-session (which would re-lock scroll unexpectedly).
   useEffect(() => {
-    setMounted(true)
-
     if (prefersReducedMotion) return
-
-    // Only lock if the user arrives at the top of the page
     if (window.scrollY > 30) return
 
-    // Measure scrollbar width to prevent layout shift when locking
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-    document.documentElement.style.setProperty(
-      "--scrollbar-width",
-      `${scrollbarWidth}px`
-    )
+    document.documentElement.style.setProperty("--scrollbar-width", `${scrollbarWidth}px`)
     document.body.classList.add("scroll-locked")
 
     const timer = setTimeout(() => {
       document.body.classList.remove("scroll-locked")
-    }, 1100) // matches entrance animation duration
+    }, 1300)
 
     return () => {
       clearTimeout(timer)
@@ -147,15 +89,15 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
   // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount-only effect
   }, [])
 
-  // Entrance: hero scales up from 0.97 and fades in
+  // Entrance: hero fades + very subtle upward drift
   const entranceVariants = {
-    hidden: { opacity: 0, scale: 0.97 },
+    hidden: { opacity: 0, y: 12 },
     visible: {
       opacity: 1,
-      scale: 1,
+      y: 0,
       transition: {
-        duration: dur.cinematic,
-        ease: ease.cinematic,
+        duration: dur.dramatic,
+        ease: ease.editorial,
       },
     },
   }
@@ -164,14 +106,13 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
     /*
      * Container creates the scroll "runway" for the pinned hero.
      * height = 100svh (the visible hero) + HERO_MORPH_RANGE (scroll space)
-     * After the hero has morphed, it unsticks and the page continues.
      */
     <div
       ref={containerRef}
       style={{ height: `calc(100svh + ${HERO_MORPH_RANGE}px)` }}
       className="relative"
     >
-      {/* Sticky viewport-height wrapper — hero stays at top while scrolling through the runway */}
+      {/* Sticky viewport-height wrapper */}
       <div className="sticky top-0 h-svh overflow-hidden">
         {/* Entrance animation wrapper */}
         <motion.div
@@ -180,18 +121,16 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
           animate="visible"
           variants={entranceVariants}
         >
-          {/* Scroll-morphing card */}
+          {/* Scroll-morphing card — no scale, just radius/margin/shadow */}
           <motion.div
             className="relative overflow-hidden h-full w-full"
             style={{
               borderRadius,
-              scale,
               marginLeft: marginX,
               marginRight: marginX,
               marginTop,
               boxShadow,
-              // Prevent subpixel bleed during scaling
-              willChange: "transform, border-radius",
+              willChange: "border-radius, margin, box-shadow",
             }}
           >
             {/* ── Background images with parallax ─────────────────────── */}
@@ -230,41 +169,53 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
               className="absolute inset-0 z-10 flex flex-col justify-end p-4 pb-10 sm:p-6 md:p-10 lg:p-14"
               style={{ opacity: contentOpacity }}
             >
-              {/* Headline */}
-              <motion.h1
-                className="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl text-white leading-[1.1] tracking-tight"
+              {/* Headline — each line staggers in */}
+              <div
                 style={{ textShadow: "0 2px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4)" }}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: dur.slow, ease: ease.cinematic }}
               >
-                <span className="block">{headline1}</span>
-                <span className="block">{headline2}</span>
-                <span
-                  className="block italic text-[hsl(200,85%,80%)]"
-                  style={{ textShadow: "0 2px 24px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.4)" }}
+                <motion.h1
+                  className="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-6xl text-white leading-[1.1] tracking-tight"
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35, duration: dur.cinematic, ease: ease.editorial }}
                 >
-                  {headline3}
-                </span>
-              </motion.h1>
+                  <span className="block">{headline1}</span>
+                  <motion.span
+                    className="block"
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: dur.cinematic, ease: ease.editorial }}
+                  >
+                    {headline2}
+                  </motion.span>
+                  <motion.span
+                    className="block italic text-[hsl(200,85%,80%)]"
+                    initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.65, duration: dur.cinematic, ease: ease.editorial }}
+                  >
+                    {headline3}
+                  </motion.span>
+                </motion.h1>
+              </div>
 
-              {/* Subtitle */}
+              {/* Subtitle — clean fade in, no typing effect */}
               <motion.p
-                className="mt-2 sm:mt-3 max-w-md text-white/90 text-xs sm:text-sm leading-relaxed font-sans"
+                className="mt-2 sm:mt-3 max-w-md text-white/85 text-xs sm:text-sm leading-relaxed font-sans"
                 style={{ textShadow: "0 1px 12px rgba(0,0,0,0.5)" }}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.55, duration: dur.slow, ease: ease.cinematic }}
+                initial={prefersReducedMotion ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.9, duration: dur.slow, ease: ease.out }}
               >
-                <TypingText text={subtitle} delay={1400} speed={28} />
+                {subtitle}
               </motion.p>
 
               {/* CTA buttons */}
               <motion.div
                 className="mt-4 sm:mt-5 flex flex-col sm:flex-row items-start gap-2 sm:gap-3"
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.75, duration: dur.slow, ease: ease.cinematic }}
+                transition={{ delay: 1.05, duration: dur.slow, ease: ease.cinematic }}
               >
                 <Link
                   href={cta1Link}
@@ -288,7 +239,7 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
                 className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
                 initial={prefersReducedMotion ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 1.1, duration: dur.normal, ease: ease.out }}
+                transition={{ delay: 1.3, duration: dur.slow, ease: ease.out }}
               >
                 <button
                   onClick={() => {
