@@ -74,22 +74,20 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      transitionTimingFunction: {
+        // Mirror the JS easing curves in CSS for consistency
+        'cinematic': 'cubic-bezier(0.22, 1, 0.36, 1)',
+        'editorial': 'cubic-bezier(0.16, 1, 0.3, 1)',
+        'smooth': 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+      },
       keyframes: {
         'accordion-down': {
-          from: {
-            height: '0',
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)',
-          },
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
         },
         'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-          to: {
-            height: '0',
-          },
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
         },
       },
       animation: {

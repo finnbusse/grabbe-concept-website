@@ -6,6 +6,23 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Smooth scrolling — disabled when the user prefers reduced motion */
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Utility class toggled by the cinematic hero entrance lock */
+body.scroll-locked {
+  overflow: hidden;
+  /* Prevent layout shift when scrollbar disappears */
+  padding-right: var(--scrollbar-width, 0px);
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -90,5 +107,21 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/*
+ * Reduced-motion override — when the user prefers reduced motion, strip
+ * all CSS transitions/animations globally. Framer Motion components
+ * also respect `useReducedMotion()` in their logic.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
