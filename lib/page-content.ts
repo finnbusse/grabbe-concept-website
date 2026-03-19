@@ -149,6 +149,8 @@ export const PAGE_DEFAULTS = {
     cta2_text: 'Profilprojekte entdecken',
     cta2_link: '/unsere-schule/profilprojekte',
     scroll_text: 'Entdecken',
+    hero_image_url: 'https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-light-JYVqm0zAQBXijY3qt5X7egYP4fmJow.webp',
+    hero_image_dark_url: 'https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-dark-9y46Mdl0OXCy6CpagXTisMr7j5Tcl8.webp',
   },
   'homepage-welcome': {
     label: 'Herzlich willkommen',
@@ -169,15 +171,19 @@ export const PAGE_DEFAULTS = {
     description: 'Gestalte frei - ohne Leistungsdruck! Die Profilprojekte in Kunst, Musik, Sport oder NaWi bieten dir die Möglichkeit, in einer gemischten Gruppe neue Lernwege zu entdecken.',
     profile1_title: 'Kunstprojekt',
     profile1_tag: 'KNS',
+    profile1_image: '/images/profil-kunst.jpg',
     profile1_description: 'Der Kunstunterricht am Grabbe-Gymnasium versteht sich als bedeutsamer Baustein im Aufbau zukunftsrelevanter Kompetenzen. Im Projektkurs "Werkstatt Kunst" arbeiten die Schüler:innen ohne Notendruck projektbezogen.',
     profile2_title: 'Musikprojekt',
     profile2_tag: 'MSK',
+    profile2_image: '/images/profil-musik.jpg',
     profile2_description: 'Im Musikprofil entdecken Schülerinnen und Schüler ihre musikalischen Interessen, Kreativität und Begabungen - in Theorie und Praxis, individuell und im Miteinander. Teil des Schulversuchs "NRW-Musikprofil-Schule".',
     profile3_title: 'Sportprojekt',
     profile3_tag: 'SPR',
+    profile3_image: '/images/profil-sport.jpg',
     profile3_description: 'Als eine der wenigen ausgewählten "Partnerschulen des Sports" in NRW bietet das Grabbe-Gymnasium allen jugendlichen Talenten die Chance, Schulausbildung mit optimaler Sportförderung zu verbinden.',
     profile4_title: 'NaWi-Projekt',
     profile4_tag: 'NWI',
+    profile4_image: '/images/profil-nawi.jpg',
     profile4_description: 'Im Profilprojekt NaWi entdecken die Schüler:innen die spannende Welt der Naturwissenschaften. Mit Neugier und Forschergeist gehen sie Phänomenen aus Biologie, Chemie, Physik und Informatik auf den Grund.',
   },
   'homepage-info': {
@@ -574,6 +580,25 @@ export const EDITABLE_PAGES: PageDefinition[] = [
           { key: 'scroll_text', label: 'Scroll-Hinweis Text', type: 'text' },
         ],
       },
+      {
+        id: 'hero_images',
+        title: 'Hero-Bilder',
+        description: 'Das große Hintergrundbild im Hero-Bereich. Es werden zwei Varianten verwendet: eine für den hellen und eine für den dunklen Modus.',
+        fields: [
+          {
+            key: 'hero_image_url',
+            label: 'Hero-Bild (Hell-Modus)',
+            type: 'image',
+            description: 'Wird im hellen Design angezeigt. Empfohlen: 1920×820 px oder breiter, Querformat.',
+          },
+          {
+            key: 'hero_image_dark_url',
+            label: 'Hero-Bild (Dunkel-Modus)',
+            type: 'image',
+            description: 'Wird im dunklen Design angezeigt. Empfohlen: 1920×820 px oder breiter, Querformat.',
+          },
+        ],
+      },
     ],
     defaults: PAGE_DEFAULTS['homepage-hero'],
   },
@@ -648,6 +673,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
         fields: [
           { key: 'profile1_title', label: 'Titel', type: 'text' },
           { key: 'profile1_tag', label: 'Kürzel (3 Buchstaben)', type: 'text' },
+          { key: 'profile1_image', label: 'Bild', type: 'image', description: 'Empfohlen: 800×450 px, Querformat (16:9).' },
           { key: 'profile1_description', label: 'Beschreibung', type: 'textarea' },
         ],
       },
@@ -657,6 +683,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
         fields: [
           { key: 'profile2_title', label: 'Titel', type: 'text' },
           { key: 'profile2_tag', label: 'Kürzel (3 Buchstaben)', type: 'text' },
+          { key: 'profile2_image', label: 'Bild', type: 'image', description: 'Empfohlen: 800×450 px, Querformat (16:9).' },
           { key: 'profile2_description', label: 'Beschreibung', type: 'textarea' },
         ],
       },
@@ -666,6 +693,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
         fields: [
           { key: 'profile3_title', label: 'Titel', type: 'text' },
           { key: 'profile3_tag', label: 'Kürzel (3 Buchstaben)', type: 'text' },
+          { key: 'profile3_image', label: 'Bild', type: 'image', description: 'Empfohlen: 800×450 px, Querformat (16:9).' },
           { key: 'profile3_description', label: 'Beschreibung', type: 'textarea' },
         ],
       },
@@ -675,6 +703,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
         fields: [
           { key: 'profile4_title', label: 'Titel', type: 'text' },
           { key: 'profile4_tag', label: 'Kürzel (3 Buchstaben)', type: 'text' },
+          { key: 'profile4_image', label: 'Bild', type: 'image', description: 'Empfohlen: 800×450 px, Querformat (16:9).' },
           { key: 'profile4_description', label: 'Beschreibung', type: 'textarea' },
         ],
       },
@@ -820,7 +849,7 @@ export const EDITABLE_PAGES: PageDefinition[] = [
         id: 'contact',
         title: 'Ansprechpartner',
         fields: [
-          { key: 'hecker_image_url', label: 'Foto Stefan Hecker (CDN-URL)', type: 'text' },
+          { key: 'hecker_image_url', label: 'Foto Stefan Hecker', type: 'image', description: 'Portraitfoto des Ansprechpartners. Empfohlen: Quadratisch oder Hochformat.' },
         ],
       },
       HERO_IMAGE_SECTION,

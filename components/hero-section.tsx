@@ -48,6 +48,8 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
   const cta2Text = (c.cta2_text as string) || 'Profilprojekte entdecken'
   const cta2Link = (c.cta2_link as string) || '/unsere-schule/profilprojekte'
   const scrollText = (c.scroll_text as string) || 'Entdecken'
+  const heroImageUrl = (c.hero_image_url as string) || 'https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-light-JYVqm0zAQBXijY3qt5X7egYP4fmJow.webp'
+  const heroImageDarkUrl = (c.hero_image_dark_url as string) || 'https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-dark-9y46Mdl0OXCy6CpagXTisMr7j5Tcl8.webp'
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -64,7 +66,7 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
         {/* Light mode hero image (default) */}
         <div className="hero-image-light absolute inset-0">
           <Image
-            src="https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-light-JYVqm0zAQBXijY3qt5X7egYP4fmJow.webp"
+            src={heroImageUrl}
             alt="Grabbe-Gymnasium Schulgebäude"
             fill
             className="object-cover"
@@ -77,7 +79,7 @@ export function HeroSection({ content }: { content?: Record<string, unknown> }) 
         {/* Dark / night-themed hero image (shown via prefers-color-scheme: dark CSS) */}
         <div className="hero-image-dark absolute inset-0">
           <Image
-            src="https://iplsqewa1jv1ew7a.public.blob.vercel-storage.com/schulwebsite/hero-a-dark-9y46Mdl0OXCy6CpagXTisMr7j5Tcl8.webp"
+            src={heroImageDarkUrl}
             alt="Grabbe-Gymnasium Schulgebäude bei Nacht"
             fill
             className="object-cover"

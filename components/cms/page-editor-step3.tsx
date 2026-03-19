@@ -7,8 +7,9 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { ImagePicker } from "./image-picker"
 import { TagBadge, type TagData } from "./tag-selector"
-import { ArrowLeft, Loader2, Save, Rocket, Check, X } from "lucide-react"
+import { ArrowLeft, Loader2, Save, Rocket, Check } from "lucide-react"
 import { toast } from "sonner"
 
 // ============================================================================
@@ -257,19 +258,11 @@ export function PageEditorStep3() {
                   ? "Standardmäßig wird das Hero-Bild verwendet."
                   : "Vorschaubild für Social Media."}
               </p>
-              {state.ogImageUrl && (
-                <div className="relative overflow-hidden rounded-lg border border-border">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={state.ogImageUrl} alt="OG" className="h-20 w-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => dispatch({ type: "SET_OG_IMAGE", payload: null })}
-                    className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              )}
+              <ImagePicker
+                value={state.ogImageUrl || null}
+                onChange={(url) => dispatch({ type: "SET_OG_IMAGE", payload: url })}
+                aspectRatio="16/9"
+              />
             </div>
           </div>
 
