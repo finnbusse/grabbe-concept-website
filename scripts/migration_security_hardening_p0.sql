@@ -13,6 +13,11 @@ SET token_hash = encode(digest(token, 'sha256'), 'hex')
 WHERE token_hash IS NULL
   AND token IS NOT NULL;
 
+-- Remove legacy plaintext token values after backfill.
+UPDATE public.invitations
+SET token = NULL
+WHERE token IS NOT NULL;
+
 -- Ensure token_hash uniqueness
 CREATE UNIQUE INDEX IF NOT EXISTS idx_invitations_token_hash
   ON public.invitations(token_hash);

@@ -78,7 +78,8 @@ export async function PUT(request: NextRequest) {
   return NextResponse.json({
     success: true,
     persisted: false,
-    message: "Token ist gültig. Bitte BUFFER_ACCESS_TOKEN als geschütztes Deployment-Secret setzen.",
+    message: "Token ist gültig. Bitte BUFFER_ACCESS_TOKEN als geschütztes Deployment-Secret setzen und Deployment neu starten.",
+    required_secret_name: "BUFFER_ACCESS_TOKEN",
     buffer_account: {
       organization_name: orgName,
       organization_count: accountInfo.organizations.length,
@@ -99,6 +100,7 @@ export async function DELETE() {
   return NextResponse.json({
     success: true,
     persisted: false,
-    message: "Bitte BUFFER_ACCESS_TOKEN aus der Secret-Verwaltung entfernen.",
+    message: "Bitte BUFFER_ACCESS_TOKEN aus der Secret-Verwaltung entfernen und Deployment neu starten.",
+    required_secret_name: "BUFFER_ACCESS_TOKEN",
   })
 }
