@@ -2,6 +2,10 @@ import { SiteLayout } from "@/components/site-layout"
 import { PageHero } from "@/components/page-hero"
 import { getPageContent, PAGE_DEFAULTS } from "@/lib/page-content"
 import { getSettings } from "@/lib/settings"
+import { createStaticClient } from "@/lib/supabase/static"
+import { MarkdownContent } from "@/components/markdown-content"
+import { BlockContentRenderer } from "@/components/block-content-renderer"
+import { isBlockContent } from "@/lib/format-helpers"
 import { generatePageMetadata } from "@/lib/seo"
 import type { Metadata } from "next"
 
@@ -16,6 +20,41 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ImpressumPage() {
+  const supabase = createStaticClient()
+  const { data: publishedImpressumRows } = await supabase
+    .from("pages")
+    .select("title, content, hero_image_url, hero_subtitle")
+    .eq("section", "impressum")
+    .eq("status", "published")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+
+  const publishedImpressum = publishedImpressumRows?.[0]
+
+  if (publishedImpressum) {
+    const content = publishedImpressum.content || ""
+    const useBlocks = isBlockContent(content)
+
+    return (
+      <SiteLayout>
+        <main>
+          <PageHero
+            title={publishedImpressum.title || "Impressum"}
+            subtitle={publishedImpressum.hero_subtitle || undefined}
+            imageUrl={publishedImpressum.hero_image_url || undefined}
+          />
+          <section className="mx-auto max-w-6xl px-4 py-28 lg:py-36 lg:px-8">
+            {useBlocks ? (
+              <BlockContentRenderer content={content} />
+            ) : (
+              <MarkdownContent content={content} />
+            )}
+          </section>
+        </main>
+      </SiteLayout>
+    )
+  }
+
   const [content, settings] = await Promise.all([
     getPageContent('impressum', PAGE_DEFAULTS['impressum']),
     getSettings(),

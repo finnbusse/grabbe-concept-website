@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ImagePicker } from "@/components/cms/image-picker"
-import { RichTextEditor } from "@/components/cms/rich-text-editor"
 import { ArrowLeft, Save, Loader2, RotateCcw, Eye, Check } from "lucide-react"
 import Link from "next/link"
 import type { PageDefinition, ContentSectionDefinition } from "@/lib/page-content"
@@ -230,13 +229,7 @@ function SectionEditor({
               {field.description && (
                 <p className="text-xs text-muted-foreground">{field.description}</p>
               )}
-              {field.type === "richtext" ? (
-                <RichTextEditor
-                  content={value}
-                  onChange={(markdown) => onChange(field.key, markdown)}
-                  placeholder={field.placeholder}
-                />
-              ) : field.type === "textarea" ? (
+              {field.type === "textarea" || field.type === "richtext" ? (
                 <textarea
                   id={`field-${field.key}`}
                   value={value}
