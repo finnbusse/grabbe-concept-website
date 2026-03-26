@@ -51,27 +51,10 @@ export default async function CmsLayout({ children }: { children: React.ReactNod
     roleSlugs = rs
     pagePermissions = pp
   } catch {
-    // RBAC tables may not exist yet — grant full access (backward compatibility)
-    permissions = {
-      posts: { create: true, edit: "all", delete: "all", publish: true },
-      events: { create: true, edit: "all", delete: "all", publish: true },
-      parent_letters: { create: true, edit: "all", delete: "all", publish: true },
-      presentations: { create: true, edit: "all", delete: "all", publish: true },
-      pages: { edit: true },
-      documents: { upload: true, delete: "all" },
-      settings: { basic: true, advanced: true, seo: true },
-      navigation: true,
-      seitenstruktur: true,
-      seitenEditor: true,
-      organisation: true,
-      users: { view: true, create: true, delete: true, assignRoles: true },
-      tags: true,
-      messages: true,
-      anmeldungen: true,
-      diagnostic: true,
-      roles: { view: true, create: true, edit: true, delete: true },
-    }
-    roleSlugs = ["administrator"]
+    // RBAC setup is missing/broken: fail closed (no implicit full access)
+    permissions = EMPTY_PERMISSIONS
+    roleSlugs = []
+    pagePermissions = []
   }
 
   return (

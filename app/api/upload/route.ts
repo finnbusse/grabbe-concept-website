@@ -1,12 +1,19 @@
-import { list, put } from "@vercel/blob"
+import { put } from "@vercel/blob"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
-
-const SUPPORTED_IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "svg", "avif"]
+import { ALLOWED_UPLOAD_MIME_TYPES, normalizeFilename, sanitizeUploadFilename } from "@/lib/upload-security"
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const typeFilter = searchParams.get("type") // e.g. "image"
     const cursor = searchParams.get("cursor") || undefined
@@ -16,14 +23,13 @@ export async function GET(request: NextRequest) {
     const sizeFilter = searchParams.get("size")
 
     // Try documents table first (unified media library)
-    const supabase = await createClient()
-
     // Deduplication check: if filename and size provided, return matching documents
     if (filenameFilter && sizeFilter) {
+      const normalizedFilename = normalizeFilename(filenameFilter)
       const { data: dupes } = await supabase
         .from("documents")
         .select("id, title, file_url, file_name, file_size, file_type, created_at")
-        .eq("file_name", filenameFilter)
+        .eq("file_name", normalizedFilename)
         .eq("file_size", parseInt(sizeFilter, 10))
         .limit(1)
       const typedDupes = (dupes || []) as Array<{
@@ -73,36 +79,14 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Fallback to Vercel Blob storage if documents table is empty or unavailable
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      return NextResponse.json({ blobs: [] })
-    }
-
-    const result = await list({
-      prefix: "schulwebsite/",
-      limit,
-      cursor,
-    })
-
-    // Filter to images only for the media library
-    const imageBlobs = result.blobs.filter((blob) => {
-      const ext = blob.pathname.split(".").pop()?.toLowerCase() || ""
-      return SUPPORTED_IMAGE_EXTENSIONS.includes(ext)
-    })
-
     return NextResponse.json({
-      blobs: imageBlobs.map((b) => ({
-        url: b.url,
-        pathname: b.pathname,
-        size: b.size,
-        uploadedAt: b.uploadedAt,
-      })),
-      cursor: result.cursor,
-      hasMore: result.hasMore,
+      blobs: [],
+      cursor: undefined,
+      hasMore: false,
     })
   } catch (error: unknown) {
     console.error("Blob list error:", error)
-    return NextResponse.json({ blobs: [], error: "Mediathek konnte nicht geladen werden" })
+    return NextResponse.json({ error: "Mediathek konnte nicht geladen werden" }, { status: 500 })
   }
 }
 
@@ -143,7 +127,14 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    const blob = await put(`schulwebsite/${file.name}`, file, {
+    if (!ALLOWED_UPLOAD_MIME_TYPES.has(file.type)) {
+      return NextResponse.json({
+        error: "Dateityp nicht erlaubt",
+      }, { status: 400 })
+    }
+
+    const safeName = sanitizeUploadFilename(file.name)
+    const blob = await put(`schulwebsite/${safeName}`, file, {
       access: "public",
     })
 
@@ -152,9 +143,9 @@ export async function POST(request: NextRequest) {
     const docCategory = formData.get("category") as string
 
     const { data: insertedDoc } = await supabase.from("documents").insert({
-      title: docTitle || file.name,
+      title: docTitle || safeName,
       file_url: blob.url,
-      file_name: file.name,
+      file_name: safeName,
       file_size: file.size,
       file_type: file.type,
       category: docCategory || "allgemein",
@@ -170,7 +161,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       url: blob.url,
-      filename: file.name,
+      filename: safeName,
       size: file.size,
       type: file.type,
       documentId: docId || null,

@@ -2,6 +2,8 @@ import { del } from "@vercel/blob"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { getUserPermissions } from "@/lib/permissions"
+import { isAllowedBlobUrl } from "@/lib/upload-security"
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -13,10 +15,18 @@ export async function DELETE(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: "Nicht autorisiert" }, { status: 401 })
     }
+    const permissions = await getUserPermissions(user.id)
+    const canDeleteAnyDocument = permissions.documents.delete === "all"
+    if (!canDeleteAnyDocument) {
+      return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+    }
 
     const { url, id } = await request.json()
 
     if (url) {
+      if (!isAllowedBlobUrl(url)) {
+        return NextResponse.json({ error: "Ungültige Blob-URL" }, { status: 400 })
+      }
       await del(url)
     }
 
