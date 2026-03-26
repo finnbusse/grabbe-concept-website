@@ -4,7 +4,7 @@ import { getUserRoleSlugs } from "@/lib/permissions"
 import { isAdmin } from "@/lib/permissions-shared"
 import { sendEmail } from "@/lib/email"
 import { invitationEmailTemplate } from "@/lib/email-templates/invitation"
-import { generateInvitationToken, guessFirstNameFromEmail, buildOnboardingUrl } from "@/lib/invitation-tokens"
+import { generateInvitationToken, guessFirstNameFromEmail, buildOnboardingUrl, hashInvitationToken } from "@/lib/invitation-tokens"
 import { NextResponse, type NextRequest } from "next/server"
 import { z } from "zod"
 
@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     .insert({
       email: email.toLowerCase(),
       role_id: roleId,
-      token,
+      token_hash: hashInvitationToken(token),
       invited_by: user.id,
       personal_message: personalMessage || null,
       expires_at: expiresAt,

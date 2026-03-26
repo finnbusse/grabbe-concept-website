@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin"
-import { validateTokenSignature } from "@/lib/invitation-tokens"
+import { hashInvitationToken, validateTokenSignature } from "@/lib/invitation-tokens"
 import { NextResponse, type NextRequest } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -16,11 +16,12 @@ export async function GET(request: NextRequest) {
   }
 
   const adminClient = createAdminClient()
+  const tokenHash = hashInvitationToken(token)
 
   const { data: invitation, error } = await adminClient
     .from("invitations")
     .select("id, email, role_id, personal_message, expires_at, accepted_at, created_at, cms_roles(id, name)")
-    .eq("token", token)
+    .eq("token_hash", tokenHash)
     .single()
 
   if (error || !invitation) {
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
   const { data: invitationFull } = await adminClient
     .from("invitations")
     .select("invited_by")
-    .eq("token", token)
+    .eq("token_hash", tokenHash)
     .single()
 
   if (invitationFull && (invitationFull as { invited_by: string | null }).invited_by) {
@@ -108,11 +109,12 @@ export async function POST(request: NextRequest) {
   }
 
   const adminClient = createAdminClient()
+  const tokenHash = hashInvitationToken(token)
 
   const { data: invitation, error: fetchError } = await adminClient
     .from("invitations")
     .select("id, email, role_id, accepted_at, expires_at")
-    .eq("token", token)
+    .eq("token_hash", tokenHash)
     .single()
 
   if (fetchError || !invitation) {

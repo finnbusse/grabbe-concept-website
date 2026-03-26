@@ -56,6 +56,11 @@ export interface RateLimitResult {
   reason?: string
 }
 
+export interface ActionRateLimitResult {
+  allowed: boolean
+  retryAfterSeconds: number
+}
+
 /**
  * Check whether a login attempt should be allowed.
  * Checks both IP-level and account-level limits.
@@ -67,9 +72,14 @@ export async function checkRateLimit(
   const ipHash = await hashValue(ip)
   const emailHash = await hashValue(email)
 
-  // If hashing is unavailable (IP_HASH_SALT not set), skip rate limiting
+  // Fail closed when hashing salt is missing or invalid configuration.
   if (!ipHash || !emailHash) {
-    return { allowed: true, retryAfterSeconds: 0, delayMs: 0 }
+    return {
+      allowed: false,
+      retryAfterSeconds: 60,
+      delayMs: 0,
+      reason: "rate_limit_unavailable",
+    }
   }
 
   const supabase = createAdminClient()
@@ -157,8 +167,9 @@ export async function recordLoginAttempt(
   const ipHash = await hashValue(ip)
   const emailHash = await hashValue(email)
 
-  // If hashing is unavailable (IP_HASH_SALT not set), skip recording
-  if (!ipHash || !emailHash) return
+  if (!ipHash || !emailHash) {
+    throw new Error("Rate limit hashing unavailable")
+  }
 
   const supabase = createAdminClient()
 
@@ -190,7 +201,7 @@ export async function recordLoginAttempt(
 export async function isIpBlocked(ip: string): Promise<{ blocked: boolean; retryAfterSeconds: number }> {
   try {
     const ipHash = await hashValue(ip)
-    if (!ipHash) return { blocked: false, retryAfterSeconds: 0 }
+    if (!ipHash) return { blocked: true, retryAfterSeconds: 60 }
 
     const supabase = createAdminClient()
     const now = new Date()
@@ -218,8 +229,61 @@ export async function isIpBlocked(ip: string): Promise<{ blocked: boolean; retry
 
     return { blocked: false, retryAfterSeconds: 0 }
   } catch {
-    // If rate limiting fails (e.g. missing env var), allow the request through
-    return { blocked: false, retryAfterSeconds: 0 }
+    return { blocked: true, retryAfterSeconds: 60 }
+  }
+}
+
+export async function checkActionRateLimit(
+  ip: string,
+  action: string,
+  maxAttempts: number,
+  windowMs: number
+): Promise<ActionRateLimitResult> {
+  const ipHash = await hashValue(ip)
+  if (!ipHash) {
+    return { allowed: false, retryAfterSeconds: 60 }
+  }
+
+  const supabase = createAdminClient()
+  const now = new Date()
+  const windowStart = new Date(now.getTime() - windowMs).toISOString()
+
+  const { data: attempts, error } = await supabase
+    .from("rate_limit_actions")
+    .select("attempted_at")
+    .eq("action", action)
+    .eq("identifier_hash", ipHash)
+    .gte("attempted_at", windowStart)
+    .order("attempted_at", { ascending: false }) as { data: Array<{ attempted_at: string }> | null; error: { message: string } | null }
+
+  if (error) {
+    return { allowed: false, retryAfterSeconds: 60 }
+  }
+
+  const count = attempts?.length ?? 0
+  if (count >= maxAttempts) {
+    const oldestRelevant = attempts![attempts!.length - 1].attempted_at
+    const blockedUntil = new Date(new Date(oldestRelevant).getTime() + windowMs)
+    const retryAfterSeconds = Math.max(1, Math.ceil((blockedUntil.getTime() - now.getTime()) / 1000))
+    return { allowed: false, retryAfterSeconds }
+  }
+
+  return { allowed: true, retryAfterSeconds: 0 }
+}
+
+export async function recordActionAttempt(ip: string, action: string): Promise<void> {
+  const ipHash = await hashValue(ip)
+  if (!ipHash) {
+    throw new Error("Rate limit hashing unavailable")
+  }
+
+  const supabase = createAdminClient()
+  const { error } = await supabase.from("rate_limit_actions").insert({
+    action,
+    identifier_hash: ipHash,
+  } as never)
+  if (error) {
+    throw new Error(error.message)
   }
 }
 

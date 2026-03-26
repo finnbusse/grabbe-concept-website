@@ -1,8 +1,21 @@
 import { createClient } from "@/lib/supabase/server"
+import { checkActionRateLimit, recordActionAttempt } from "@/lib/rate-limiter"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "unknown"
+    const rateLimit = await checkActionRateLimit(ip, "contact_submit", 10, 10 * 60 * 1000)
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Zu viele Anfragen. Bitte warten Sie.", retryAfterSeconds: rateLimit.retryAfterSeconds },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      )
+    }
+
     const body = await request.json()
     const { name, email, subject, message } = body
 
@@ -16,12 +29,13 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createClient()
+    await recordActionAttempt(ip, "contact_submit")
     const { error } = await supabase.from("contact_submissions").insert({
       name: name.trim(),
       email: email.trim(),
       subject: subject?.trim() || null,
       message: message.trim(),
-    })
+    } as never)
 
     if (error) {
       console.error("Contact submission error:", error)

@@ -2,14 +2,11 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { sendEmail } from "@/lib/email"
 import { passwordResetEmailTemplate } from "@/lib/email-templates/password-reset"
 import { generateInvitationToken } from "@/lib/invitation-tokens"
+import { checkActionRateLimit, recordActionAttempt } from "@/lib/rate-limiter"
 import { NextResponse, type NextRequest } from "next/server"
 
 export const dynamic = "force-dynamic"
 
-// In-memory rate limiting for password reset requests (per IP)
-// Note: In serverless/multi-instance deployments this is per-instance only.
-// For stronger protection, consider a shared store (DB/Redis).
-const resetAttempts = new Map<string, { count: number; firstAttempt: number }>()
 const MAX_ATTEMPTS = 3
 const WINDOW_MS = 15 * 60 * 1000 // 15 minutes
 
@@ -19,35 +16,6 @@ function getIp(request: NextRequest): string {
     request.headers.get("x-real-ip") ||
     "unknown"
   )
-}
-
-function checkResetRateLimit(ip: string): { allowed: boolean; retryAfterSeconds?: number } {
-  const now = Date.now()
-  const entry = resetAttempts.get(ip)
-
-  if (entry) {
-    // Clean up old entries
-    if (now - entry.firstAttempt > WINDOW_MS) {
-      resetAttempts.delete(ip)
-    } else if (entry.count >= MAX_ATTEMPTS) {
-      const elapsed = now - entry.firstAttempt
-      const remaining = Math.ceil((WINDOW_MS - elapsed) / 1000)
-      return { allowed: false, retryAfterSeconds: remaining }
-    }
-  }
-
-  return { allowed: true }
-}
-
-function recordResetAttempt(ip: string): void {
-  const now = Date.now()
-  const entry = resetAttempts.get(ip)
-
-  if (entry && now - entry.firstAttempt < WINDOW_MS) {
-    entry.count++
-  } else {
-    resetAttempts.set(ip, { count: 1, firstAttempt: now })
-  }
 }
 
 function getBaseUrl(): string {
@@ -76,7 +44,7 @@ export async function POST(request: NextRequest) {
     const ip = getIp(request)
 
     // Rate limit check
-    const rateLimit = checkResetRateLimit(ip)
+    const rateLimit = await checkActionRateLimit(ip, "password_reset", MAX_ATTEMPTS, WINDOW_MS)
     if (!rateLimit.allowed) {
       return NextResponse.json(
         {
@@ -101,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Record the attempt regardless of whether the email exists
-    recordResetAttempt(ip)
+    await recordActionAttempt(ip, "password_reset")
 
     // Always return success to prevent email enumeration.
     // Behind the scenes, only send if the user exists.

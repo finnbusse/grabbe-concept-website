@@ -1,8 +1,21 @@
 import { createClient } from "@/lib/supabase/server"
+import { checkActionRateLimit, recordActionAttempt } from "@/lib/rate-limiter"
 import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "unknown"
+    const rateLimit = await checkActionRateLimit(ip, "anmeldung_submit", 10, 10 * 60 * 1000)
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: "Zu viele Anfragen. Bitte warten Sie.", retryAfterSeconds: rateLimit.retryAfterSeconds },
+        { status: 429, headers: { "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      )
+    }
+
     const body = await request.json()
     const { child_name, child_birthday, parent_name, parent_email, parent_phone, grundschule, anmeldung_type, wunschpartner, profilprojekt, message } = body
 
@@ -15,6 +28,7 @@ export async function POST(request: Request) {
     }
 
     const supabase = await createClient()
+    await recordActionAttempt(ip, "anmeldung_submit")
     const { error } = await supabase.from("anmeldung_submissions").insert({
       child_name: child_name.trim(),
       child_birthday: child_birthday || null,
@@ -26,7 +40,7 @@ export async function POST(request: Request) {
       wunschpartner: wunschpartner?.trim() || null,
       profilprojekt: profilprojekt?.trim() || null,
       message: message?.trim() || null,
-    })
+    } as never)
 
     if (error) {
       console.error("Anmeldung submission error:", error)

@@ -4,7 +4,7 @@ import { getUserRoleSlugs } from "@/lib/permissions"
 import { isAdmin } from "@/lib/permissions-shared"
 import { sendEmail } from "@/lib/email"
 import { invitationEmailTemplate } from "@/lib/email-templates/invitation"
-import { guessFirstNameFromEmail, buildOnboardingUrl } from "@/lib/invitation-tokens"
+import { generateInvitationToken, guessFirstNameFromEmail, buildOnboardingUrl, hashInvitationToken } from "@/lib/invitation-tokens"
 import { NextResponse, type NextRequest } from "next/server"
 
 export const dynamic = "force-dynamic"
@@ -40,14 +40,18 @@ export async function POST(
 
   const inv = invitation as Record<string, unknown>
 
-  // Check if expired — if so, extend by 72 hours
-  const isExpired = new Date(inv.expires_at as string) < new Date()
-  if (isExpired) {
-    const newExpiry = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString()
-    await adminClient
-      .from("invitations")
-      .update({ expires_at: newExpiry })
-      .eq("id", id)
+  const newExpiry = new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString()
+  const token = generateInvitationToken()
+  const { error: rotationError } = await adminClient
+    .from("invitations")
+    .update({
+      token_hash: hashInvitationToken(token),
+      expires_at: newExpiry,
+    })
+    .eq("id", id)
+    .is("accepted_at", null)
+  if (rotationError) {
+    return NextResponse.json({ error: rotationError.message }, { status: 500 })
   }
 
   // Fetch inviter profile
@@ -62,7 +66,7 @@ export async function POST(
     : user.email || "Administrator"
 
   // Build onboarding URL
-  const onboardingUrl = buildOnboardingUrl(inv.token as string)
+  const onboardingUrl = buildOnboardingUrl(token)
 
   const recipientFirstName = guessFirstNameFromEmail(inv.email as string)
   const roleName = (inv.cms_roles as { name: string } | null)?.name || "Mitglied"
