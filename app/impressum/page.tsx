@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ImpressumPage() {
   const supabase = createStaticClient()
-  const { data: publishedImpressumRows } = await supabase
+  const { data: publishedImpressumRows, error: publishedImpressumError } = await supabase
     .from("pages")
     .select("title, content, hero_image_url, hero_subtitle")
     .eq("section", "impressum")
@@ -29,7 +29,7 @@ export default async function ImpressumPage() {
     .order("updated_at", { ascending: false })
     .limit(1)
 
-  const publishedImpressum = publishedImpressumRows?.[0]
+  const publishedImpressum = publishedImpressumError ? undefined : publishedImpressumRows?.[0]
 
   if (publishedImpressum) {
     const content = publishedImpressum.content || ""

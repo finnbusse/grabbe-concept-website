@@ -7,6 +7,31 @@ import { PageWizardProvider } from "@/components/cms/page-wizard-context"
 import { PageWizard } from "@/components/cms/page-wizard"
 import { isBlockContent } from "@/lib/format-helpers"
 
+type CmsPageRow = {
+  id: string
+  title: string
+  slug: string
+  content: string
+  section: string | null
+  sort_order: number
+  status: string
+  route_path: string | null
+  hero_image_url: string | null
+  hero_subtitle: string | null
+  meta_description: string | null
+  seo_og_image: string | null
+  created_at?: string
+}
+
+type ImpressumDefaults = {
+  hero_image_url?: string
+  verantwortlich?: string
+  anschrift?: string
+  kontakt_info?: string
+  schultraeger?: string
+  aufsichtsbehoerde?: string
+}
+
 export default async function PageEditPage({ params }: { params: Promise<{ pageId: string }> }) {
   const { pageId } = await params
 
@@ -20,16 +45,16 @@ export default async function PageEditPage({ params }: { params: Promise<{ pageI
   // Special case: Impressum should be edited like a normal dynamic subpage (wizard/texteditor)
   if (pageId === "impressum") {
     const supabase = await createClient()
-    const { data: impressumPages } = await supabase
+    const { data: impressumPages, error: impressumPagesError } = await supabase
       .from("pages")
       .select("*")
       .eq("section", "impressum")
       .order("updated_at", { ascending: false })
       .limit(1)
 
-    const page = impressumPages?.[0]
+    const page = impressumPagesError ? undefined : impressumPages?.[0]
 
-    const defaultImpressum = PAGE_DEFAULTS["impressum"] as Record<string, string>
+    const defaultImpressum = PAGE_DEFAULTS["impressum"] as ImpressumDefaults
     const legacyMarkdown = [
       "## Verantwortlich",
       defaultImpressum.verantwortlich || "",
@@ -47,22 +72,7 @@ export default async function PageEditPage({ params }: { params: Promise<{ pageI
       defaultImpressum.aufsichtsbehoerde || "",
     ].join("\n")
 
-    const p = page as
-      | {
-          id: string
-          title: string
-          slug: string
-          content: string
-          section: string | null
-          sort_order: number
-          status: string
-          route_path: string | null
-          hero_image_url: string | null
-          hero_subtitle: string | null
-          meta_description: string | null
-          seo_og_image: string | null
-        }
-      | undefined
+    const p = page as CmsPageRow | undefined
 
     return (
       <PageWizardProvider
@@ -110,21 +120,7 @@ export default async function PageEditPage({ params }: { params: Promise<{ pageI
 
   if (!page) notFound()
 
-  const p = page as unknown as {
-    id: string
-    title: string
-    slug: string
-    content: string
-    section: string | null
-    sort_order: number
-    status: string
-    route_path: string | null
-    hero_image_url: string | null
-    hero_subtitle: string | null
-    meta_description: string | null
-    seo_og_image: string | null
-    created_at: string
-  }
+  const p = page as CmsPageRow
 
   return (
     <PageWizardProvider initialState={{
