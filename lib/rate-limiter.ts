@@ -61,6 +61,10 @@ export interface ActionRateLimitResult {
   retryAfterSeconds: number
 }
 
+interface ActionRateLimitAttemptRow {
+  attempted_at: string
+}
+
 /**
  * Check whether a login attempt should be allowed.
  * Checks both IP-level and account-level limits.
@@ -254,7 +258,7 @@ export async function checkActionRateLimit(
     .eq("action", action)
     .eq("identifier_hash", ipHash)
     .gte("attempted_at", windowStart)
-    .order("attempted_at", { ascending: false }) as { data: Array<{ attempted_at: string }> | null; error: { message: string } | null }
+    .order("attempted_at", { ascending: false }) as { data: ActionRateLimitAttemptRow[] | null; error: { message: string } | null }
 
   if (error) {
     return { allowed: false, retryAfterSeconds: 60 }
@@ -262,7 +266,10 @@ export async function checkActionRateLimit(
 
   const count = attempts?.length ?? 0
   if (count >= maxAttempts) {
-    const oldestRelevant = attempts![attempts!.length - 1].attempted_at
+    const oldestRelevant = attempts?.[count - 1]?.attempted_at
+    if (!oldestRelevant) {
+      return { allowed: false, retryAfterSeconds: Math.max(1, Math.ceil(windowMs / 1000)) }
+    }
     const blockedUntil = new Date(new Date(oldestRelevant).getTime() + windowMs)
     const retryAfterSeconds = Math.max(1, Math.ceil((blockedUntil.getTime() - now.getTime()) / 1000))
     return { allowed: false, retryAfterSeconds }
@@ -281,6 +288,7 @@ export async function recordActionAttempt(ip: string, action: string): Promise<v
   const { error } = await supabase.from("rate_limit_actions").insert({
     action,
     identifier_hash: ipHash,
+    // Table is created via SQL migration and may lag behind generated TS database types.
   } as never)
   if (error) {
     throw new Error(error.message)
