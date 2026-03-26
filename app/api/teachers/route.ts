@@ -10,13 +10,35 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
+import { getUserPermissions, getUserRoleSlugs } from "@/lib/permissions"
+import { canAccessTeachers } from "@/lib/api-permissions"
+
+async function ensureTeachersAccess(method: "GET" | "POST" | "PUT" | "DELETE") {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { error: NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 }) }
+  }
+  const [permissions, roleSlugs] = await Promise.all([
+    getUserPermissions(user.id),
+    getUserRoleSlugs(user.id),
+  ])
+  if (!canAccessTeachers({ method, permissions, roleSlugs })) {
+    return { error: NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 }) }
+  }
+  return { supabase }
+}
 
 // ---------------------------------------------------------------------------
 // GET — list all teachers
 // ---------------------------------------------------------------------------
 
 export async function GET() {
-  const supabase = await createClient()
+  const auth = await ensureTeachersAccess("GET")
+  if (auth.error) return auth.error
+  const supabase = auth.supabase
 
   // Fetch teachers
   const { data: teachers, error } = await supabase
@@ -61,13 +83,9 @@ export async function GET() {
 // ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
-  }
+  const auth = await ensureTeachersAccess("POST")
+  if (auth.error) return auth.error
+  const supabase = auth.supabase
 
   const body = await request.json()
   const { gender, first_name, last_name, email, abbreviation, image_url, user_id, is_active, subject_ids } = body
@@ -124,13 +142,9 @@ export async function POST(request: NextRequest) {
 // ---------------------------------------------------------------------------
 
 export async function PUT(request: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
-  }
+  const auth = await ensureTeachersAccess("PUT")
+  if (auth.error) return auth.error
+  const supabase = auth.supabase
 
   const body = await request.json()
   const { id, gender, first_name, last_name, email, abbreviation, image_url, user_id, is_active, subject_ids } = body
@@ -188,13 +202,9 @@ export async function PUT(request: NextRequest) {
 // ---------------------------------------------------------------------------
 
 export async function DELETE(request: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
-  }
+  const auth = await ensureTeachersAccess("DELETE")
+  if (auth.error) return auth.error
+  const supabase = auth.supabase
 
   const { searchParams } = new URL(request.url)
   const id = searchParams.get("id")

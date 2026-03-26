@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server"
 import { type NextRequest, NextResponse } from "next/server"
 import { put } from "@vercel/blob"
+import { getUserPermissions, getUserRoleSlugs } from "@/lib/permissions"
+import { canManageUserProfile } from "@/lib/api-permissions"
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
@@ -8,6 +10,13 @@ export async function GET(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
 
   const userId = request.nextUrl.searchParams.get("userId") || user.id
+  const [permissions, roleSlugs] = await Promise.all([
+    getUserPermissions(user.id),
+    getUserRoleSlugs(user.id),
+  ])
+  if (!canManageUserProfile({ currentUserId: user.id, targetUserId: userId, permissions, roleSlugs })) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
 
   // Try with all columns first, fall back to without avatar_url if column doesn't exist
   let profile = null
@@ -38,6 +47,10 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
+  const [permissions, roleSlugs] = await Promise.all([
+    getUserPermissions(user.id),
+    getUserRoleSlugs(user.id),
+  ])
 
   const contentType = request.headers.get("content-type") || ""
 
@@ -50,6 +63,9 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get("avatar") as File
     const targetUserId = (formData.get("userId") as string) || user.id
+    if (!canManageUserProfile({ currentUserId: user.id, targetUserId, permissions, roleSlugs })) {
+      return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+    }
 
     if (!file) {
       return NextResponse.json({ error: "Keine Datei angegeben" }, { status: 400 })
@@ -118,6 +134,9 @@ export async function POST(request: NextRequest) {
   const body = await request.json()
   const { userId: targetUserId, first_name, last_name, title } = body
   const profileUserId = targetUserId || user.id
+  if (!canManageUserProfile({ currentUserId: user.id, targetUserId: profileUserId, permissions, roleSlugs })) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
 
   const profileData = {
     first_name: first_name ?? "",

@@ -723,13 +723,13 @@ Das Profilbild wird in der CMS-Seitenleiste, bei Beiträgen (Autorenansicht) und
 | `/api/settings` | GET, PUT, POST | Einstellungen lesen/aktualisieren/erstellen |
 | `/api/users` | GET, POST, DELETE | Benutzer verwalten |
 | `/api/user-profile` | POST | Profil aktualisieren (inkl. Avatar) |
-| `/api/navigation` | GET, POST, PUT, DELETE | Navigationseinträge verwalten |
-| `/api/page-content` | GET, POST | Seiteneditor-Inhalte laden/speichern |
+| `/api/navigation` | GET, POST, PUT, DELETE | Navigationseinträge verwalten (CMS-Permission `navigation` erforderlich) |
+| `/api/page-content` | GET, POST | Seiteneditor-Inhalte laden/speichern (CMS-Permission `seitenEditor` erforderlich) |
 | `/api/upload` | POST | Dateien hochladen |
 | `/api/upload/delete` | POST | Dateien löschen |
 | `/api/contact` | POST | Kontaktformular absenden |
 | `/api/anmeldung` | POST | Anmeldeformular absenden |
-| `/api/diagnostic` | GET | Systemdiagnose |
+| `/api/diagnostic` | GET | Systemdiagnose (CMS-Permission `diagnostic`, read-only, keine Schreibtests) |
 
 ### URL-Routing für eigene Seiten
 

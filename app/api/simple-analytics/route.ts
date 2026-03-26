@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { getUserPermissions, getUserRoleSlugs } from "@/lib/permissions"
+import { canAccessAnalytics } from "@/lib/api-permissions"
 
 export const dynamic = "force-dynamic"
 
@@ -105,6 +107,13 @@ export async function GET(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 })
   }
+  const [permissions, roleSlugs] = await Promise.all([
+    getUserPermissions(user.id),
+    getUserRoleSlugs(user.id),
+  ])
+  if (!canAccessAnalytics({ permissions, roleSlugs })) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
 
   const { searchParams } = new URL(request.url)
   const startParam = searchParams.get("start") || "today-30d"
@@ -129,9 +138,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Simple Analytics API Anfrage fehlgeschlagen",
-        status: response.status,
-        details: await response.text(),
-        source: url,
       },
       { status: 502 }
     )

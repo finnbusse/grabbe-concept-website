@@ -1,9 +1,19 @@
 import { createClient } from "@/lib/supabase/server"
+import { checkPermission, getUserPermissions } from "@/lib/permissions"
 import { revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
+  }
+  const permissions = await getUserPermissions(user.id)
+  if (!checkPermission(permissions, "tags")) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
+
   const { data, error } = await supabase
     .from("tags")
     .select("*")
@@ -20,6 +30,10 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
+  }
+  const permissions = await getUserPermissions(user.id)
+  if (!checkPermission(permissions, "tags")) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
   }
 
   const body = await request.json()
@@ -50,6 +64,10 @@ export async function PUT(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
   }
+  const permissions = await getUserPermissions(user.id)
+  if (!checkPermission(permissions, "tags")) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
 
   const body = await request.json()
   const { id, name, color } = body
@@ -79,6 +97,10 @@ export async function DELETE(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
+  }
+  const permissions = await getUserPermissions(user.id)
+  if (!checkPermission(permissions, "tags")) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
   }
 
   const { searchParams } = new URL(request.url)

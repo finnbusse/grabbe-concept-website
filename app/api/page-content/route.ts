@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { checkPermission, getUserPermissions } from "@/lib/permissions"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -7,13 +8,22 @@ import { NextRequest, NextResponse } from "next/server"
  * Fetch page content for a specific page.
  */
 export async function GET(request: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
+  }
+  const permissions = await getUserPermissions(user.id)
+  if (!checkPermission(permissions, "seitenEditor")) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
+
   const pageId = request.nextUrl.searchParams.get("pageId")
   if (!pageId) {
     return NextResponse.json({ error: "pageId is required" }, { status: 400 })
   }
 
   try {
-    const supabase = await createClient()
     const { data, error } = await supabase
       .from("site_settings")
       .select("value")
@@ -42,6 +52,10 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
+    }
+    const permissions = await getUserPermissions(user.id)
+    if (!checkPermission(permissions, "seitenEditor")) {
+      return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
     }
 
     const body = await request.json()

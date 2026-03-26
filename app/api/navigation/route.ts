@@ -1,10 +1,28 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { NextResponse, type NextRequest } from "next/server"
+import { checkPermission, getUserPermissions } from "@/lib/permissions"
+
+async function requireNavigationPermission() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) }
+  }
+  const permissions = await getUserPermissions(user.id)
+  if (!checkPermission(permissions, "navigation")) {
+    return { error: NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 }) }
+  }
+  return { supabase }
+}
 
 export async function GET(request: NextRequest) {
+  const auth = await requireNavigationPermission()
+  if (auth.error) return auth.error
   const location = request.nextUrl.searchParams.get("location")
-  const supabase = await createClient()
+  const supabase = auth.supabase
   let query = supabase
     .from("navigation_items")
     .select("*")
@@ -16,11 +34,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const auth = await requireNavigationPermission()
+  if (auth.error) return auth.error
+  const supabase = auth.supabase
 
   const body = await request.json()
   const { data, error } = await supabase
@@ -35,11 +51,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const auth = await requireNavigationPermission()
+  if (auth.error) return auth.error
+  const supabase = auth.supabase
 
   const body = await request.json()
   const { id, ...updates } = body
@@ -55,11 +69,9 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  const auth = await requireNavigationPermission()
+  if (auth.error) return auth.error
+  const supabase = auth.supabase
 
   const { id } = await request.json()
   const { error } = await supabase

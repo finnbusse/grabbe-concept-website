@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { checkPermission, getUserPermissions } from "@/lib/permissions"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+  const permissions = await getUserPermissions(user.id)
 
   let body: unknown
   try {
@@ -51,6 +53,28 @@ export async function POST(request: NextRequest) {
 
   if (!type) {
     return NextResponse.json({ error: "type is required" }, { status: 400 })
+  }
+
+  const hasPermissionForType = (() => {
+    switch (type) {
+      case "posts":
+        return checkPermission(permissions, "posts")
+      case "pages":
+        return checkPermission(permissions, "seitenEditor") || permissions.pages.edit
+      case "events":
+        return checkPermission(permissions, "events")
+      case "documents":
+        return checkPermission(permissions, "documents")
+      case "settings":
+        return checkPermission(permissions, "settings.advanced")
+      case "navigation":
+        return checkPermission(permissions, "navigation")
+      default:
+        return false
+    }
+  })()
+  if (!hasPermissionForType) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
   }
 
   // Validate path if provided
