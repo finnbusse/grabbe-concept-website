@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 import { getUserRoleSlugs, isAdminOrSchulleitung, isAdmin, setUserRoles } from "@/lib/permissions"
 import { revalidatePath } from "next/cache"
+import { writeAuditLog } from "@/lib/audit-log"
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -41,6 +42,14 @@ export async function POST(request: Request) {
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 })
     }
+
+    await writeAuditLog({
+      action: "user_roles.set",
+      actorUserId: user.id,
+      targetType: "user",
+      targetId: userId,
+      metadata: { roleIds },
+    })
 
     revalidatePath("/cms", "layout")
     return NextResponse.json({ success: true })

@@ -4,6 +4,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getUserPermissions } from "@/lib/permissions"
 import { isAllowedBlobUrl } from "@/lib/upload-security"
+import { writeAuditLog } from "@/lib/audit-log"
 
 export async function DELETE(request: NextRequest) {
   try {
@@ -33,6 +34,14 @@ export async function DELETE(request: NextRequest) {
     if (id) {
       await supabase.from("documents").delete().eq("id", id)
     }
+
+    await writeAuditLog({
+      action: "documents.delete",
+      actorUserId: user.id,
+      targetType: "document",
+      targetId: typeof id === "string" ? id : null,
+      metadata: { deletedBlobUrl: typeof url === "string" ? url : null },
+    })
 
     revalidateTag("documents", "max")
     revalidatePath("/downloads")

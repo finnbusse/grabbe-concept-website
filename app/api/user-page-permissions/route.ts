@@ -8,6 +8,11 @@ export async function GET(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
 
+  const roleSlugs = await getUserRoleSlugs(user.id)
+  if (!isAdminOrSchulleitung(roleSlugs)) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
+
   const url = new URL(request.url)
   const userId = url.searchParams.get("userId")
 

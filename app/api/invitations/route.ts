@@ -5,6 +5,7 @@ import { isAdmin } from "@/lib/permissions-shared"
 import { sendEmail } from "@/lib/email"
 import { invitationEmailTemplate } from "@/lib/email-templates/invitation"
 import { generateInvitationToken, guessFirstNameFromEmail, buildOnboardingUrl, hashInvitationToken } from "@/lib/invitation-tokens"
+import { writeAuditLog } from "@/lib/audit-log"
 import { NextResponse, type NextRequest } from "next/server"
 import { z } from "zod"
 
@@ -186,6 +187,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `E-Mail konnte nicht gesendet werden: ${emailResult.error}` }, { status: 500 })
     }
   }
+
+  await writeAuditLog({
+    action: "invitation.create",
+    actorUserId: user.id,
+    targetType: "invitation",
+    targetId: (invitation as { id: string }).id,
+    metadata: {
+      roleId,
+      email: email.toLowerCase(),
+      expiresAt,
+    },
+  })
 
   return NextResponse.json({ success: true, invitation, onboardingUrl })
 }

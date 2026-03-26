@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { checkPermission, getUserPermissions } from "@/lib/permissions"
+import { writeAuditLog } from "@/lib/audit-log"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { NextResponse, type NextRequest } from "next/server"
 
@@ -70,6 +71,13 @@ export async function PUT(request: NextRequest) {
       .upsert(rows as never, { onConflict: "key" })
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
+    await writeAuditLog({
+      action: "settings.bulk_upsert",
+      actorUserId: user.id,
+      targetType: "site_settings",
+      metadata: { keys: rows.map((row) => row.key) },
+    })
+
     revalidateSettingsPages()
     return NextResponse.json({ success: true })
   }
@@ -92,6 +100,14 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString(),
     } as never, { onConflict: "key" })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await writeAuditLog({
+    action: "settings.upsert",
+    actorUserId: user.id,
+    targetType: "site_settings",
+    targetId: key,
+    metadata: { key },
+  })
 
   revalidateSettingsPages()
   return NextResponse.json({ success: true })
@@ -125,6 +141,14 @@ export async function POST(request: NextRequest) {
     category: category ?? "allgemein",
   } as never)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  await writeAuditLog({
+    action: "settings.insert",
+    actorUserId: user.id,
+    targetType: "site_settings",
+    targetId: key,
+    metadata: { key, category: category ?? "allgemein" },
+  })
 
   revalidateSettingsPages()
   return NextResponse.json({ success: true })

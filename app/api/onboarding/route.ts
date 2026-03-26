@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin"
 import { hashInvitationToken, validateTokenSignature } from "@/lib/invitation-tokens"
 import { NextResponse, type NextRequest } from "next/server"
+import { writeAuditLog } from "@/lib/audit-log"
 
 export const dynamic = "force-dynamic"
 
@@ -153,38 +154,49 @@ export async function POST(request: NextRequest) {
 
   const userId = authData.user.id
 
-  const { error: profileError } = await adminClient.from("user_profiles").insert({
-    user_id: userId,
-    first_name: normalizedFirstName,
-    last_name: normalizedLastName,
-    title: "",
-  })
-
-  if (profileError) {
-    await adminClient.auth.admin.deleteUser(userId)
-    return NextResponse.json({ error: "Profil konnte nicht gespeichert werden" }, { status: 500 })
-  }
-
-  if (inv.role_id) {
-    const { error: roleError } = await adminClient.from("user_roles").insert({
+  try {
+    const { error: profileError } = await adminClient.from("user_profiles").insert({
       user_id: userId,
-      role_id: inv.role_id,
+      first_name: normalizedFirstName,
+      last_name: normalizedLastName,
+      title: "",
+    } as never)
+
+    if (profileError) {
+      throw new Error("Profil konnte nicht gespeichert werden")
+    }
+
+    if (inv.role_id) {
+      const { error: roleError } = await adminClient.from("user_roles").insert({
+        user_id: userId,
+        role_id: inv.role_id,
+      } as never)
+      if (roleError) {
+        throw new Error("Rolle konnte nicht zugewiesen werden")
+      }
+    }
+
+    const { error: invitationUpdateError } = await adminClient
+      .from("invitations")
+      .update({ accepted_at: new Date().toISOString() })
+      .eq("id", inv.id)
+      .is("accepted_at", null)
+    if (invitationUpdateError) {
+      throw new Error("Einladung konnte nicht finalisiert werden")
+    }
+
+    await writeAuditLog({
+      action: "onboarding.complete",
+      actorUserId: userId,
+      targetType: "invitation",
+      targetId: inv.id,
+      metadata: { roleId: inv.role_id },
     })
 
-    if (roleError) {
-      await adminClient.auth.admin.deleteUser(userId)
-      return NextResponse.json({ error: "Rolle konnte nicht zugewiesen werden" }, { status: 500 })
-    }
+    return NextResponse.json({ success: true, userId })
+  } catch (error) {
+    await adminClient.auth.admin.deleteUser(userId)
+    const message = error instanceof Error ? error.message : "Onboarding fehlgeschlagen"
+    return NextResponse.json({ error: message }, { status: 500 })
   }
-
-  const { error: invitationUpdateError } = await adminClient
-    .from("invitations")
-    .update({ accepted_at: new Date().toISOString() })
-    .eq("id", inv.id)
-
-  if (invitationUpdateError) {
-    return NextResponse.json({ error: "Einladung konnte nicht finalisiert werden" }, { status: 500 })
-  }
-
-  return NextResponse.json({ success: true, userId })
 }
