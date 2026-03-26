@@ -1294,9 +1294,9 @@ export const EDITABLE_PAGES: PageDefinition[] = [
         title: 'Inhalt',
         fields: [
           { key: 'page_title', label: 'Seitentitel', type: 'text' },
-          { key: 'verantwortlich', label: 'Verantwortlich', type: 'textarea' },
-          { key: 'anschrift', label: 'Anschrift', type: 'textarea' },
-          { key: 'kontakt_info', label: 'Kontakt', type: 'textarea' },
+          { key: 'verantwortlich', label: 'Verantwortlich', type: 'richtext' },
+          { key: 'anschrift', label: 'Anschrift', type: 'richtext' },
+          { key: 'kontakt_info', label: 'Kontakt', type: 'richtext' },
           { key: 'schultraeger', label: 'Schulträger', type: 'text' },
           { key: 'aufsichtsbehoerde', label: 'Aufsichtsbehörde', type: 'text' },
         ],
