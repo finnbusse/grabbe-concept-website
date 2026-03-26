@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
+import { checkPermission, getUserPermissions } from "@/lib/permissions"
 import { revalidatePath, revalidateTag } from "next/cache"
 import { NextResponse, type NextRequest } from "next/server"
 
@@ -19,6 +20,16 @@ function isValidSettingItem(item: { key?: unknown; value?: unknown }) {
 
 export async function GET() {
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const permissions = await getUserPermissions(user.id)
+  if (!checkPermission(permissions, "settings")) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
+
   const { data, error } = await supabase
     .from("site_settings")
     .select("*")
@@ -29,12 +40,17 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   const supabase = await createClient()
-  const adminSupabase = createAdminClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+  const permissions = await getUserPermissions(user.id)
+  if (!checkPermission(permissions, "settings.advanced")) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
+
+  const adminSupabase = createAdminClient()
   const body = await request.json()
 
   if (Array.isArray(body)) {
@@ -83,12 +99,17 @@ export async function PUT(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const adminSupabase = createAdminClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+  const permissions = await getUserPermissions(user.id)
+  if (!checkPermission(permissions, "settings.advanced")) {
+    return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
+  }
+
+  const adminSupabase = createAdminClient()
   const { key, value, type, label, category } = await request.json()
   if (typeof key !== "string" || key.trim().length === 0) {
     return NextResponse.json({ error: "Invalid payload: key is required" }, { status: 400 })

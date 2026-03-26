@@ -1,11 +1,21 @@
 import { createClient } from "@/lib/supabase/server"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { NextResponse } from "next/server"
+import { getUserRoleSlugs } from "@/lib/permissions"
+import { getUsersRouteAuthorization } from "@/lib/users-route-rbac"
 
 export async function GET() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
+  const roleSlugs = user ? await getUserRoleSlugs(user.id) : []
+  const authz = getUsersRouteAuthorization({
+    method: "GET",
+    isAuthenticated: !!user,
+    roleSlugs,
+  })
+  if (!authz.allowed) {
+    return NextResponse.json({ error: authz.error }, { status: authz.status })
+  }
 
   try {
     const adminClient = createAdminClient()
@@ -54,7 +64,15 @@ export async function GET() {
 export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
+  const roleSlugs = user ? await getUserRoleSlugs(user.id) : []
+  const authz = getUsersRouteAuthorization({
+    method: "POST",
+    isAuthenticated: !!user,
+    roleSlugs,
+  })
+  if (!authz.allowed) {
+    return NextResponse.json({ error: authz.error }, { status: authz.status })
+  }
 
   const body = await request.json()
   const { email, password, first_name, last_name, title: userTitle } = body
@@ -91,7 +109,15 @@ export async function POST(request: Request) {
 export async function DELETE(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 })
+  const roleSlugs = user ? await getUserRoleSlugs(user.id) : []
+  const authz = getUsersRouteAuthorization({
+    method: "DELETE",
+    isAuthenticated: !!user,
+    roleSlugs,
+  })
+  if (!authz.allowed) {
+    return NextResponse.json({ error: authz.error }, { status: authz.status })
+  }
 
   const body = await request.json()
   const { userId } = body
