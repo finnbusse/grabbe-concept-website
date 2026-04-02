@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
-import { formatEventTime } from "@/lib/db-helpers"
+import { formatEventTime } from "@/lib/format-helpers"
 import Link from "next/link"
 import { Plus, CalendarDays, MapPin, Tag as TagIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"

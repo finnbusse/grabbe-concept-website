@@ -306,7 +306,7 @@ function BoolRow({
       <Switch
         id={id}
         checked={checked}
-        onCheckedChange={(v) => onChange(field.set(permissions, v))}
+        onCheckedChange={(v: boolean) => onChange(field.set(permissions, v))}
         disabled={disabled}
       />
     </div>
@@ -330,7 +330,7 @@ function ThreeStateRow({
       <span className={`text-sm pt-0.5 ${disabled ? "text-muted-foreground" : ""}`}>{field.label}</span>
       <RadioGroup
         value={value}
-        onValueChange={(v) => onChange(field.set(permissions, fromRadioValue(v as ThreeStateValue)))}
+        onValueChange={(v: string) => onChange(field.set(permissions, fromRadioValue(v as ThreeStateValue)))}
         disabled={disabled}
         className="flex gap-3"
       >

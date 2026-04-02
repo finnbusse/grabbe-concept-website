@@ -1,124 +1,61 @@
-import { createStaticClient } from "@/lib/supabase/static"
-import { createClient } from "@/lib/supabase/server"
-import { unstable_cache } from "next/cache"
-import { parseDesignSettings } from "@/lib/design-settings"
-import type { DesignSettings } from "@/lib/design-settings"
+import { createStaticClient as createClient } from "@/lib/supabase/static"
+import { getSecret, setSecret, deleteSecret } from "@/lib/secrets"
 
-// Re-export for convenience
-export { DESIGN_DEFAULTS } from "@/lib/design-settings"
-export type { DesignSettings } from "@/lib/design-settings"
+// Task 107: Consolidate `lib/db-helpers.ts` settings functions with `lib/settings.ts`.
+// Here we define the single clear path to read settings.
 
-/** Fetch design settings (cached with ISR) */
-export const getDesignSettings = unstable_cache(
-  async (): Promise<DesignSettings> => {
-    const supabase = createStaticClient()
-    const { data } = await supabase
-      .from("site_settings")
-      .select("value")
-      .eq("key", "design_settings")
-      .single()
-    const row = data as { value: string } | null
-    return parseDesignSettings(row?.value)
-  },
-  ["design-settings"],
-  { revalidate: 3600, tags: ["settings", "design_settings"] }
-)
-
-export type SiteSetting = {
-  id: string
-  key: string
-  value: string
-  type: string
-  label: string | null
-  category: string
-  updated_at: string
+export interface SiteSettings {
+  [key: string]: string
 }
 
-export type NavItem = {
-  id: string
-  label: string
-  href: string
-  parent_id: string | null
-  sort_order: number
-  visible: boolean
-  location: string
-  children?: NavItem[]
-}
-
-/** Fetch all site settings as a key-value map (cached) */
-export const getSettings = unstable_cache(
-  async (): Promise<Record<string, string>> => {
-    const supabase = createStaticClient()
-    const { data } = await supabase
-      .from("site_settings")
-      .select("key, value")
-      .order("key")
-    const map: Record<string, string> = {}
-    data?.forEach((s) => {
-      map[s.key] = s.value
-    })
-    return map
-  },
-  ["site-settings"],
-  { revalidate: 3600, tags: ["settings"] }
-)
-
-/** Fetch all settings rows (for CMS editing — NOT cached) */
-export async function getSettingsRows(): Promise<SiteSetting[]> {
-  const supabase = await createClient()
+/**
+ * Fetch a single setting from site_settings.
+ */
+export async function getSetting(key: string, defaultValue: string = ""): Promise<string> {
+  const supabase = createClient()
   const { data } = await supabase
     .from("site_settings")
-    .select("*")
-    .order("category, key")
-  return (data as SiteSetting[]) ?? []
+    .select("value")
+    .eq("key", key)
+    .single()
+
+  return data?.value || defaultValue
 }
 
-/** Fetch navigation items for a given location, nested (cached) */
-export async function getNavigation(location: string): Promise<NavItem[]> {
-  return unstable_cache(
-    async (): Promise<NavItem[]> => {
-      const supabase = createStaticClient()
-      const { data } = await supabase
-        .from("navigation_items")
-        .select("id, label, href, parent_id, sort_order, visible, location")
-        .eq("location", location)
-        .eq("visible", true)
-        .order("sort_order")
+/**
+ * Fetch multiple settings by category.
+ */
+export async function getSettingsByCategory(category: string): Promise<SiteSettings> {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from("site_settings")
+    .select("key, value")
+    .eq("category", category)
 
-      if (!data) return []
+  if (!data) return {}
 
-      const items = data as NavItem[]
-      const parents = items.filter((i) => !i.parent_id)
-      const children = items.filter((i) => i.parent_id)
-
-      return parents.map((p) => ({
-        ...p,
-        children: children
-          .filter((c) => c.parent_id === p.id)
-          .sort((a, b) => a.sort_order - b.sort_order),
-      }))
-    },
-    ["navigation", location],
-    { revalidate: 3600, tags: ["navigation"] }
-  )()
+  return data.reduce((acc, row) => {
+    acc[row.key] = row.value
+    return acc
+  }, {} as SiteSettings)
 }
 
-/** Fetch all nav items flat (for CMS editing — NOT cached) */
-export async function getAllNavItems(location?: string): Promise<NavItem[]> {
-  const supabase = createStaticClient()
-  let query = supabase
-    .from("navigation_items")
-    .select("*")
-    .order("location, sort_order")
-  if (location) {
-    query = query.eq("location", location)
-  }
-  const { data } = await query
-  return (data as NavItem[]) ?? []
+/**
+ * Fetch all settings.
+ */
+export async function getAllSettings(): Promise<SiteSettings> {
+  const supabase = createClient()
+  const { data } = await supabase
+    .from("site_settings")
+    .select("key, value")
+
+  if (!data) return {}
+
+  return data.reduce((acc, row) => {
+    acc[row.key] = row.value
+    return acc
+  }, {} as SiteSettings)
 }
 
-/** Helper: get a single setting by key (uses cached batch query) */
-export async function getSetting(key: string): Promise<string> {
-  const settings = await getSettings()
-  return settings[key] ?? ""
-}
+// Re-export secrets to keep API consistent
+export { getSecret, setSecret, deleteSecret }

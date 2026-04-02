@@ -16,6 +16,7 @@ import { getDesignSettings, DESIGN_DEFAULTS } from "@/lib/settings"
 import type { DesignSettings } from "@/lib/settings"
 import { tailwindToHex } from "@/lib/design-settings"
 import "./globals.css"
+import "@/lib/accessibility-fixes.css"
 
 const _instrumentSerif = Instrument_Serif({
   subsets: ["latin"],

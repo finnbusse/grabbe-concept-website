@@ -45,15 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   })
 }
 
-function isBlockContent(content: string): boolean {
-  try {
-    if (content.startsWith('[{') || content.startsWith('[{"')) {
-      const parsed = JSON.parse(content)
-      return Array.isArray(parsed) && parsed.length > 0 && parsed[0].type && parsed[0].id
-    }
-  } catch { /* not blocks */ }
-  return false
-}
+import { DynamicPageRenderer } from "@/lib/dynamic-page-renderer"
 
 export default async function UnsereSchuleDynamicPage({ params }: Props) {
   const { slug } = await params
@@ -63,30 +55,5 @@ export default async function UnsereSchuleDynamicPage({ params }: Props) {
 
   if (!page) notFound()
 
-  const useBlocks = isBlockContent(page.content)
-
-  return (
-    <SiteLayout>
-      <main>
-        <PageHero
-          title={page.title}
-          label={page.section || undefined}
-          subtitle={page.hero_subtitle || undefined}
-          imageUrl={page.hero_image_url || undefined}
-        />
-        <Breadcrumbs items={[
-          { name: "Unsere Schule", href: "/unsere-schule/erprobungsstufe" },
-          { name: page.title, href: `/unsere-schule/${slug.join("/")}` },
-        ]} />
-
-        <section className="mx-auto max-w-6xl px-4 py-28 lg:py-36 lg:px-8">
-          {useBlocks ? (
-            <BlockContentRenderer content={page.content} />
-          ) : (
-            <MarkdownContent content={page.content} />
-          )}
-        </section>
-      </main>
-    </SiteLayout>
-  )
+  return <DynamicPageRenderer page={page} />
 }

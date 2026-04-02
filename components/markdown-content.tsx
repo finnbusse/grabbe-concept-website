@@ -1,3 +1,5 @@
+import Image from "next/image"
+
 /**
  * Simple Markdown-like content renderer.
  * Supports: **bold**, *italic*, ## headings, [links](url), ![images](url),
@@ -29,10 +31,20 @@ export function MarkdownContent({ content }: { content: string }) {
 
     while (remaining.length > 0) {
       // Image: ![alt](url)
+      // Image: ![alt](url)
+      // Task 155: Replace markdown img with responsive picture/next-image or proper layout.
       const imgMatch = remaining.match(/^!\[([^\]]*)\]\(([^)]+)\)/)
       if (imgMatch) {
         parts.push(
-          <img key={`i${idx++}`} src={imgMatch[2]} alt={imgMatch[1]} className="my-4 rounded-lg max-w-full" />
+          <div key={`i${idx++}`} className="relative my-6 w-full overflow-hidden rounded-xl bg-muted" style={{ minHeight: '300px' }}>
+            <Image
+              src={imgMatch[2]}
+              alt={imgMatch[1]}
+              fill
+              sizes="(max-width: 768px) 100vw, 800px"
+              className="object-contain"
+            />
+          </div>
         )
         remaining = remaining.slice(imgMatch[0].length)
         continue
@@ -82,8 +94,45 @@ export function MarkdownContent({ content }: { content: string }) {
     return parts.length === 1 ? parts[0] : parts
   }
 
+  let inList: "ul" | "ol" | null = null
+  const currentListItems: React.ReactNode[] = []
+
+  function flushList() {
+    if (inList === "ul") {
+      elements.push(<ul key={key++} className="list-disc ml-6 mb-4 space-y-1">{[...currentListItems]}</ul>)
+    } else if (inList === "ol") {
+      elements.push(<ol key={key++} className="list-decimal ml-6 mb-4 space-y-1">{[...currentListItems]}</ol>)
+    }
+    inList = null
+    currentListItems.length = 0
+  }
+
   for (const line of lines) {
     const trimmed = line.trim()
+
+    // Handle Lists
+    const isUnordered = trimmed.startsWith("- ") || trimmed.startsWith("* ")
+    const orderedMatch = trimmed.match(/^(\d+)\.\s+(.*)/)
+
+    if (isUnordered || orderedMatch) {
+      flushParagraph()
+      const targetListType = isUnordered ? "ul" : "ol"
+      const content = isUnordered ? trimmed.slice(2) : orderedMatch![2]
+
+      if (inList !== targetListType) {
+        flushList()
+        inList = targetListType
+      }
+
+      currentListItems.push(
+        <li key={`li${key++}`} className="text-muted-foreground leading-relaxed">
+          {renderInline(content)}
+        </li>
+      )
+      continue
+    } else {
+      flushList() // if it's not a list item, flush the list
+    }
 
     if (trimmed === "") {
       flushParagraph()
@@ -118,29 +167,6 @@ export function MarkdownContent({ content }: { content: string }) {
       continue
     }
 
-    // Unordered lists
-    if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
-      flushParagraph()
-      elements.push(
-        <li key={key++} className="text-muted-foreground leading-relaxed ml-6 list-disc mb-1">
-          {renderInline(trimmed.slice(2))}
-        </li>
-      )
-      continue
-    }
-
-    // Ordered lists (e.g. "1. item", "2. item")
-    const orderedMatch = trimmed.match(/^(\d+)\.\s+(.*)/)
-    if (orderedMatch) {
-      flushParagraph()
-      elements.push(
-        <li key={key++} className="text-muted-foreground leading-relaxed ml-6 list-decimal mb-1">
-          {renderInline(orderedMatch[2])}
-        </li>
-      )
-      continue
-    }
-
     // Horizontal rule
     if (trimmed === "---" || trimmed === "***") {
       flushParagraph()
@@ -152,6 +178,7 @@ export function MarkdownContent({ content }: { content: string }) {
   }
 
   flushParagraph()
+  flushList()
 
   return <div>{elements}</div>
 }

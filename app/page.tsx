@@ -11,6 +11,7 @@ import { PartnersSection } from "@/components/partners-section"
 import { CampaignPopup } from "@/components/campaign-popup"
 import { createStaticClient as createClient } from "@/lib/supabase/static"
 import { PAGE_DEFAULTS, getMultiplePageContents } from "@/lib/page-content"
+import { enrichPostsWithAuthors } from "@/lib/author-enricher"
 import type { Campaign } from "@/lib/types/database.types"
 
 export const revalidate = 300
@@ -45,7 +46,8 @@ export default async function HomePage() {
       .from("campaigns")
       .select("*")
       .eq("is_active", true)
-      .order("created_at", { ascending: false }),
+      .order("created_at", { ascending: false })
+      .returns<Campaign[]>(),
   ])
 
   // Fetch author profiles for posts
@@ -88,7 +90,7 @@ export default async function HomePage() {
         <ContactSection />
         <PartnersSection content={pageContents['homepage-partners']} />
       </main>
-      <CampaignPopup campaigns={(campaignsRes.data || []) as unknown as Campaign[]} />
+      <CampaignPopup campaigns={campaignsRes.data || []} />
     </SiteLayout>
   )
 }

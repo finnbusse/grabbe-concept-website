@@ -1,5 +1,6 @@
 "use client"
 
+import { TableSkeleton } from "@/components/cms/table-skeleton"
 import { Suspense, useEffect, useState, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -1262,7 +1263,7 @@ function SeitenstrukturContent() {
 
 export default function SeitenstrukturPage() {
   return (
-    <Suspense fallback={<div className="py-12 text-center text-muted-foreground">Laden...</div>}>
+    <Suspense fallback={<TableSkeleton />}>
       <SeitenstrukturContent />
     </Suspense>
   )

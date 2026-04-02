@@ -5,7 +5,7 @@
  */
 
 import { createStaticClient as createClient } from "@/lib/supabase/static"
-import { formatEventTime } from "@/lib/db-helpers"
+import { formatEventTime } from "@/lib/format-helpers"
 import { CalendarDays, Clock, MapPin, Download, FileText, ChevronRight } from "lucide-react"
 
 interface TaggedSectionProps {

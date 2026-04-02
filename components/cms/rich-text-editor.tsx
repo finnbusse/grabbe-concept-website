@@ -22,8 +22,12 @@ import {
   Pilcrow,
   Eye,
   Edit3,
+  Blocks,
 } from "lucide-react"
 import { ImagePicker } from "./image-picker"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { CardBlockNode } from "./editor/card-block-node"
+import { CardGridNode } from "./editor/card-grid-node"
 
 // ============================================================================
 // Types
@@ -70,6 +74,8 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
         transformPastedText: true,
         transformCopiedText: true,
       }),
+      CardBlockNode,
+      CardGridNode,
     ],
     content: content || "",
     editorProps: {
@@ -545,6 +551,44 @@ function EditorToolbar({
       <ToolbarButton onClick={onImageClick} title="Bild einfügen">
         <ImageIcon className="h-4 w-4" />
       </ToolbarButton>
+
+      {/* Components (Interactive Blocks) */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            title="Komponente einfügen"
+            className="flex items-center justify-center rounded-lg p-2 text-sm transition-colors text-muted-foreground hover:bg-muted hover:text-foreground cursor-pointer"
+          >
+            <Blocks className="h-4 w-4 text-primary" />
+            <span className="ml-2 font-medium text-xs">Komponenten</span>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-2">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-2 py-1">Inhaltselemente</span>
+            <button
+              onClick={() => editor.chain().focus().insertContent({ type: 'cardBlock' }).run()}
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent text-left"
+            >
+              <div className="h-4 w-4 rounded bg-primary/20" />
+              Einzelkarte
+            </button>
+            <button
+              onClick={() => editor.chain().focus().insertContent({ type: 'cardGrid' }).run()}
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent text-left"
+            >
+              <div className="grid grid-cols-2 gap-0.5 h-4 w-4">
+                <div className="bg-primary/20 rounded-sm" />
+                <div className="bg-primary/20 rounded-sm" />
+                <div className="bg-primary/20 rounded-sm" />
+                <div className="bg-primary/20 rounded-sm" />
+              </div>
+              Karten-Raster
+            </button>
+          </div>
+        </PopoverContent>
+      </Popover>
 
       <ToolbarDivider />
 

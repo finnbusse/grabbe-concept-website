@@ -1,5 +1,6 @@
 "use client"
 
+import { TableSkeleton } from "@/components/cms/table-skeleton"
 import { Suspense, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -47,7 +48,7 @@ function AnmeldungenTab() {
   }, [])
 
   if (!loaded) {
-    return <div className="py-12 text-center text-muted-foreground">Laden...</div>
+    return <TableSkeleton />
   }
 
   const handleDelete = async (id: string) => {
@@ -209,7 +210,7 @@ function KontaktTab() {
   }, [])
 
   if (!loaded) {
-    return <div className="py-12 text-center text-muted-foreground">Laden...</div>
+    return <TableSkeleton />
   }
 
   return <MessagesInbox initialMessages={messages} />
@@ -256,7 +257,7 @@ function NachrichtenContent() {
 
 export default function NachrichtenPage() {
   return (
-    <Suspense fallback={<div className="py-12 text-center text-muted-foreground">Laden...</div>}>
+    <Suspense fallback={<TableSkeleton />}>
       <NachrichtenContent />
     </Suspense>
   )

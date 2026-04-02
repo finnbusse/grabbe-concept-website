@@ -196,13 +196,22 @@ export default function CmsPagesPage() {
           })}
         </div>
       ) : (
-        <div className="mt-8 rounded-2xl border border-dashed border-border py-16 text-center">
+        <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-12 text-center animate-in fade-in duration-500">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 mb-4">
+            <FileText className="h-10 w-10 text-primary opacity-60" />
+          </div>
           {pages.length > 0 ? (
-            <p className="text-muted-foreground">Keine Seiten gefunden.</p>
+            <>
+              <h2 className="text-xl font-semibold mb-2">Keine Seiten gefunden</h2>
+              <p className="text-muted-foreground">Probieren Sie einen anderen Suchbegriff.</p>
+            </>
           ) : (
             <>
-              <p className="text-muted-foreground">Noch keine Seiten vorhanden.</p>
-              <Button asChild className="mt-4">
+              <h2 className="text-xl font-semibold mb-2">Noch keine Seiten vorhanden</h2>
+              <p className="text-muted-foreground mb-6 max-w-sm">
+                Erstellen Sie Ihre erste CMS-Seite, um Inhalte auf der Website zu veröffentlichen.
+              </p>
+              <Button asChild>
                 <Link href="/cms/pages/new">
                   <Plus className="mr-2 h-4 w-4" />
                   Erste Seite erstellen

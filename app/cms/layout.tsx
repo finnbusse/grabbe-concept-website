@@ -12,9 +12,10 @@ export default async function CmsLayout({ children }: { children: React.ReactNod
     redirect("/auth/login")
   }
 
-  // Fetch user profile (gracefully handle missing table or columns)
+  // Fetch user profile
   let userProfile = null
   try {
+    // Task 71: Remove silent fallback for missing `avatar_url`.
     const { data, error } = await supabase
       .from("user_profiles")
       .select("first_name, last_name, title, avatar_url")
@@ -22,16 +23,6 @@ export default async function CmsLayout({ children }: { children: React.ReactNod
       .single()
     if (!error) {
       userProfile = data
-    } else if (error.message?.includes("avatar_url")) {
-      // avatar_url column doesn't exist yet - query without it
-      const { data: fallbackData } = await supabase
-        .from("user_profiles")
-        .select("first_name, last_name, title")
-        .eq("user_id", user.id)
-        .single()
-      if (fallbackData) {
-        userProfile = { ...fallbackData, avatar_url: null }
-      }
     }
   } catch {
     // Table may not exist yet
