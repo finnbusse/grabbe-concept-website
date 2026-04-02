@@ -5,7 +5,8 @@
 
 import { ChevronDown, CalendarDays, MapPin, Clock, Download, FileText } from "lucide-react"
 import { createStaticClient as createClient } from "@/lib/supabase/static"
-import { formatEventTime } from "@/lib/db-helpers"
+import { formatEventTime } from "@/lib/format-helpers"
+import Image from "next/image"
 
 interface ContentBlock {
   id: string
@@ -268,8 +269,14 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       return (
         <div className={`mb-12 grid gap-4 ${validImages.length <= 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-3'}`}>
           {validImages.map((img, i) => (
-            <div key={i} className="overflow-hidden rounded-2xl border border-border/60">
-              <img src={img.url} alt={img.alt || ''} className="w-full h-auto object-cover" />
+            <div key={i} className="relative overflow-hidden rounded-2xl border border-border/60 aspect-[4/3]">
+              <Image
+                src={img.url}
+                alt={img.alt || ''}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover"
+              />
             </div>
           ))}
         </div>
@@ -295,6 +302,7 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       )
     }
     case 'iframe': {
+      // Task 165, 166: Iframe Security and Lazy Loading
       const url = block.data.url as string
       const title = (block.data.title as string) || 'Eingebettete Website'
       const height = (block.data.height as string) || '500'
@@ -302,17 +310,34 @@ function BlockRenderer({ block }: { block: ContentBlock }) {
       const allowFullscreen = (block.data.allowFullscreen as boolean) !== false
       const showBorder = (block.data.showBorder as boolean) !== false
       const caption = block.data.caption as string
+
       if (!url) return null
+
+      // Simple domain allowlist for iframe security.
+      // E.g., block arbitrary unsafe hosts. Realistically, youtube, vimeo, maps, or local domain is fine.
+      const safeUrlPattern = /^(https:\/\/|http:\/\/)(www\.)?(youtube\.com|youtu\.be|vimeo\.com|google\.com\/maps|forms\.office\.com|grabbe\.site|localhost).*$/i
+      const isSafe = safeUrlPattern.test(url)
+
+      if (!isSafe) {
+        return (
+          <div className="mb-12 p-4 border border-destructive/50 bg-destructive/10 rounded-xl text-destructive text-sm text-center">
+            Die eingebettete Quelle ({new URL(url).hostname}) ist aus Sicherheitsgründen nicht zugelassen.
+          </div>
+        )
+      }
+
       return (
         <div className="mb-12">
-          <div className={`overflow-hidden ${showBorder ? 'rounded-2xl border border-border/60' : 'rounded-2xl'}`}>
+          <div className={`overflow-hidden bg-muted ${showBorder ? 'rounded-2xl border border-border/60' : 'rounded-2xl'}`}>
             <iframe
               src={url}
               title={title}
               height={height}
               scrolling={scrolling}
+              loading="lazy"
               allowFullScreen={allowFullscreen}
-              className="w-full"
+              sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-presentation"
+              className="w-full transition-opacity duration-300"
               style={{ border: 'none', display: 'block' }}
             />
           </div>

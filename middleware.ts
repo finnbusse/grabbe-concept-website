@@ -2,11 +2,12 @@ import { updateSession } from '@/lib/supabase/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isIpBlocked } from '@/lib/rate-limiter'
 
-// Known filesystem routes that should NOT be rewritten
+// Task 88: Known filesystem routes that should NOT be rewritten
+import { SYSTEM_ROUTES } from '@/lib/page-content'
+
 const KNOWN_ROUTES = new Set([
-  '', 'aktuelles', 'termine', 'downloads', 'kontakt', 'impressum', 'datenschutz',
-  'unsere-schule', 'schulleben', 'unterricht', 'seiten', 'cms', 'auth', 'api', 'protected', 'onboarding',
-  'p',
+  '', 'cms', 'auth', 'api', 'protected', 'onboarding', 'p',
+  ...SYSTEM_ROUTES.map(r => r.path.split('/')[1]).filter(Boolean)
 ])
 
 export async function middleware(request: NextRequest) {
@@ -110,9 +111,13 @@ export async function middleware(request: NextRequest) {
       return sessionResponse
     }
 
-    // If the first segment is NOT a known route, this might be a custom category page
-    // Rewrite to /seiten/[...slug] which handles DB lookup
-    if (!KNOWN_ROUTES.has(firstSegment) && !firstSegment.startsWith('_')) {
+    // Task 89: Limit the broad rewrite rule for custom category pages.
+    // Ensure we only rewrite explicitly unknown paths that don't match static folders like `images` or `fonts`.
+    if (
+      !KNOWN_ROUTES.has(firstSegment) &&
+      !firstSegment.startsWith('_') &&
+      !['images', 'fonts', 'favicon.ico'].includes(firstSegment)
+    ) {
       const rewriteUrl = request.nextUrl.clone()
       rewriteUrl.pathname = `/seiten/${segments.join('/')}`
 

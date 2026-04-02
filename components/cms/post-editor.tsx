@@ -185,14 +185,14 @@ export function PostEditor({ post }: PostEditorProps) {
         await supabase.from("post_tags").delete().eq("post_id", post.id)
         if (tagIds.length > 0) {
           await supabase.from("post_tags").insert(
-            tagIds.map((tag_id) => ({ post_id: post.id, tag_id }))
+            tagIds.map((tag_id) => ({ post_id: post.id, tag_id }) as never)
           )
         }
         // Save author teachers
         await supabase.from("post_authors").delete().eq("post_id", post.id)
         if (authorTeacherIds.length > 0) {
           await supabase.from("post_authors").insert(
-            authorTeacherIds.map((teacher_id) => ({ post_id: post.id, teacher_id }))
+            authorTeacherIds.map((teacher_id) => ({ post_id: post.id, teacher_id }) as never)
           )
         }
       } else {
@@ -202,16 +202,17 @@ export function PostEditor({ post }: PostEditorProps) {
           .select("id")
           .eq("slug", slug)
           .order("created_at", { ascending: false })
-          .limit(1)
+          .limit(1) as { data: { id: string }[] | null }
+
         if (newPosts && newPosts.length > 0 && tagIds.length > 0) {
           await supabase.from("post_tags").insert(
-            tagIds.map((tag_id) => ({ post_id: newPosts[0].id, tag_id }))
+            tagIds.map((tag_id) => ({ post_id: newPosts[0].id, tag_id }) as never)
           )
         }
         // Save author teachers for new post
         if (newPosts && newPosts.length > 0 && authorTeacherIds.length > 0) {
           await supabase.from("post_authors").insert(
-            authorTeacherIds.map((teacher_id) => ({ post_id: newPosts[0].id, teacher_id }))
+            authorTeacherIds.map((teacher_id) => ({ post_id: newPosts[0].id, teacher_id }) as never)
           )
         }
       }

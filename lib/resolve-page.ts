@@ -8,29 +8,20 @@ import { createClient } from "@/lib/supabase/server"
  * @param routePath - Optional route path prefix (e.g., "/unsere-schule")
  * @returns The page data or null if not found
  */
-export async function resolveCustomPage(slug: string, routePath?: string) {
+export async function resolveCustomPage(slug: string, routePath: string = "/") {
   const supabase = await createClient()
 
-  if (routePath) {
-    // Try exact route_path + slug match first
-    const { data } = await supabase
-      .from("pages")
-      .select("*")
-      .eq("slug", slug)
-      .eq("route_path", routePath)
-      .eq("status", "published")
-      .single()
-
-    if (data) return data
-  }
-
-  // Fallback: try slug-only lookup
-  const { data: fallback } = await supabase
+  // Security/Correctness Point 54: Removed arbitrary slug-only fallback to enforce strict
+  // routing contracts based on route_path + slug uniqueness.
+  const { data, error } = await supabase
     .from("pages")
     .select("*")
     .eq("slug", slug)
+    .eq("route_path", routePath)
     .eq("status", "published")
     .single()
 
-  return fallback
+  if (error || !data) return null
+
+  return data
 }

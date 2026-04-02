@@ -34,52 +34,26 @@ export async function generateStaticParams() {
 
 /**
  * Resolves a page from the URL segments.
- * Supports:
- *   /seiten/my-page          -> slug = "my-page", no route_path
- *   /seiten/category/my-page -> slug = "my-page", route_path = "/category"
- *   (also handles middleware rewrites from /category/my-page)
+ * Supports strict route mapping:
+ *   /my-page          -> slug = "my-page", route_path = "/"
+ *   /category/my-page -> slug = "my-page", route_path = "/category"
  */
 async function resolvePage(segments: string[]) {
   const supabase = createClient()
 
-  if (segments.length === 1) {
-    // Simple slug lookup: /seiten/my-page
-    const { data } = await supabase
-      .from("pages")
-      .select("*")
-      .eq("slug", segments[0])
-      .eq("status", "published")
-      .single()
-    return data
-  }
+  const pageSlug = segments[segments.length - 1]
+  const routePath = segments.length > 1 ? "/" + segments.slice(0, -1).join("/") : "/"
 
-  if (segments.length >= 2) {
-    // Hierarchical lookup: /seiten/category/subcategory/my-page
-    const pageSlug = segments[segments.length - 1]
-    const routePath = "/" + segments.slice(0, -1).join("/")
+  // Point 55: Removed fallback for arbitrary slug matching to enforce uniqueness and canonical safety.
+  const { data } = await supabase
+    .from("pages")
+    .select("*")
+    .eq("slug", pageSlug)
+    .eq("route_path", routePath)
+    .eq("status", "published")
+    .single()
 
-    // Try route_path + slug match
-    const { data } = await supabase
-      .from("pages")
-      .select("*")
-      .eq("slug", pageSlug)
-      .eq("route_path", routePath)
-      .eq("status", "published")
-      .single()
-
-    if (data) return data
-
-    // Fallback: try slug-only lookup (page may have been moved)
-    const { data: fallback } = await supabase
-      .from("pages")
-      .select("*")
-      .eq("slug", pageSlug)
-      .eq("status", "published")
-      .single()
-    return fallback
-  }
-
-  return null
+  return data
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -102,15 +76,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   })
 }
 
-function isBlockContent(content: string): boolean {
-  try {
-    if (content.startsWith('[{') || content.startsWith('[{"')) {
-      const parsed = JSON.parse(content)
-      return Array.isArray(parsed) && parsed.length > 0 && parsed[0].type && parsed[0].id
-    }
-  } catch { /* not blocks */ }
-  return false
-}
+import { DynamicPageRenderer } from "@/lib/dynamic-page-renderer"
 
 export default async function DynamicPage({ params }: Props) {
   const { slug } = await params
@@ -118,39 +84,5 @@ export default async function DynamicPage({ params }: Props) {
 
   if (!page) notFound()
 
-  const useBlocks = isBlockContent(page.content)
-  const routePrefix = page.route_path || ""
-  const fullPath = routePrefix ? `${routePrefix}/${page.slug}` : `/seiten/${page.slug}`
-
-  const seo = await getSEOSettings()
-  const webPageJsonLd = generateWebPageJsonLd({
-    seo,
-    title: page.seo_title || page.title,
-    description: page.meta_description || seo.defaultDescription,
-    url: `${seo.siteUrl}${fullPath}`,
-    breadcrumbs: [{ name: page.title, href: fullPath }],
-  })
-
-  return (
-    <SiteLayout>
-      <main>
-        <JsonLd data={webPageJsonLd} />
-        <PageHero
-          title={page.title}
-          label={page.section || undefined}
-          subtitle={page.hero_subtitle || undefined}
-          imageUrl={page.hero_image_url || undefined}
-        />
-        <Breadcrumbs items={[{ name: page.title, href: fullPath }]} />
-
-        <section className="mx-auto max-w-6xl px-4 py-28 lg:py-36 lg:px-8">
-          {useBlocks ? (
-            <BlockContentRenderer content={page.content} />
-          ) : (
-            <MarkdownContent content={page.content} />
-          )}
-        </section>
-      </main>
-    </SiteLayout>
-  )
+  return <DynamicPageRenderer page={page} />
 }

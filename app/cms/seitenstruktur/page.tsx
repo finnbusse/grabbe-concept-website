@@ -1,3 +1,4 @@
+import { TableSkeleton } from "@/components/cms/table-skeleton"
 "use client"
 
 import { Suspense, useEffect, useState, useCallback } from "react"
@@ -1262,7 +1263,7 @@ function SeitenstrukturContent() {
 
 export default function SeitenstrukturPage() {
   return (
-    <Suspense fallback={<div className="py-12 text-center text-muted-foreground">Laden...</div>}>
+    <Suspense fallback={<TableSkeleton />}>
       <SeitenstrukturContent />
     </Suspense>
   )

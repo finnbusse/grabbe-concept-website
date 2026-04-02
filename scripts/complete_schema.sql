@@ -518,3 +518,81 @@ CREATE TRIGGER update_tags_updated_at
 -- ============================================================================
 -- END OF SCHEMA
 -- ============================================================================
+
+-- 11. Pages uniqueness (Points 56, 57)
+-- Add unique constraint for route_path + slug to ensure predictable routing
+ALTER TABLE public.pages DROP CONSTRAINT IF EXISTS pages_route_path_slug_key;
+ALTER TABLE public.pages ADD CONSTRAINT pages_route_path_slug_key UNIQUE (route_path, slug);
+
+
+-- ============================================================================
+-- WAVE 1: SCHEMA CORRECTIONS (Points 65-67)
+-- ============================================================================
+
+-- Fix `status` documentation/implementation
+-- Historically, some documentation relied on `published` boolean, but the actual app
+-- uses `status TEXT CHECK (status IN ('draft', 'published'))` for most entities.
+-- Let's ensure the `pages` table matches the rest of the application's actual pattern
+-- since `app/seiten/[...slug]/page.tsx` filters by `.eq('status', 'published')`.
+
+-- Add `status` to pages if it doesn't exist, and migrate `published` boolean over.
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'pages' AND column_name = 'status') THEN
+        ALTER TABLE public.pages ADD COLUMN status TEXT DEFAULT 'draft';
+        UPDATE public.pages SET status = CASE WHEN published = true THEN 'published' ELSE 'draft' END;
+        ALTER TABLE public.pages ADD CONSTRAINT pages_status_check CHECK (status IN ('draft', 'published'));
+    END IF;
+END $$;
+
+-- Align `events` table with the real application code.
+-- The application queries `starts_at, ends_at, is_all_day, timezone` instead of `event_date`.
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'events' AND column_name = 'starts_at') THEN
+        ALTER TABLE public.events ADD COLUMN starts_at TIMESTAMPTZ;
+        ALTER TABLE public.events ADD COLUMN ends_at TIMESTAMPTZ;
+        ALTER TABLE public.events ADD COLUMN is_all_day BOOLEAN DEFAULT false;
+        ALTER TABLE public.events ADD COLUMN timezone TEXT DEFAULT 'Europe/Berlin';
+
+        -- Migrate old data if present
+        UPDATE public.events SET starts_at = event_date WHERE event_date IS NOT NULL;
+    END IF;
+END $$;
+
+-- ============================================================================
+-- WAVE 6: CONTENT VERSIONING (Git-like history)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.content_versions (
+    id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+    entity_type text NOT NULL CHECK (entity_type IN ('page', 'post', 'setting')),
+    entity_id text NOT NULL, -- e.g. page UUID or setting key
+    user_id uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+    snapshot jsonb NOT NULL,
+    created_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+    commit_message text
+);
+
+ALTER TABLE public.content_versions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "content_versions_select_admin" ON public.content_versions
+  FOR SELECT USING (
+    auth.uid() IN (
+      SELECT user_id FROM public.user_roles ur
+      JOIN public.cms_roles cr ON ur.role_id = cr.id
+      WHERE cr.slug = 'administrator'
+    )
+  );
+
+CREATE POLICY "content_versions_insert_admin" ON public.content_versions
+  FOR INSERT WITH CHECK (
+    auth.uid() IN (
+      SELECT user_id FROM public.user_roles ur
+      JOIN public.cms_roles cr ON ur.role_id = cr.id
+      WHERE cr.slug = 'administrator'
+    )
+  );
+
+-- Create index for quick lookup of history per entity
+CREATE INDEX IF NOT EXISTS idx_content_versions_entity ON public.content_versions (entity_type, entity_id);

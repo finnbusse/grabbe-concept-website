@@ -45,20 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   })
 }
 
-function isBlockContent(content: string): boolean {
-  try {
-    if (content.startsWith('[{') || content.startsWith('[{"')) {
-      const parsed = JSON.parse(content)
-      return Array.isArray(parsed) && parsed.length > 0 && parsed[0].type && parsed[0].id
-    }
-  } catch { /* not blocks */ }
-  return false
-}
-
-/** Human-readable labels for intermediate URL segments under /unterricht */
-const UNTERRICHT_SEGMENT_LABELS: Record<string, string> = {
-  faecher: "Fächer",
-}
+import { DynamicPageRenderer } from "@/lib/dynamic-page-renderer"
 
 export default async function UnterrichtDynamicPage({ params }: Props) {
   const { slug } = await params
@@ -68,36 +55,6 @@ export default async function UnterrichtDynamicPage({ params }: Props) {
 
   if (!page) notFound()
 
-  const useBlocks = isBlockContent(page.content)
-
-  return (
-    <SiteLayout>
-      <main>
-        <PageHero
-          title={page.title}
-          label={page.section || undefined}
-          subtitle={page.hero_subtitle || undefined}
-          imageUrl={page.hero_image_url || undefined}
-        />
-        <Breadcrumbs items={[
-          { name: "Unterricht", href: "/unterricht" },
-          ...(slug.length > 1
-            ? slug.slice(0, -1).map((segment, idx) => ({
-                name: UNTERRICHT_SEGMENT_LABELS[segment] ?? segment,
-                href: "/unterricht/" + slug.slice(0, idx + 1).join("/"),
-              }))
-            : []),
-          { name: page.title, href: `/unterricht/${slug.join("/")}` },
-        ]} />
-
-        <section className="mx-auto max-w-6xl px-4 py-28 lg:py-36 lg:px-8">
-          {useBlocks ? (
-            <BlockContentRenderer content={page.content} />
-          ) : (
-            <MarkdownContent content={page.content} />
-          )}
-        </section>
-      </main>
-    </SiteLayout>
-  )
+  // Task 60: Use the centralized dynamic page renderer
+  return <DynamicPageRenderer page={page} />
 }

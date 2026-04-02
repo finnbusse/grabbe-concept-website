@@ -9,6 +9,7 @@ import { AktuellesContent } from "@/components/aktuelles-content"
 import type { ContentItem } from "@/components/aktuelles-content"
 import { generatePageMetadata } from "@/lib/seo"
 import type { Metadata } from "next"
+import { enrichPostsWithAuthors } from "@/lib/author-enricher"
 
 export const revalidate = 300
 
@@ -50,34 +51,16 @@ export default async function AktuellesPage() {
       .order("created_at", { ascending: false }),
   ])
 
-  const posts = postsResult.data || []
+  const rawPosts = postsResult.data || []
   const presentations = presentationsResult.data || []
   const parentLetters = parentLettersResult.data || []
 
-  // Fetch author profiles for posts
-  const userIds = [...new Set(posts.map(p => p.user_id).filter(Boolean))]
-  let authorProfiles: Record<string, { first_name?: string; last_name?: string; title?: string; avatar_url?: string | null }> = {}
-  if (userIds.length > 0) {
-    const { data: profiles, error: profilesError } = await supabase
-      .from("user_profiles")
-      .select("user_id, first_name, last_name, title, avatar_url")
-      .in("user_id", userIds)
-    if (profiles) {
-      authorProfiles = Object.fromEntries(profiles.map(p => [p.user_id, p]))
-    } else if (profilesError?.message?.includes("avatar_url")) {
-      const { data: fallbackProfiles } = await supabase
-        .from("user_profiles")
-        .select("user_id, first_name, last_name, title")
-        .in("user_id", userIds)
-      if (fallbackProfiles) {
-        authorProfiles = Object.fromEntries(fallbackProfiles.map(p => [p.user_id, { ...p, avatar_url: null }]))
-      }
-    }
-  }
+  // Task 99: Fetch author profiles for posts via shared enricher
+  const enrichedPostsData = await enrichPostsWithAuthors(rawPosts)
 
   // Build unified content items
-  const newsItems: ContentItem[] = posts.map((post) => {
-    const profile = post.user_id ? authorProfiles[post.user_id] : null
+  const newsItems: ContentItem[] = enrichedPostsData.map((post) => {
+    const profile = post.author_profile
     const authorName = post.author_name || (profile ? [profile.title, profile.first_name, profile.last_name].filter(Boolean).join(" ") : null)
     return {
       type: "news",

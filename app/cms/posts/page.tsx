@@ -1,3 +1,4 @@
+import { TableSkeleton } from "@/components/cms/table-skeleton"
 "use client"
 
 import { Suspense, useState, useEffect } from "react"
@@ -70,7 +71,7 @@ function BeitraegeTab() {
   }, [])
 
   if (!loaded) {
-    return <div className="py-12 text-center text-muted-foreground">Laden...</div>
+    return <TableSkeleton />
   }
 
   return (
@@ -127,9 +128,15 @@ function BeitraegeTab() {
           </div>
         ))
       ) : (
-        <div className="rounded-2xl border border-dashed border-border py-16 text-center">
-          <p className="text-muted-foreground">Noch keine Beiträge vorhanden.</p>
-          <Button asChild className="mt-4">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card p-12 text-center animate-in fade-in duration-500">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10 mb-4">
+            <FileText className="h-10 w-10 text-primary opacity-60" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2">Noch keine Beiträge vorhanden</h2>
+          <p className="text-muted-foreground mb-6 max-w-sm">
+            Verfassen Sie Ihren ersten Beitrag, um Neuigkeiten mit Besuchern zu teilen.
+          </p>
+          <Button asChild>
             <Link href="/cms/posts/new">
               <Plus className="mr-2 h-4 w-4" />
               Ersten Beitrag erstellen
@@ -163,7 +170,7 @@ function KampagnenTab() {
   }, [])
 
   if (!loaded) {
-    return <div className="py-12 text-center text-muted-foreground">Laden...</div>
+    return <TableSkeleton />
   }
 
   const now = new Date()
@@ -263,7 +270,7 @@ function ElterninfobriefeTab() {
   }, [])
 
   if (!loaded) {
-    return <div className="py-12 text-center text-muted-foreground">Laden...</div>
+    return <TableSkeleton />
   }
 
   return (
@@ -363,7 +370,7 @@ function PraesentationenTab() {
   }, [])
 
   if (!loaded) {
-    return <div className="py-12 text-center text-muted-foreground">Laden...</div>
+    return <TableSkeleton />
   }
 
   return (
@@ -525,7 +532,7 @@ function PostsContent() {
 
 export default function CmsPostsPage() {
   return (
-    <Suspense fallback={<div className="py-12 text-center text-muted-foreground">Laden...</div>}>
+    <Suspense fallback={<TableSkeleton />}>
       <PostsContent />
     </Suspense>
   )

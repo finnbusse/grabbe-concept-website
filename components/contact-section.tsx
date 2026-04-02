@@ -1,8 +1,8 @@
-import { getSettings } from "@/lib/settings"
+import { getAllSettings } from "@/lib/settings"
 import { ContactSectionClient } from "./contact-section-client"
 
 export async function ContactSection() {
-  const s = await getSettings()
+  const s = await getAllSettings()
 
   const address = s.school_address || "Küster-Meyer-Platz 2, 32756 Detmold"
   const phone = s.school_phone || "05231 - 99260"

@@ -27,8 +27,30 @@ interface CmsShellProps {
   pagePermissions: UserPagePermission[]
 }
 
-function CmsShellContent({ children, userEmail, userProfile, sidebarOpen, setSidebarOpen, collapsed, toggleCollapsed }: any) {
+// Task 110: Replace `any` in CmsShellContent with proper TS interface
+interface CmsShellContentProps {
+  children: React.ReactNode
+  userEmail: string
+  userProfile?: UserProfileData | null
+  sidebarOpen: boolean
+  setSidebarOpen: (open: boolean) => void
+  collapsed: boolean
+  toggleCollapsed: () => void
+}
+
+function CmsShellContent({ children, userEmail, userProfile, sidebarOpen, setSidebarOpen, collapsed, toggleCollapsed }: CmsShellContentProps) {
   const { setOpen: setCommandOpen } = useCommandPalette()
+
+  // Task 186: Accessibility focus management for CMS overlays.
+  // Trap focus or manage it when mobile sidebar is open.
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => { document.body.style.overflow = "" }
+  }, [sidebarOpen])
 
   return (
     <div className="flex h-svh overflow-hidden">
@@ -61,6 +83,7 @@ function CmsShellContent({ children, userEmail, userProfile, sidebarOpen, setSid
               size="icon"
               onClick={() => setSidebarOpen(true)}
               aria-label="Menü öffnen"
+              aria-expanded={sidebarOpen}
               className="-ml-2"
             >
               <Menu className="h-5 w-5" />

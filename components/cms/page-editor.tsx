@@ -122,24 +122,14 @@ export function PageEditor({ page }: PageEditorProps) {
         updated_at: new Date().toISOString(),
       }
 
+      // Task 72: Remove silent fallback for missing `hero_image_url` column. Treat schema as strict contract.
       let saveError: unknown = null
       if (page) {
         const { error: err } = await supabase.from("pages").update(payload).eq("id", page.id)
         saveError = err
-        // Resilient: if hero_image_url column doesn't exist yet, retry without it
-        if (err && (err as { message?: string }).message?.includes("hero_image_url")) {
-          const { hero_image_url: _dropped, ...payloadWithout } = payload
-          const { error: err2 } = await supabase.from("pages").update(payloadWithout).eq("id", page.id)
-          saveError = err2
-        }
       } else {
         const { error: err } = await supabase.from("pages").insert(payload)
         saveError = err
-        if (err && (err as { message?: string }).message?.includes("hero_image_url")) {
-          const { hero_image_url: _dropped, ...payloadWithout } = payload
-          const { error: err2 } = await supabase.from("pages").insert(payloadWithout)
-          saveError = err2
-        }
       }
       if (saveError) throw saveError
       // Show celebration when publishing for first time

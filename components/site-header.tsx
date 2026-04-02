@@ -120,10 +120,13 @@ export function SiteHeader({
     <>
       {/* School logo */}
       <div className="fixed left-4 top-3 z-[55] md:left-6 lg:absolute lg:left-12 lg:top-4 lg:z-40">
-        <Link href="/">
-          <img
+        <Link href="/" aria-label="Zur Startseite" title="Startseite">
+          <Image
             src={logoUrl || "/images/grabbe-logo.svg"}
             alt={schoolName}
+            width={128}
+            height={128}
+            priority
             className="school-logo-dark h-12 w-auto md:h-16 lg:h-24 drop-shadow-lg transition-all duration-300"
           />
         </Link>
@@ -168,10 +171,15 @@ export function SiteHeader({
                 className="relative"
                 onMouseEnter={() => handleDropdownEnter(item.id)}
                 onMouseLeave={handleDropdownLeave}
+                onFocus={() => handleDropdownEnter(item.id)}
+                onBlur={handleDropdownLeave}
               >
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-1 rounded-full px-4 py-2 text-[13px] font-medium transition-colors duration-200 nav-glass-interactive ${
+                  aria-expanded={openDropdown === item.id}
+                  aria-controls={`submenu-${item.id}`}
+                  aria-haspopup="true"
+                  className={`flex items-center gap-1 rounded-full px-4 py-2 text-[13px] font-medium transition-colors duration-200 nav-glass-interactive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                     isActive(item.href)
                       ? "text-foreground"
                       : "text-foreground/85 hover:text-foreground"
@@ -181,8 +189,6 @@ export function SiteHeader({
                     : undefined
                   }
                   onTouchEnd={(e) => {
-                    // preventDefault() cancels all subsequent synthetic mouse events
-                    // (mouseenter, mouseleave, mousedown, click) so hover state is not disturbed.
                     e.preventDefault()
                     if (openDropdown !== item.id) {
                       handleDropdownEnter(item.id)
@@ -254,13 +260,15 @@ export function SiteHeader({
 
         {/* Mobile toggle */}
         <button
-          className="flex h-9 w-9 items-center justify-center rounded-full text-foreground/85 hover:text-foreground transition-all duration-200 nav-glass-interactive lg:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-foreground/85 hover:text-foreground transition-all duration-200 nav-glass-interactive lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           style={{ backgroundColor: mobileOpen ? "rgb(var(--nav-glass-item-hover) / 0.2)" : undefined }}
           onClick={() => {
             const next = !mobileOpen
             setMobileOpen(next)
             trackEvent("nav_mobile_toggle", { open: next })
           }}
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-nav-container"
           aria-label={mobileOpen ? "Navigation schließen" : "Navigation öffnen"}
         >
           {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -270,13 +278,14 @@ export function SiteHeader({
       {/* Mobile nav */}
       {mobileOpen && (
         <div
+          id="mobile-nav-container"
           className="mx-4 mt-2 rounded-3xl backdrop-blur-xl p-3 shadow-xl lg:hidden animate-blur-in"
           style={{
             backgroundColor: "rgb(var(--nav-glass-bg) / 0.24)",
             border: "1px solid rgb(var(--nav-glass-border) / 0.26)",
           }}
         >
-          <nav className="flex flex-col gap-1">
+          <nav className="flex flex-col gap-1" aria-label="Mobile Navigation">
             {navItems.map((item) => (
               <div key={item.id}>
                 <Link
