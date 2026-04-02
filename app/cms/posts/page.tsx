@@ -1,6 +1,6 @@
-import { TableSkeleton } from "@/components/cms/table-skeleton"
 "use client"
 
+import { TableSkeleton } from "@/components/cms/table-skeleton"
 import { Suspense, useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"

@@ -1,4 +1,4 @@
-import { getSettings } from "@/lib/settings"
+import { getAllSettings } from "@/lib/settings"
 import type { Metadata } from "next"
 
 // ============================================================================
@@ -97,7 +97,7 @@ function isPreviewEnvironment(): boolean {
 export async function getSEOSettings(): Promise<SEOSettings> {
   let s: Record<string, string> = {}
   try {
-    s = await getSettings()
+    s = await getAllSettings()
   } catch {
     // DB unavailable – degrade gracefully
   }
