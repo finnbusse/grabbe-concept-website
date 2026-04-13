@@ -17,74 +17,102 @@ export type ContentStatus = 'draft' | 'published' | 'archived' | 'scheduled'
 /** Runtime-usable array of all valid content status values */
 export const CONTENT_STATUS = ['draft', 'published', 'archived', 'scheduled'] as const
 
+
+// ============================================================================
+// Base Traits
+// ============================================================================
+
+export interface BaseEntity {
+  id: string; // UUID
+  created_at: string; // timestamptz
+  updated_at: string; // timestamptz
+}
+
+export interface OwnedEntity {
+  created_by: string | null; // UUID, soft reference to auth.users
+  updated_by: string | null; // UUID, soft reference to auth.users
+}
+
+export interface PublishableEntity {
+  status: ContentStatus; // Default: 'published' or 'draft'
+  published_at: string | null; // timestamptz
+  visibility?: 'public' | 'internal' | 'private';
+}
+
+export interface SeoEntity {
+  seo_title: string | null;
+  meta_description: string | null;
+  og_image: string | null; // replaces seo_og_image
+  canonical: string | null; // replaces seo_canonical_override
+  no_index: boolean; // replaces seo_no_index
+}
+
+export interface ThemableEntity {
+  // Marker interface indicating support for TopicTags
+}
+
+export interface MediaPresentable {
+  hero_media_id: string | null; // References MediaAsset.id
+  teaser_media_id: string | null; // References MediaAsset.id
+}
+
+export interface ContentItem extends BaseEntity, OwnedEntity, PublishableEntity, SeoEntity, ThemableEntity, MediaPresentable {
+  title: string;
+  slug: string;
+}
+
 // ============================================================================
 // Database Tables
 // ============================================================================
 
+
 /**
  * Static pages (Impressum, Oberstufe, Anmeldung, etc.)
  */
-export interface Page {
-  id: string; // UUID
-  title: string;
-  slug: string;
+export interface Page extends ContentItem {
   content: string;
   section: string; // Default: 'allgemein'
   sort_order: number; // Default: 0
-  status: ContentStatus; // Default: 'published'
-  published_at: string | null; // timestamptz
-  created_by: string | null; // UUID, soft reference to auth.users
-  updated_by: string | null; // UUID, soft reference to auth.users
   /** @deprecated Use created_by instead. Retained for backwards compatibility. */
   user_id: string | null; // UUID, references auth.users
-  created_at: string; // timestamptz
-  updated_at: string; // timestamptz
   is_system: boolean; // Default: false
   route_path: string | null;
-  hero_image_url: string | null;
-  meta_description: string | null;
-  seo_og_image: string | null;
-  seo_title: string | null;
-  seo_no_index: boolean;
-  seo_canonical_override: string | null;
   og_type: string | null;
+
+  // Legacy fields for backwards compatibility
+  hero_image_url?: string | null;
+  seo_og_image?: string | null;
+  seo_canonical_override?: string | null;
+  seo_no_index?: boolean;
 }
 
 /**
  * Blog posts / News
  */
-export interface Post {
-  id: string; // UUID
-  title: string;
-  slug: string;
+export interface NewsPost extends ContentItem {
   content: string;
   excerpt: string | null;
   category: string; // Default: 'aktuelles'
-  status: ContentStatus; // Default: 'draft'
-  published_at: string | null; // timestamptz
-  created_by: string | null; // UUID, soft reference to auth.users
-  updated_by: string | null; // UUID, soft reference to auth.users
   featured: boolean; // Default: false
-  image_url: string | null;
   author_name: string | null;
   /** @deprecated Use created_by instead. Retained for backwards compatibility. */
   user_id: string; // UUID, references auth.users
   event_date: string | null; // date (YYYY-MM-DD), optional custom display date
-  meta_description: string | null;
-  seo_og_image: string | null;
-  seo_title: string | null;
-  seo_no_index: boolean;
-  seo_canonical_override: string | null;
-  created_at: string; // timestamptz
-  updated_at: string; // timestamptz
+
+  // Legacy fields for backwards compatibility
+  image_url?: string | null;
+  seo_og_image?: string | null;
+  seo_canonical_override?: string | null;
+  seo_no_index?: boolean;
 }
+
+/** @deprecated Use NewsPost instead */
+export type Post = NewsPost;
 
 /**
  * School events / Calendar entries
  */
-export interface Event {
-  id: string; // UUID
-  title: string;
+export interface Event extends Omit<ContentItem, 'slug' | 'seo_title' | 'meta_description' | 'og_image' | 'canonical' | 'no_index' | 'hero_media_id' | 'teaser_media_id'> {
   description: string | null;
   starts_at: string; // timestamptz (replaces event_date + event_time)
   ends_at: string | null; // timestamptz (replaces event_end_date)
@@ -92,19 +120,14 @@ export interface Event {
   timezone: string; // Default: 'Europe/Berlin'
   location: string | null;
   category: string; // Default: 'termin'
-  status: ContentStatus; // Default: 'published'
-  published_at: string | null; // timestamptz
-  created_by: string | null; // UUID, soft reference to auth.users
-  updated_by: string | null; // UUID, soft reference to auth.users
   /** @deprecated Use created_by instead. Retained for backwards compatibility. */
   user_id: string; // UUID, references auth.users
-  created_at: string; // timestamptz
-  updated_at: string; // timestamptz
 }
 
 /**
  * Downloads (PDFs, files)
  */
+/** @deprecated Use MediaAsset instead */
 export interface Document {
   id: string; // UUID
   title: string;
@@ -137,13 +160,15 @@ export interface Document {
  */
 export interface NavigationItem {
   id: string; // UUID
+  menu_id: string; // UUID, references navigation_menus
+  parent_id: string | null; // UUID, references navigation_items
   label: string;
-  href: string;
-  parent_id: string | null; // UUID, self-referencing FK
+  url: string | null;
+  page_id: string | null; // UUID, references pages
+  topic_tag_id: string | null; // UUID, references topic_tags
   sort_order: number; // Default: 0
-  visible: boolean; // Default: true
-  location: string; // Default: 'header' (retained for backwards compatibility)
-  menu_id: string | null; // UUID, references navigation_menus
+  is_external: boolean; // Default: false
+  open_in_new_tab: boolean; // Default: false
   created_at: string; // timestamptz
   updated_at: string; // timestamptz
 }
@@ -217,10 +242,75 @@ export interface AnmeldungSubmission {
   created_at: string; // timestamptz
 }
 
+
+// ============================================================================
+// Centralized Tagging System
+// ============================================================================
+
 /**
- * Tags for categorizing events, documents, and posts
+ * TopicTag: Central polymorphic tag
+ */
+export interface TopicTag {
+  id: string; // UUID
+  name: string;
+  slug: string;
+  color: string; // Default: 'blue'
+  parent_id: string | null; // UUID, references topic_tags.id for hierarchy
+  landing_page_id: string | null; // UUID, references pages.id
+  created_at: string; // timestamptz
+  updated_at: string; // timestamptz
+}
+
+export type EntityType = 'page' | 'news' | 'event' | 'media';
+export type TagRole = 'primary' | 'secondary' | 'contextual';
+
+/**
+ * Polymorphic assignment of tags to any entity
+ */
+export interface EntityTagAssignment {
+  id: string; // UUID
+  entity_type: EntityType;
+  entity_id: string; // UUID
+  tag_id: string; // UUID, references topic_tags.id
+  role: TagRole; // Default: 'secondary'
+  sort_order: number; // Default: 0
+  created_at: string; // timestamptz
+}
+
+/**
+ * TopicPageAggregate: Represents an aggregate view for a topic tag
+ */
+export interface TopicPageAggregate {
+  tag: TopicTag;
+  pages: Page[];
+  news: NewsPost[];
+  events: Event[];
+  media: MediaAsset[];
+}
+
+
+/**
+ * Unified Media Asset (Image, File, Video, Audio)
+ */
+export interface MediaAsset extends BaseEntity, OwnedEntity, PublishableEntity, ThemableEntity {
+  title: string;
+  file_name: string;
+  file_url: string;
+  file_size: number;
+  mime_type: string;
+  asset_type: 'image' | 'file' | 'video' | 'audio';
+  alt_text: string | null;
+  dimensions: { width: number; height: number } | null;
+}
+
+// Legacy Tagging Systems (Deprecated)
+// ============================================================================
+
+/**
+ * @deprecated Use TopicTag instead
  */
 export interface Tag {
+  /** @deprecated */
   id: string; // UUID
   name: string;
   color: string; // Default: 'blue'
@@ -231,6 +321,7 @@ export interface Tag {
 /**
  * Junction: event ↔ tag
  */
+/** @deprecated Use EntityTagAssignment instead */
 export interface EventTag {
   event_id: string; // UUID
   tag_id: string; // UUID
@@ -239,6 +330,7 @@ export interface EventTag {
 /**
  * Junction: document ↔ tag
  */
+/** @deprecated Use EntityTagAssignment instead */
 export interface DocumentTag {
   document_id: string; // UUID
   tag_id: string; // UUID
@@ -247,6 +339,7 @@ export interface DocumentTag {
 /**
  * Junction: post ↔ tag
  */
+/** @deprecated Use EntityTagAssignment instead */
 export interface PostTag {
   post_id: string; // UUID
   tag_id: string; // UUID
@@ -276,7 +369,7 @@ export type PageInsert = Omit<Page, 'id' | 'created_at' | 'updated_at'> & {
   updated_at?: string;
 };
 
-export type PostInsert = Omit<Post, 'id' | 'created_at' | 'updated_at'> & {
+export type NewsPostInsert = Omit<NewsPost, 'id' | 'created_at' | 'updated_at'> & {
   id?: string;
   created_at?: string;
   updated_at?: string;
@@ -339,7 +432,7 @@ export type UserProfileInsert = Omit<UserProfile, 'id' | 'created_at' | 'updated
 // ============================================================================
 
 export type PageUpdate = Partial<Omit<Page, 'id' | 'created_at'>>;
-export type PostUpdate = Partial<Omit<Post, 'id' | 'created_at'>>;
+export type PostUpdate = Partial<Omit<NewsPost, 'id' | 'created_at'>>;
 export type EventUpdate = Partial<Omit<Event, 'id' | 'created_at'>>;
 export type DocumentUpdate = Partial<Omit<Document, 'id' | 'created_at'>>;
 export type NavigationItemUpdate = Partial<Omit<NavigationItem, 'id' | 'created_at'>>;
@@ -446,7 +539,7 @@ export type PresentationUpdate = Partial<Omit<Presentation, 'id' | 'created_at'>
 // ============================================================================
 
 /** Post fields fetched for card/list views (excludes `content`) */
-export type PostListItem = Omit<Post, 'content'>
+export type PostListItem = Omit<NewsPost, 'content'>
 
 /** Event fields fetched for card/list views */
 export type EventListItem = Pick<Event, 'id' | 'title' | 'description' | 'starts_at' | 'ends_at' | 'is_all_day' | 'timezone' | 'location' | 'category'>
@@ -697,7 +790,7 @@ export interface ContentRevision {
   entity_type: string;
   entity_id: string; // UUID
   revision_number: number;
-  content: Record<string, unknown>; // JSONB
+  snapshot: Record<string, unknown>; // JSONB (renamed from content)
   created_by: string | null; // UUID
   created_at: string; // timestamptz
 }
@@ -721,7 +814,7 @@ export interface NavigationItemWithChildren extends NavigationItem {
 /**
  * Post with author details
  */
-export interface PostWithAuthor extends Post {
+export interface PostWithAuthor extends NewsPost {
   author?: {
     id: string;
     email?: string;
