@@ -1,6 +1,8 @@
 import { updateSession } from '@/lib/supabase/middleware'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isIpBlocked } from '@/lib/rate-limiter'
+import { detectRequestLocale } from '@/lib/i18n/locale'
+import { LOCALE_COOKIE_MAX_AGE, LOCALE_COOKIE_NAME } from '@/lib/i18n/config'
 
 // Known filesystem routes that should NOT be rewritten
 const KNOWN_ROUTES = new Set([
@@ -11,6 +13,22 @@ const KNOWN_ROUTES = new Set([
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
+  const locale = detectRequestLocale({
+    cookieLocale: request.cookies.get(LOCALE_COOKIE_NAME)?.value,
+    acceptLanguage: request.headers.get('accept-language'),
+  })
+  const hasLocaleCookie = request.cookies.get(LOCALE_COOKIE_NAME)?.value === locale
+
+  const withLocaleCookie = (response: NextResponse) => {
+    if (!hasLocaleCookie) {
+      response.cookies.set(LOCALE_COOKIE_NAME, locale, {
+        maxAge: LOCALE_COOKIE_MAX_AGE,
+        path: '/',
+        sameSite: 'lax',
+      })
+    }
+    return response
+  }
 
   // ── Early block check for login API route ──
   if (pathname === '/api/auth/login' && request.method === 'POST') {
@@ -22,7 +40,7 @@ export async function middleware(request: NextRequest) {
     const { blocked, retryAfterSeconds } = await isIpBlocked(ip)
 
     if (blocked) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         {
           error: 'Zu viele Anmeldeversuche. Bitte warten Sie.',
           retryAfterSeconds,
@@ -32,10 +50,11 @@ export async function middleware(request: NextRequest) {
           headers: { 'Retry-After': String(retryAfterSeconds) },
         }
       )
+      return withLocaleCookie(response)
     }
   }
 
-  const sessionResponse = await updateSession(request)
+  const sessionResponse = withLocaleCookie(await updateSession(request))
 
   // If session handling already redirected (e.g., to login), return that
   if (sessionResponse.status === 307 || sessionResponse.status === 308) {
@@ -48,7 +67,7 @@ export async function middleware(request: NextRequest) {
     const rest = pathname.replace('/cms/seiten-editor', '')
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = rest ? `/cms/seiten${rest}/bearbeiten` : '/cms/seiten'
-    return NextResponse.redirect(redirectUrl, 301)
+    return withLocaleCookie(NextResponse.redirect(redirectUrl, 301))
   }
   if (pathname === '/cms/pages/new') {
     // Keep new page wizard at its current URL
@@ -56,18 +75,18 @@ export async function middleware(request: NextRequest) {
     const pageId = pathname.replace('/cms/pages/', '')
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = `/cms/seiten/${pageId}/bearbeiten`
-    return NextResponse.redirect(redirectUrl, 301)
+    return withLocaleCookie(NextResponse.redirect(redirectUrl, 301))
   } else if (pathname === '/cms/pages') {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/cms/seiten'
-    return NextResponse.redirect(redirectUrl, 301)
+    return withLocaleCookie(NextResponse.redirect(redirectUrl, 301))
   }
 
   // Redirect /cms/documents → /cms/dateien
   if (pathname === '/cms/documents') {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/cms/dateien'
-    return NextResponse.redirect(redirectUrl, 301)
+    return withLocaleCookie(NextResponse.redirect(redirectUrl, 301))
   }
 
   // Redirect /cms/messages → /cms/nachrichten?tab=kontakt
@@ -75,7 +94,7 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/cms/nachrichten'
     redirectUrl.searchParams.set('tab', 'kontakt')
-    return NextResponse.redirect(redirectUrl, 301)
+    return withLocaleCookie(NextResponse.redirect(redirectUrl, 301))
   }
 
   // Redirect /cms/anmeldungen → /cms/nachrichten?tab=anmeldungen
@@ -83,7 +102,7 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/cms/nachrichten'
     redirectUrl.searchParams.set('tab', 'anmeldungen')
-    return NextResponse.redirect(redirectUrl, 301)
+    return withLocaleCookie(NextResponse.redirect(redirectUrl, 301))
   }
 
   // Redirect /cms/campaigns → /cms/posts?tab=kampagnen
@@ -91,14 +110,14 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/cms/posts'
     redirectUrl.searchParams.set('tab', 'kampagnen')
-    return NextResponse.redirect(redirectUrl, 301)
+    return withLocaleCookie(NextResponse.redirect(redirectUrl, 301))
   }
 
   // Redirect /cms/navigation → /cms/seitenstruktur
   if (pathname === '/cms/navigation') {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/cms/seitenstruktur'
-    return NextResponse.redirect(redirectUrl, 301)
+    return withLocaleCookie(NextResponse.redirect(redirectUrl, 301))
   }
 
   // Only consider paths with 1-3 segments that don't match known filesystem routes
@@ -121,7 +140,7 @@ export async function middleware(request: NextRequest) {
       sessionResponse.cookies.getAll().forEach(cookie => {
         rewriteResponse.cookies.set(cookie.name, cookie.value)
       })
-      return rewriteResponse
+      return withLocaleCookie(rewriteResponse)
     }
   }
 

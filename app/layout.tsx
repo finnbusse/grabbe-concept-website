@@ -15,6 +15,7 @@ import {
 import { getDesignSettings, DESIGN_DEFAULTS } from "@/lib/settings"
 import type { DesignSettings } from "@/lib/settings"
 import { tailwindToHex } from "@/lib/design-settings"
+import { getRequestLocale } from "@/lib/i18n/server"
 import "./globals.css"
 
 const _instrumentSerif = Instrument_Serif({
@@ -196,11 +197,12 @@ export default async function RootLayout({
   const orgJsonLd = generateOrganizationJsonLd(seo)
   const siteJsonLd = generateWebSiteJsonLd(seo)
   const ds = await getDesignSettings()
+  const locale = await getRequestLocale()
   const { style, fontsUrl } = buildDesignOverrides(ds)
 
   return (
     <html
-      lang="de"
+      lang={locale}
       className={`${GeistSans.variable} ${GeistMono.variable} ${GeistPixelSquare.variable} ${_instrumentSerif.variable} ${_josefinSans.variable}`}
       style={Object.keys(style).length > 0 ? (style as React.CSSProperties) : undefined}
     >
