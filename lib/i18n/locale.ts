@@ -6,7 +6,7 @@ type LocaleCandidate = {
 }
 
 function normalizeLocale(input: string): string {
-  return input.trim().toLowerCase().replace('_', '-')
+  return input.trim().toLowerCase().replace(/_/g, '-')
 }
 
 function toBaseLocale(input: string): string {
@@ -53,7 +53,7 @@ export function detectRequestLocale({
   const fromCookie = resolveSupportedLocale(cookieLocale)
   if (fromCookie) return fromCookie
 
-  const candidates = parseAcceptLanguage(acceptLanguage ?? null)
+  const candidates = parseAcceptLanguage(acceptLanguage)
   for (const candidate of candidates) {
     const resolved = resolveSupportedLocale(candidate.locale)
     if (resolved) return resolved

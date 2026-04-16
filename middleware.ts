@@ -17,10 +17,10 @@ export async function middleware(request: NextRequest) {
     cookieLocale: request.cookies.get(LOCALE_COOKIE_NAME)?.value,
     acceptLanguage: request.headers.get('accept-language'),
   })
-  const hasLocaleCookie = request.cookies.get(LOCALE_COOKIE_NAME)?.value === locale
+  const hasCorrectLocaleCookie = request.cookies.get(LOCALE_COOKIE_NAME)?.value === locale
 
   const withLocaleCookie = (response: NextResponse) => {
-    if (!hasLocaleCookie) {
+    if (!hasCorrectLocaleCookie) {
       response.cookies.set(LOCALE_COOKIE_NAME, locale, {
         maxAge: LOCALE_COOKIE_MAX_AGE,
         path: '/',
